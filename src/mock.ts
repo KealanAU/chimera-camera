@@ -1,4 +1,4 @@
-import { SAMPLE_PHOTO_FIXTURE } from './fixtures'
+import { SAMPLE_PHOTO_FIXTURE } from './fixtures.js'
 import type {
   CameraAdapter,
   CameraDevice,
@@ -11,7 +11,7 @@ import type {
   TargetCameraPosition,
   TorchMode,
   VideoFile,
-} from './types'
+} from './types.js'
 
 export interface MockCameraOptions {
   permissions?: CameraPermissions

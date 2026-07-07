@@ -21,7 +21,7 @@ export type {
   TargetCameraPosition,
   TorchMode,
   VideoFile,
-} from './types'
+} from './types.js'
 
 export {
   LYNX_CAMERA_JS_VERSION,
@@ -35,4 +35,4 @@ export {
   type CameraInstallStatus,
   type CameraInstallStatusCode,
   type CreateCameraAdapterOptions,
-} from './native'
+} from './native.js'

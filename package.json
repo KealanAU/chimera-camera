@@ -38,7 +38,9 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "test": "node --test 'tests/*.test.js'"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

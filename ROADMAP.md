@@ -1,8 +1,9 @@
 # Roadmap
 
-Milestone-level status for `lynx-camera`. The V1 contract lives in
-[V1.md](V1.md); the long-form plan lives in [README.md](README.md). Update this
-file whenever a milestone changes state so the plan docs never have to guess.
+Milestone-level status for `lynx-camera`. The contract for what ships today
+is [V0.md](V0.md); the target contract for the native view is [V1.md](V1.md);
+the long-form plan lives in [README.md](README.md). Update this file whenever
+a milestone changes state so the plan docs never have to guess.
 
 ## Milestones
 
@@ -13,6 +14,8 @@ file whenever a milestone changes state so the plan docs never have to guess.
 - Install and testing guides under `docs/`.
 
 ### M1 — iOS module with system-camera capture (interim) — ✅ Done
+
+Formal contract: [V0.md](V0.md).
 
 - `ios/LynxCameraModule.swift` registers as `CameraModule`: permission
   status/request for camera and microphone, device enumeration.
@@ -68,9 +71,6 @@ bridge, and it is the only part of the architecture not yet proven.
 
 ## Known debt
 
-- No automated tests yet. The pure-JS surface (mock behavior, `callNative`
-  callback/promise handling, the legacy `capture` fallback, error
-  normalization) is cheap to cover now.
 - `createNativeCameraAdapter` still soft-degrades when individual native
   methods are missing (returns `not-determined`, empty device lists). The
   install checks make this detectable, but apps must opt in by calling them;

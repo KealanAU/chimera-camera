@@ -1,4 +1,4 @@
-import { createMockCameraModule, type MockCameraOptions } from './mock'
+import { createMockCameraModule, type MockCameraOptions } from './mock.js'
 import type {
   CameraAdapter,
   CameraDevice,
@@ -11,7 +11,7 @@ import type {
   TargetCameraPosition,
   TorchMode,
   VideoFile,
-} from './types'
+} from './types.js'
 
 declare const NativeModules: Record<string, unknown> | undefined
 

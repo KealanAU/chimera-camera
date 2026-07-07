@@ -274,6 +274,8 @@ The repository should include:
 ## Current Status
 
 See [ROADMAP.md](ROADMAP.md) for milestone-level status and known debt.
+[V0.md](V0.md) is the contract for what ships today; [V1.md](V1.md) is the
+target contract for the native `camera-view` element.
 
 Working today:
 
