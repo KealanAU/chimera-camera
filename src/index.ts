@@ -36,3 +36,11 @@ export {
   type CameraInstallStatusCode,
   type CreateCameraAdapterOptions,
 } from './native.js'
+
+export {
+  CAMERA_VIEW_TAG,
+  createCameraViewHandle,
+  invokeCameraViewMethod,
+  isCameraViewBridgeAvailable,
+  type CameraViewHandle,
+} from './view.js'

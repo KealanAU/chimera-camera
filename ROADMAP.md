@@ -34,17 +34,26 @@ Known differences from the V1 contract, to be resolved in M4/M5:
   local file path. Base64 across the bridge is 3–8 MB per 12 MP photo; the fix
   is to write a temp file in Swift and return its path.
 
-### M2 — Lynx bridge spike (`camera-view`) — ⬜ Not started (next up)
+### M2 — Lynx bridge spike (`camera-view`) — 🚧 In progress
 
 Acceptance criteria in V1.md ("Bridge Spike Acceptance Criteria"):
 
-- Register a native `camera-view` placeholder element on iOS.
-- Pass props from JavaScript into native code.
-- Call `ping()` on the view and receive `{ ok: true }`.
-- Receive a native `ready` event in JavaScript.
+- [x] iOS `camera-view` placeholder element written
+      (`ios/LynxCameraView.h/.m`: `facing`/`active` props, `ping()` method,
+      `ready` detail event).
+- [x] JS surface: `CAMERA_VIEW_TAG`, `invokeCameraViewMethod`,
+      `createCameraViewHandle` in `src/view.ts`, with tests against a fake
+      SelectorQuery bridge.
+- [ ] Compile the element in a real iOS Lynx host app (the ObjC files are
+      written against the documented Lynx macros but have not been built yet
+      — expect import/lifecycle fixes on first compile).
+- [ ] Verify on device: props reach native, `ping()` returns `{ ok: true }`,
+      `bindready` fires in JavaScript.
+- [ ] Android equivalent (`Behavior`/`LynxUI`, `@LynxUIMethod`,
+      `LynxDetailEvent`).
 
 This is the de-risking milestone: every later milestone builds behind this
-bridge, and it is the only part of the architecture not yet proven.
+bridge, and the native halves remain unproven until a host app compiles them.
 
 ### M3 — Android module parity — ⬜ Not started
 

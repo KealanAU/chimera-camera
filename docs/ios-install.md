@@ -11,7 +11,12 @@ files on disk, but the Lynx host app still needs to compile and register them.
    pnpm add @kealanau/lynx-camera@alpha
    ```
 
-2. Add the package's `ios/` files to the iOS app target.
+2. Add the package's `ios/` files to the iOS app target:
+
+   - `LynxCameraModule.swift` — the `CameraModule` native module.
+   - `LynxCameraView.h` + `LynxCameraView.m` — the `camera-view` element
+     (bridge spike). It self-registers via `LYNX_LAZY_REGISTER_UI` when
+     compiled into the target; no bootstrap call needed.
 
 3. Add camera permissions to `Info.plist`:
 
@@ -53,6 +58,19 @@ await assertCameraInstalledAsync()
 
 If the Swift file is not compiled or the module is not registered, the package
 throws a targeted error that lists the missing iOS setup steps.
+
+To verify the `camera-view` bridge spike, render the element and ping it:
+
+```tsx
+<camera-view id="camera" active={true} bindready={(e) => console.log('ready', e.detail)} />
+```
+
+```ts
+import { createCameraViewHandle } from '@kealanau/lynx-camera'
+
+const camera = createCameraViewHandle('#camera')
+console.log(await camera.ping()) // { ok: true }
+```
 
 ## Testing
 
