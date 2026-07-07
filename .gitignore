@@ -1,0 +1,9 @@
+node_modules/
+dist/
+
+# Local reference clone of react-native-vision-camera (has its own .git).
+# Re-clone it if missing; see V1.md "Upstream Reference Strategy".
+upstream/
+
+.DS_Store
+*.tgz

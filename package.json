@@ -1,0 +1,50 @@
+{
+  "name": "@kealanau/lynx-camera",
+  "version": "0.1.0-alpha.0",
+  "description": "A Lynx-native camera surface with plain TypeScript APIs and native iOS/Android hooks.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "default": "./dist/mock.js"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures.d.ts",
+      "default": "./dist/fixtures.js"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    }
+  },
+  "files": [
+    "dist",
+    "ios",
+    "android",
+    "docs",
+    "example",
+    "README.md",
+    "V1.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
+  }
+}
