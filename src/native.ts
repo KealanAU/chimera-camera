@@ -44,6 +44,13 @@ interface LegacyCaptureResult {
 export interface CreateCameraAdapterOptions {
   nativeModuleName?: string
   mock?: boolean | MockCameraOptions
+  /**
+   * By default createCameraAdapter throws when neither the native module nor
+   * the mock is available, so hosts like LynxExplorer / Lynx Go fail loudly
+   * with setup instructions. Pass `optional: true` to get `null` instead and
+   * handle the fallback yourself.
+   */
+  optional?: boolean
 }
 
 export type CameraInstallStatusCode =
@@ -73,13 +80,16 @@ export function getNativeCameraModule<T = NativeCameraModuleShape>(name = 'Camer
   }
 }
 
+export function createCameraAdapter(options?: CreateCameraAdapterOptions & { optional?: false }): CameraAdapter
+export function createCameraAdapter(options: CreateCameraAdapterOptions & { optional: boolean }): CameraAdapter | null
 export function createCameraAdapter(options: CreateCameraAdapterOptions = {}): CameraAdapter | null {
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
   if (nativeModule) return createNativeCameraAdapter(nativeModule)
   if (options.mock) {
     return createMockCameraModule(options.mock === true ? undefined : options.mock)
   }
-  return null
+  if (options.optional) return null
+  throw new Error(getCameraInstallStatus(options).message)
 }
 
 export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {}): CameraInstallStatus {
@@ -299,7 +309,10 @@ function createInstallErrorMessage(nativeModuleName: string, reason: string): st
     '- Add CAMERA permission to AndroidManifest.xml.',
     '- Register CameraModule in the Lynx host app.',
     '',
-    'For LynxExplorer or JS-only development:',
+    'For LynxExplorer / Lynx Go or JS-only development:',
+    '- The real camera cannot work in these hosts: they cannot compile this',
+    '  package\'s native source, even though the host app itself uses a camera',
+    '  (e.g. to scan QR codes).',
     '- Use createCameraAdapter({ mock: true }) or createMockCameraModule().',
     '',
     'See docs/ios-install.md, docs/android-install.md, and docs/lynx-explorer.md.',

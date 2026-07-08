@@ -100,9 +100,17 @@ test('assertCameraInstalled throws an actionable message', () => {
   assert.doesNotThrow(() => assertCameraInstalled())
 })
 
-test('createCameraAdapter picks native, mock, or null', async () => {
-  assert.equal(createCameraAdapter(), null)
+test('createCameraAdapter throws loudly when nothing is available', () => {
+  assert.throws(() => createCameraAdapter(), /not installed correctly/)
+  assert.throws(() => createCameraAdapter(), /LynxExplorer \/ Lynx Go/)
+  assert.throws(() => createCameraAdapter(), /mock: true/)
+})
 
+test('createCameraAdapter({ optional: true }) returns null instead of throwing', () => {
+  assert.equal(createCameraAdapter({ optional: true }), null)
+})
+
+test('createCameraAdapter picks native or mock when available', async () => {
   const mock = createCameraAdapter({ mock: true })
   assert.equal((await mock.getPermissions()).camera, 'authorized')
 

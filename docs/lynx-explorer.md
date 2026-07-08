@@ -1,9 +1,16 @@
-# LynxExplorer Testing
+# LynxExplorer / Lynx Go Testing
 
-LynxExplorer can test the JavaScript and UI flow, but it cannot compile and
-register native Swift/Kotlin source from an npm package at runtime.
+LynxExplorer and Lynx Go can test the JavaScript and UI flow, but they cannot
+compile and register native Swift/Kotlin source from an npm package at
+runtime. The camera these hosts use to scan QR codes is their own compiled-in
+feature — it is not reachable from your card's JavaScript.
 
-Use LynxExplorer with the mock adapter first:
+Because of that, `createCameraAdapter()` without options **throws** in these
+hosts, with a message listing the native setup steps and pointing at the mock.
+When debugging on device, render `getCameraInstallStatus().code` into your UI
+— console logs are only visible with Lynx DevTool connected.
+
+Use these hosts with the mock adapter first:
 
 ```ts
 import { createCameraAdapter } from '@kealanau/lynx-camera'
