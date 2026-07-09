@@ -41,6 +41,11 @@ For a visual starting point, copy or adapt:
 node_modules/@kealanau/lynx-camera/example/MockCameraDemo.vue
 ```
 
+The demo shows the recommended host-detection pattern: it renders the
+install-status badge and message on screen, uses the real camera when the
+native module is registered, and falls back to the mock (visibly) on hosts
+like Lynx Go.
+
 Real iPhone camera testing requires a custom iOS Lynx host app that compiles the
 package's `ios/` files, registers `LynxCameraModule`, and includes camera
 permission keys in `Info.plist`.
