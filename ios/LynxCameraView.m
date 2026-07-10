@@ -114,6 +114,9 @@ LYNX_UI_METHOD(capturePhoto) {
   if ([rawQuality isKindOfClass:[NSNumber class]]) {
     quality = MIN(MAX(rawQuality.doubleValue, 0.0), 1.0);
   }
+  // Opt-in: base64 costs MBs across the bridge, but JS can't read the temp
+  // file, so upload pipelines fed from JS need it until native upload exists.
+  BOOL includeBase64 = [params[@"includeBase64"] boolValue];
 
   dispatch_async(_sessionQueue, ^{
     if (!self->_photoOutput || !self->_session.isRunning) {
@@ -159,13 +162,17 @@ LYNX_UI_METHOD(capturePhoto) {
           }
 
           UIImage *image = [UIImage imageWithData:data];
-          callback(kUIMethodSuccess, @{
+          NSMutableDictionary *result = [@{
             @"path" : path,
             @"width" : @((NSInteger)(image.size.width * image.scale)),
             @"height" : @((NSInteger)(image.size.height * image.scale)),
             @"orientation" : @"up",
             @"mime" : @"image/jpeg",
-          });
+          } mutableCopy];
+          if (includeBase64) {
+            result[@"base64"] = [data base64EncodedStringWithOptions:0];
+          }
+          callback(kUIMethodSuccess, result);
         }];
 
     [self->_photoOutput capturePhotoWithSettings:settings delegate:delegate];

@@ -42,6 +42,13 @@ export interface CapturePhotoOptions {
    * capture uses the `camera-view` `facing` prop instead of this option.
    */
   facing?: 'front' | 'back'
+  /**
+   * View-session capture only: also return the JPEG as `base64`. Off by
+   * default — the path-only result keeps multi-MB strings off the bridge —
+   * but JS can't read the temp file, so upload pipelines fed from JS need it
+   * until native upload exists.
+   */
+  includeBase64?: boolean
 }
 
 export interface StartRecordingOptions {
