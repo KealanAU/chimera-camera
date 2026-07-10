@@ -56,14 +56,14 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraA
       return devices.find((device) => device.position === position) ?? null
     },
 
-    async capturePhoto(_options?: CapturePhotoOptions): Promise<PhotoFile> {
+    async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {
       await delay(captureDelayMs)
-      return { ...photo }
+      return mockPhotoResult(photo, options?.includeBase64)
     },
 
-    async pickPhoto(_options?: PickPhotoOptions): Promise<PhotoFile> {
+    async pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile> {
       await delay(captureDelayMs)
-      return { ...photo }
+      return mockPhotoResult(photo, options?.includeBase64)
     },
 
     async startRecording(_options?: StartRecordingOptions): Promise<void> {
@@ -124,4 +124,10 @@ export function defaultMockDevices(): CameraDevice[] {
 
 function delay(ms: number): Promise<void> {
   return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve()
+}
+
+// Matches the native contract: base64 rides along only when asked for.
+function mockPhotoResult(photo: PhotoFile, includeBase64: boolean | undefined): PhotoFile {
+  const { base64, ...rest } = photo
+  return includeBase64 ? { ...photo } : rest
 }

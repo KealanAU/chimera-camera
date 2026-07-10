@@ -41,24 +41,22 @@ state there when a block completes.
 
 ## V0 debt (keep 0.1.x honest)
 
-- [ ] Audit 2026-07-10: `SystemCameraCapture.present` can hang the JS promise
-      forever — `present(picker)` is fire-and-forget; if UIKit refuses the
-      presentation (presenter mid-transition, another picker up), no delegate
-      fires and `retainSelf` leaks. Guard in-flight captures, use the
-      present-completion handler, and fail via callback.
-- [ ] Audit 2026-07-10: `topViewController()` requires `.foregroundActive` —
-      cold-start captures race scene activation; accept `foregroundInactive`
-      or retry briefly.
-- [ ] Audit 2026-07-10: downscale captures in the module (max-dimension cap)
-      — full 12 MP JPEGs are 4–8 MB of base64 across the bridge.
-- [ ] Audit 2026-07-10 (minor): check `isCameraDeviceAvailable(.front)`
-      before setting `picker.cameraDevice`; dispatch `requestPermission`
-      callbacks to the main queue; module ignores `flash`/`enableShutterSound`
-      that the JS adapter sends.
+- [x] Audit 2026-07-10: `SystemCameraCapture.present` hang — fixed with an
+      in-flight guard (`capture/in-progress`), a present-completion check
+      that fails via callback (`camera/present-failed`), and an idempotent
+      `finish` so the callback fires exactly once.
+- [x] Audit 2026-07-10: `topViewController()` now also accepts
+      `.foregroundInactive` (cold-start scene-activation race).
+- [x] Audit 2026-07-10: `maxDimension` option downscales captures/picks
+      before encode.
+- [x] Audit 2026-07-10 (minor): front-camera availability checked; permission
+      callbacks dispatched to main; `flash` mapped to `cameraFlashMode`.
+      `enableShutterSound` stays ignored — the system camera UI owns it
+      (documented in types.ts / V0.md).
 
-- [ ] Write the captured JPEG to a temp file in Swift and return a real
-      `path` (keep `base64` optional) — removes the 3–8 MB bridge payload
-      and the `memory://` pseudo-path.
+- [x] Captured JPEG now written to a temp file in Swift with a real `path`;
+      `base64` opt-in via `includeBase64` (capture + pick, mock matches).
+      Needs device verification with the M2 pass.
 - [ ] Decide the removal release for the legacy `capture` fallback
       (V0.md says before `0.2.0`).
 - [ ] Consider coded errors from the adapter instead of soft-degrading when

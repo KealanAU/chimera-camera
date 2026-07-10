@@ -34,6 +34,10 @@ export interface CameraPermissions {
 
 export interface CapturePhotoOptions {
   flash?: FlashMode
+  /**
+   * View-session capture only. The V0 system camera UI owns its shutter
+   * sound and ignores this.
+   */
   enableShutterSound?: boolean
   /** JPEG quality 0..1. Honored by the V0 system-camera path. Default 0.9. */
   quality?: number
@@ -43,12 +47,16 @@ export interface CapturePhotoOptions {
    */
   facing?: 'front' | 'back'
   /**
-   * View-session capture only: also return the JPEG as `base64`. Off by
-   * default — the path-only result keeps multi-MB strings off the bridge —
-   * but JS can't read the temp file, so upload pipelines fed from JS need it
-   * until native upload exists.
+   * Also return the JPEG as `base64`. Off by default — the path-only result
+   * keeps multi-MB strings off the bridge — but JS can't read the temp file,
+   * so upload pipelines fed from JS need it until native upload exists.
    */
   includeBase64?: boolean
+  /**
+   * Cap the longest image side in pixels; larger captures are downscaled
+   * before encoding. Unset means full resolution. V0 module path only.
+   */
+  maxDimension?: number
 }
 
 export interface StartRecordingOptions {
@@ -125,6 +133,10 @@ export interface CameraViewMethods {
 export interface PickPhotoOptions {
   /** JPEG re-encode quality 0..1. Default 0.9. */
   quality?: number
+  /** Also return the JPEG as `base64` (off by default; see CapturePhotoOptions). */
+  includeBase64?: boolean
+  /** Cap the longest image side in pixels; larger picks are downscaled. */
+  maxDimension?: number
 }
 
 export interface CameraAdapter extends CameraModule {

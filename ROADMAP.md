@@ -2,7 +2,10 @@
 
 Milestone-level status for `chimera-camera`. The contract for what ships today
 is [V0.md](V0.md); the target contract for the native view is [V1.md](V1.md);
-the long-form plan lives in [README.md](README.md). Update this file whenever
+the long-form plan lives in [README.md](README.md). Per-release checklists
+(done and remaining points for each npm version) live in
+[versions/](versions/): [0.1](versions/0.1.md), [0.2](versions/0.2.md),
+[0.3](versions/0.3.md), [1.0](versions/1.0.md). Update this file whenever
 a milestone changes state so the plan docs never have to guess.
 
 ## Milestones
@@ -30,9 +33,9 @@ lets a host app ship photo capture before the `camera-view` bridge exists.
 Known differences from the V1 contract, to be resolved in M4/M5:
 
 - Capture lives on the module; V1 puts capture on the `camera-view` session.
-- The photo returns as base64 with a `memory://` pseudo-path instead of a real
-  local file path. Base64 across the bridge is 3–8 MB per 12 MP photo; the fix
-  is to write a temp file in Swift and return its path.
+- ~~The photo returns as base64 with a `memory://` pseudo-path~~ Resolved
+  2026-07-10: the module now writes a JPEG temp file and returns its real
+  path; `base64` is opt-in via `includeBase64`, `maxDimension` caps size.
 
 ### M2 — Lynx bridge spike (`camera-view`) — 🚧 In progress
 

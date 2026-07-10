@@ -36,10 +36,12 @@ test('mock device lists are defensive copies', async () => {
   assert.equal(second[0].id, 'mock-back-camera')
 })
 
-test('mock capturePhoto returns the sample fixture', async () => {
+test('mock capturePhoto returns the sample fixture, base64 only when asked', async () => {
   const camera = createMockCameraModule()
-  const photo = await camera.capturePhoto()
-  assert.deepEqual(photo, SAMPLE_PHOTO_FIXTURE)
+  const { base64, ...fixtureWithoutBase64 } = SAMPLE_PHOTO_FIXTURE
+  assert.deepEqual(await camera.capturePhoto(), fixtureWithoutBase64)
+  assert.deepEqual(await camera.capturePhoto({ includeBase64: true }), SAMPLE_PHOTO_FIXTURE)
+  assert.deepEqual(await camera.pickPhoto({ includeBase64: true }), SAMPLE_PHOTO_FIXTURE)
 })
 
 test('mock capturePhoto honors a custom photo and delay', async () => {

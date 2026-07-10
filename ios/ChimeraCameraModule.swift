@@ -76,37 +76,29 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
         })
     }
 
+    /// `enableShutterSound` from the JS adapter is ignored on purpose: the
+    /// system camera UI owns its shutter sound.
     public func capturePhoto(_ options: [String: Any], callback: @escaping LynxCallbackBlock) {
-        let quality = (options["quality"] as? NSNumber)?.doubleValue
-            ?? (options["jpegQuality"] as? NSNumber)?.doubleValue
-            ?? 0.9
-        let facing = (options["facing"] as? String) ?? "back"
-
         DispatchQueue.main.async {
-            SystemCameraCapture.present(quality: CGFloat(quality), facing: facing) { result in
-                callback(result)
-            }
+            SystemCameraCapture.present(options: options, source: .camera) { callback($0) }
         }
     }
 
     /// Picks an existing photo from the library through the system picker.
-    /// Same result shape as `capturePhoto` (base64 JPEG + dimensions); no
+    /// Same result shape as `capturePhoto` (temp-file path, opt-in base64); no
     /// photo-library permission is needed for picker-mediated access.
     public func pickPhoto(_ options: [String: Any], callback: @escaping LynxCallbackBlock) {
-        let quality = (options["quality"] as? NSNumber)?.doubleValue ?? 0.9
-
         DispatchQueue.main.async {
-            SystemCameraCapture.present(
-                quality: CGFloat(quality), facing: "back", source: .photoLibrary
-            ) { result in
-                callback(result)
-            }
+            SystemCameraCapture.present(options: options, source: .photoLibrary) { callback($0) }
         }
     }
 
     private func requestPermission(for mediaType: AVMediaType, callback: @escaping LynxCallbackBlock) {
         AVCaptureDevice.requestAccess(for: mediaType) { _ in
-            callback(self.permissionStatus(for: mediaType))
+            // AVFoundation calls back on an arbitrary queue; Lynx callbacks expect main.
+            DispatchQueue.main.async {
+                callback(self.permissionStatus(for: mediaType))
+            }
         }
     }
 
@@ -141,73 +133,147 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
 
 private final class SystemCameraCapture: NSObject, UIImagePickerControllerDelegate,
     UINavigationControllerDelegate {
-    private let quality: CGFloat
-    private let completion: ([String: Any]) -> Void
-    private var retainSelf: SystemCameraCapture?
+    /// One capture at a time. UIKit silently refuses a second full-screen
+    /// present, which would strand that capture's callback forever.
+    private static var current: SystemCameraCapture?
 
-    private init(quality: CGFloat, completion: @escaping ([String: Any]) -> Void) {
-        self.quality = quality
+    private let quality: CGFloat
+    private let includeBase64: Bool
+    private let maxDimension: CGFloat?
+    private var completion: (([String: Any]) -> Void)?
+
+    private init(options: [String: Any], completion: @escaping ([String: Any]) -> Void) {
+        self.quality = CGFloat(
+            (options["quality"] as? NSNumber)?.doubleValue
+                ?? (options["jpegQuality"] as? NSNumber)?.doubleValue
+                ?? 0.9)
+        self.includeBase64 = (options["includeBase64"] as? NSNumber)?.boolValue ?? false
+        self.maxDimension = (options["maxDimension"] as? NSNumber).map { CGFloat($0.doubleValue) }
         self.completion = completion
     }
 
     static func present(
-        quality: CGFloat, facing: String,
-        source: UIImagePickerController.SourceType = .camera,
+        options: [String: Any],
+        source: UIImagePickerController.SourceType,
         completion: @escaping ([String: Any]) -> Void
     ) {
+        guard current == nil else {
+            completion(errorResult("capture/in-progress", "Another capture is already in progress."))
+            return
+        }
         guard UIImagePickerController.isSourceTypeAvailable(source) else {
-            completion(["error": ["code": "camera/unavailable", "message": "Camera is not available on this device."]])
+            completion(errorResult("camera/unavailable", "Camera is not available on this device."))
             return
         }
-
         guard let presentingViewController = topViewController() else {
-            completion(["error": ["code": "camera/no-presenter", "message": "Could not find a view controller to present the camera."]])
+            completion(errorResult("camera/no-presenter", "Could not find a view controller to present the camera."))
             return
         }
 
-        let capture = SystemCameraCapture(quality: quality, completion: completion)
-        capture.retainSelf = capture
+        let capture = SystemCameraCapture(options: options, completion: completion)
+        current = capture
 
         let picker = UIImagePickerController()
         picker.sourceType = source
         if source == .camera {
-            picker.cameraDevice = facing == "front" ? .front : .rear
+            let facing = (options["facing"] as? String) ?? "back"
+            picker.cameraDevice =
+                facing == "front" && UIImagePickerController.isCameraDeviceAvailable(.front)
+                ? .front : .rear
+            switch options["flash"] as? String {
+            case "on": picker.cameraFlashMode = .on
+            case "auto": picker.cameraFlashMode = .auto
+            default: picker.cameraFlashMode = .off
+            }
         }
         picker.delegate = capture
 
-        presentingViewController.present(picker, animated: true)
+        var presented = false
+        presentingViewController.present(picker, animated: true) { presented = true }
+        // UIKit refuses a presentation silently (presenter mid-transition,
+        // another modal already up): no delegate would ever fire. Fail the JS
+        // promise instead of hanging it.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            if !presented {
+                capture.finish(errorResult("camera/present-failed", "Could not present the system camera UI."))
+            }
+        }
     }
 
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        defer { retainSelf = nil }
         picker.dismiss(animated: true)
 
-        guard let image = info[.originalImage] as? UIImage,
-              let data = image.jpegData(compressionQuality: quality) else {
-            completion(["error": ["code": "capture/encode-failed", "message": "Could not encode captured image."]])
+        guard var image = info[.originalImage] as? UIImage else {
+            finish(Self.errorResult("capture/encode-failed", "Could not read captured image."))
+            return
+        }
+        if let maxDimension {
+            image = Self.downscale(image, longestSide: maxDimension)
+        }
+        guard let data = image.jpegData(compressionQuality: quality) else {
+            finish(Self.errorResult("capture/encode-failed", "Could not encode captured image."))
             return
         }
 
-        completion([
-            "path": "memory://chimera-camera/capture.jpg",
+        let path = NSTemporaryDirectory().appending("chimera-camera-\(UUID().uuidString).jpg")
+        do {
+            try data.write(to: URL(fileURLWithPath: path), options: .atomic)
+        } catch {
+            finish(Self.errorResult("capture/write-failed", error.localizedDescription))
+            return
+        }
+
+        var result: [String: Any] = [
+            "path": path,
             "width": Int(image.size.width * image.scale),
             "height": Int(image.size.height * image.scale),
             "orientation": "up",
             "mime": "image/jpeg",
-            "base64": data.base64EncodedString(),
-        ])
+        ]
+        if includeBase64 {
+            result["base64"] = data.base64EncodedString()
+        }
+        finish(result)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        defer { retainSelf = nil }
         picker.dismiss(animated: true)
-        completion(["error": ["code": "capture/cancelled", "message": "Capture cancelled."]])
+        finish(Self.errorResult("capture/cancelled", "Capture cancelled."))
+    }
+
+    /// Single exit: releases the in-flight slot and guarantees the JS callback
+    /// fires exactly once, whichever of delegate/timeout gets here first.
+    private func finish(_ result: [String: Any]) {
+        guard let completion else { return }
+        self.completion = nil
+        Self.current = nil
+        completion(result)
+    }
+
+    private static func errorResult(_ code: String, _ message: String) -> [String: Any] {
+        ["error": ["code": code, "message": message]]
+    }
+
+    private static func downscale(_ image: UIImage, longestSide: CGFloat) -> UIImage {
+        let pixelWidth = image.size.width * image.scale
+        let pixelHeight = image.size.height * image.scale
+        let longest = max(pixelWidth, pixelHeight)
+        guard longest > longestSide else { return image }
+        let ratio = longestSide / longest
+        let size = CGSize(width: (pixelWidth * ratio).rounded(), height: (pixelHeight * ratio).rounded())
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
     }
 
     private static func topViewController() -> UIViewController? {
-        let scene = UIApplication.shared.connectedScenes
-            .first { $0.activationState == .foregroundActive } as? UIWindowScene
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        // foregroundInactive too: cold-start captures race scene activation.
+        let scene = scenes.first { $0.activationState == .foregroundActive }
+            ?? scenes.first { $0.activationState == .foregroundInactive }
         var top = scene?.windows.first { $0.isKeyWindow }?.rootViewController
         while let presented = top?.presentedViewController {
             top = presented

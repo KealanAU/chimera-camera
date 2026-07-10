@@ -273,9 +273,7 @@ export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape)
       // Optional on purpose: hosts compiled before this method exist happily
       // without it, so it is not in requiredNativeMethods.
       if (!nativeModule.pickPhoto) throw new Error('CameraModule.pickPhoto is not available.')
-      return callNative((callback) =>
-        nativeModule.pickPhoto?.({ quality: options?.quality ?? 0.9 }, callback),
-      )
+      return callNative((callback) => nativeModule.pickPhoto?.(pickOptionsToNative(options), callback))
     },
 
     async startRecording(_options?: StartRecordingOptions): Promise<void> {
@@ -383,12 +381,24 @@ function rejectIfNativeError(result: unknown): void {
 }
 
 function captureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {
-  return {
+  const native: Record<string, unknown> = {
     flash: options?.flash ?? 'off',
     enableShutterSound: options?.enableShutterSound ?? true,
     quality: clampQuality(options?.quality),
     facing: options?.facing ?? 'back',
+    includeBase64: options?.includeBase64 ?? false,
   }
+  if (options?.maxDimension !== undefined) native.maxDimension = options.maxDimension
+  return native
+}
+
+function pickOptionsToNative(options: PickPhotoOptions | undefined): Record<string, unknown> {
+  const native: Record<string, unknown> = {
+    quality: clampQuality(options?.quality),
+    includeBase64: options?.includeBase64 ?? false,
+  }
+  if (options?.maxDimension !== undefined) native.maxDimension = options.maxDimension
+  return native
 }
 
 function legacyCaptureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {

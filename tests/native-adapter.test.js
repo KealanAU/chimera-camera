@@ -60,7 +60,13 @@ test('capturePhoto prefers the modern native method and applies defaults', async
   const photo = await adapter.capturePhoto()
   assert.equal(photo.path, 'file:///photo.jpg')
   assert.equal(legacyCalled, false)
-  assert.deepEqual(received, { flash: 'off', enableShutterSound: true, quality: 0.9, facing: 'back' })
+  assert.deepEqual(received, {
+    flash: 'off',
+    enableShutterSound: true,
+    quality: 0.9,
+    facing: 'back',
+    includeBase64: false,
+  })
 })
 
 test('capturePhoto passes quality and facing through, clamped to 0..1', async () => {
@@ -71,9 +77,26 @@ test('capturePhoto passes quality and facing through, clamped to 0..1', async ()
       callback({ path: 'file:///photo.jpg' })
     },
   })
-  await adapter.capturePhoto({ quality: 1.7, facing: 'front' })
+  await adapter.capturePhoto({ quality: 1.7, facing: 'front', includeBase64: true, maxDimension: 1600 })
   assert.equal(received.quality, 1)
   assert.equal(received.facing, 'front')
+  assert.equal(received.includeBase64, true)
+  assert.equal(received.maxDimension, 1600)
+})
+
+test('pickPhoto passes options through with defaults', async () => {
+  let received = null
+  const adapter = createNativeCameraAdapter({
+    capturePhoto: (_options, callback) => callback({ path: 'file:///photo.jpg' }),
+    pickPhoto: (options, callback) => {
+      received = options
+      callback({ path: 'file:///picked.jpg' })
+    },
+  })
+  await adapter.pickPhoto()
+  assert.deepEqual(received, { quality: 0.9, includeBase64: false })
+  await adapter.pickPhoto({ quality: 0.5, includeBase64: true, maxDimension: 800 })
+  assert.deepEqual(received, { quality: 0.5, includeBase64: true, maxDimension: 800 })
 })
 
 test('capturePhoto falls back to the legacy capture method', async () => {
