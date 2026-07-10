@@ -9,9 +9,10 @@ Installing `@kealanau/chimera-camera` puts this folder in:
 node_modules/@kealanau/chimera-camera/ios
 ```
 
-Lynx does not currently provide a package autolinking convention we can rely on,
-so host apps must add these files to their Xcode target and register the module
-in their Lynx bootstrap.
+Chimera Camera is not yet configured for Lynx's native-library/autolink tooling,
+so current host apps must add these files to their Xcode target and register
+the module in their Lynx bootstrap. The migration is tracked for 0.2 in
+`ROADMAP.md`.
 
 Sources:
 
@@ -23,8 +24,9 @@ Sources:
   compiled into the target; no bootstrap call needed.
 
 Both compile clean against Lynx 3.9.0 pods on Xcode 26. The Swift module
-needs `use_modular_headers!` in the host Podfile (for `import Lynx`).
-Runtime behavior on device is still being verified.
+needs `use_modular_headers!` in the host Podfile (for `import Lynx`). Embedded
+preview, capture, front/back switching, and close/reopen were exercised on a
+physical iPhone on 2026-07-10; remaining acceptance is tracked in `ROADMAP.md`.
 
 For LynxExplorer, use `@kealanau/chimera-camera/mock`. Explorer cannot compile and
 register native Swift from an installed npm package at runtime.

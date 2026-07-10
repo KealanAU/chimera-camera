@@ -2,24 +2,27 @@
   <view class="screen">
     <text class="title">Chimera Camera Demo</text>
 
-    <view class="badge" :class="install.ok ? 'badgeNative' : 'badgeMock'">
-      <text class="badgeText">{{ install.ok ? 'NATIVE CAMERA' : 'MOCK ADAPTER' }}</text>
+    <view class="badge" :class="cameraInstallStatus.ok ? 'badgeNative' : 'badgeMock'">
+      <text class="badgeText">{{ cameraInstallStatus.ok ? 'NATIVE CAMERA' : 'MOCK ADAPTER' }}</text>
     </view>
 
-    <text class="meta">Install: {{ install.code }}</text>
+    <text class="meta">Install: {{ cameraInstallStatus.code }}</text>
     <text class="meta">Camera: {{ cameraName }}</text>
     <text class="meta">Permission: {{ permission }}</text>
     <text class="status">{{ status }}</text>
 
-    <!-- On Lynx Go / LynxExplorer the native module can't exist; say so on
-         screen, because console logs are invisible without Lynx DevTool. -->
-    <view v-if="!install.ok" class="installBox">
-      <text class="installText">{{ install.message }}</text>
+    <view v-if="!cameraInstallStatus.ok" class="installBox">
+      <text class="installText">{{ cameraInstallStatus.message }}</text>
     </view>
 
     <view class="preview">
-      <image v-if="photoSrc" :src="photoSrc" class="previewImage" mode="aspectFit" />
-      <text v-else class="previewText">{{ photoLabel }}</text>
+      <image
+        v-if="capturedPhotoPreviewSource"
+        :src="capturedPhotoPreviewSource"
+        class="previewImage"
+        mode="aspectFit"
+      />
+      <text v-else class="previewText">{{ capturedPhotoLabel }}</text>
     </view>
 
     <view class="button" @tap="capture">
@@ -38,38 +41,35 @@ import {
 } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
-// The pattern for hosts like Lynx Go / LynxExplorer: check the install
-// status first, use the real adapter when it exists, and fall back to the
-// mock loudly (badge + status box) instead of silently.
-const install = getCameraInstallStatus()
-const camera: CameraAdapter = createCameraAdapter({ optional: true }) ?? createMockCameraModule()
+const cameraInstallStatus = getCameraInstallStatus()
+const cameraAdapter: CameraAdapter = createCameraAdapter({ optional: true }) ?? createMockCameraModule()
 
 const busy = ref(false)
 const permission = ref('unknown')
 const cameraName = ref('unknown')
-const photo = ref<PhotoFile | null>(null)
+const capturedPhoto = ref<PhotoFile | null>(null)
 const error = ref<string | null>(null)
 
 const status = computed(() => {
   if (error.value) return error.value
-  if (photo.value) return install.ok ? 'Photo captured' : 'Mock photo captured'
+  if (capturedPhoto.value) return cameraInstallStatus.ok ? 'Photo captured' : 'Mock photo captured'
   return 'Ready'
 })
 
-const photoLabel = computed(() => {
-  if (!photo.value) return 'No photo yet'
-  return `${photo.value.width ?? 0} x ${photo.value.height ?? 0} ${photo.value.mime ?? 'image'}`
+const capturedPhotoLabel = computed(() => {
+  if (!capturedPhoto.value) return 'No photo yet'
+  return `${capturedPhoto.value.width ?? 0} x ${capturedPhoto.value.height ?? 0} ${capturedPhoto.value.mime ?? 'image'}`
 })
 
-const photoSrc = computed(() => {
-  if (!photo.value?.base64) return null
-  return `data:${photo.value.mime ?? 'image/jpeg'};base64,${photo.value.base64}`
+const capturedPhotoPreviewSource = computed(() => {
+  if (!capturedPhoto.value?.base64) return null
+  return `data:${capturedPhoto.value.mime ?? 'image/jpeg'};base64,${capturedPhoto.value.base64}`
 })
 
 onMounted(async () => {
   try {
-    const permissions = await camera.getPermissions()
-    const devices = await camera.getAvailableCameraDevices()
+    const permissions = await cameraAdapter.getPermissions()
+    const devices = await cameraAdapter.getAvailableCameraDevices()
     permission.value = permissions.camera
     cameraName.value = devices[0]?.localizedName ?? 'No camera'
   } catch (e) {
@@ -81,7 +81,7 @@ async function capture() {
   busy.value = true
   error.value = null
   try {
-    photo.value = await camera.capturePhoto()
+    capturedPhoto.value = await cameraAdapter.capturePhoto({ includeBase64: true, maxDimension: 1600 })
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {

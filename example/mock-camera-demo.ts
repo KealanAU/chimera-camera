@@ -4,7 +4,7 @@ async function runMockCameraDemo() {
   const camera = createMockCameraModule({ captureDelayMs: 250 })
   const permissions = await camera.getPermissions()
   const devices = await camera.getAvailableCameraDevices()
-  const photo = await camera.capturePhoto()
+  const photo = await camera.capturePhoto({ includeBase64: true, maxDimension: 1600 })
 
   return {
     permissions,

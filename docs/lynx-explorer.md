@@ -92,4 +92,6 @@ permission keys in `Info.plist`.
 2. the consuming app app flow with mock capture.
 3. Custom iOS host with `ios/ChimeraCameraModule.swift` registered.
 4. Real iPhone system-camera capture through `CameraModule.capturePhoto`.
-5. Later: native `camera-view` live preview once that component exists.
+5. Native `camera-view` live preview, front/back switching, close/reopen, and
+   view-session capture. These core behaviors were first exercised on a
+   physical iPhone on 2026-07-10; remaining cases live in `ROADMAP.md`.

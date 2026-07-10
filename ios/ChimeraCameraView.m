@@ -7,8 +7,6 @@
 #import <Lynx/LynxPropsProcessor.h>
 #import <Lynx/LynxUIMethodProcessor.h>
 
-/// UIView backed by an AVCaptureVideoPreviewLayer, so the preview always
-/// tracks the view's bounds without manual frame syncing.
 @interface ChimeraCameraPreviewView : UIView
 @property(nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
 @end
@@ -61,6 +59,7 @@
   AVCaptureDeviceInput *_input;
   AVCapturePhotoOutput *_photoOutput;
   NSString *_readyDeviceId;
+  BOOL _captureInProgress;
 }
 
 LYNX_LAZY_REGISTER_UI("camera-view")
@@ -73,10 +72,21 @@ LYNX_LAZY_REGISTER_UI("camera-view")
   view.backgroundColor = [UIColor blackColor];
   view.clipsToBounds = YES;
   view.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+
+  NSNotificationCenter *notifications = NSNotificationCenter.defaultCenter;
+  [notifications addObserver:self
+                     selector:@selector(applicationDidEnterBackground:)
+                         name:UIApplicationDidEnterBackgroundNotification
+                       object:nil];
+  [notifications addObserver:self
+                     selector:@selector(applicationWillEnterForeground:)
+                         name:UIApplicationWillEnterForegroundNotification
+                       object:nil];
   return view;
 }
 
 - (void)dealloc {
+  [NSNotificationCenter.defaultCenter removeObserver:self];
   AVCaptureSession *session = _session;
   if (session && _sessionQueue) {
     dispatch_async(_sessionQueue, ^{
@@ -85,6 +95,19 @@ LYNX_LAZY_REGISTER_UI("camera-view")
       }
     });
   }
+}
+
+- (void)applicationDidEnterBackground:(NSNotification *)notification {
+  dispatch_async(_sessionQueue, ^{
+    if (self->_session.isRunning) {
+      [self->_session stopRunning];
+    }
+    self->_readyDeviceId = nil;
+  });
+}
+
+- (void)applicationWillEnterForeground:(NSNotification *)notification {
+  [self syncSession];
 }
 
 LYNX_PROP_SETTER("facing", setFacing, NSString *) {
@@ -114,9 +137,8 @@ LYNX_UI_METHOD(capturePhoto) {
   if ([rawQuality isKindOfClass:[NSNumber class]]) {
     quality = MIN(MAX(rawQuality.doubleValue, 0.0), 1.0);
   }
-  // Opt-in: base64 costs MBs across the bridge, but JS can't read the temp
-  // file, so upload pipelines fed from JS need it until native upload exists.
   BOOL includeBase64 = [params[@"includeBase64"] boolValue];
+  CGFloat maxDimension = [params[@"maxDimension"] doubleValue];
 
   dispatch_async(_sessionQueue, ^{
     if (!self->_photoOutput || !self->_session.isRunning) {
@@ -126,11 +148,18 @@ LYNX_UI_METHOD(capturePhoto) {
       });
       return;
     }
+    if (self->_captureInProgress) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/in-progress",
+        @"message" : @"Another camera-view capture is already in progress."
+      });
+      return;
+    }
+    self->_captureInProgress = YES;
 
     AVCaptureConnection *connection = [self->_photoOutput connectionWithMediaType:AVMediaTypeVideo];
     if (connection.isVideoOrientationSupported) {
-      // ponytail: portrait-locked hosts only; read UIDevice orientation here
-      // if a landscape host ever consumes this.
+      // Portrait-only until host orientation support lands.
       connection.videoOrientation = AVCaptureVideoOrientationPortrait;
     }
 
@@ -141,38 +170,57 @@ LYNX_UI_METHOD(capturePhoto) {
 
     ChimeraCameraPhotoDelegate *delegate =
         [[ChimeraCameraPhotoDelegate alloc] initWithCompletion:^(NSData *data, NSError *error) {
-          if (!data) {
-            callback(kUIMethodOperationError, @{
-              @"code" : @"capture/failed",
-              @"message" : error.localizedDescription ?: @"Photo capture failed."
-            });
-            return;
-          }
+          dispatch_async(self->_sessionQueue, ^{
+            self->_captureInProgress = NO;
+            if (!data) {
+              callback(kUIMethodOperationError, @{
+                @"code" : @"capture/failed",
+                @"message" : error.localizedDescription ?: @"Photo capture failed."
+              });
+              return;
+            }
 
-          NSString *path = [NSTemporaryDirectory()
-              stringByAppendingPathComponent:[NSString stringWithFormat:@"chimera-camera-%@.jpg",
-                                                                        NSUUID.UUID.UUIDString]];
-          NSError *writeError;
-          if (![data writeToFile:path options:NSDataWritingAtomic error:&writeError]) {
-            callback(kUIMethodOperationError, @{
-              @"code" : @"capture/write-failed",
-              @"message" : writeError.localizedDescription ?: @"Could not write the captured photo."
-            });
-            return;
-          }
+            UIImage *image = [UIImage imageWithData:data];
+            NSData *resultData = data;
+            CGFloat width = image.size.width * image.scale;
+            CGFloat height = image.size.height * image.scale;
+            CGFloat longestSide = MAX(width, height);
+            if (maxDimension > 0 && longestSide > maxDimension) {
+              CGFloat ratio = maxDimension / longestSide;
+              CGSize targetSize = CGSizeMake(round(width * ratio), round(height * ratio));
+              UIGraphicsImageRendererFormat *format = [[UIGraphicsImageRendererFormat alloc] init];
+              format.scale = 1;
+              image = [[[UIGraphicsImageRenderer alloc] initWithSize:targetSize format:format]
+                  imageWithActions:^(UIGraphicsImageRendererContext *context) {
+                    [image drawInRect:(CGRect){.origin = CGPointZero, .size = targetSize}];
+                  }];
+              resultData = UIImageJPEGRepresentation(image, quality);
+            }
 
-          UIImage *image = [UIImage imageWithData:data];
-          NSMutableDictionary *result = [@{
-            @"path" : path,
-            @"width" : @((NSInteger)(image.size.width * image.scale)),
-            @"height" : @((NSInteger)(image.size.height * image.scale)),
-            @"orientation" : @"up",
-            @"mime" : @"image/jpeg",
-          } mutableCopy];
-          if (includeBase64) {
-            result[@"base64"] = [data base64EncodedStringWithOptions:0];
-          }
-          callback(kUIMethodSuccess, result);
+            NSString *path = [NSTemporaryDirectory()
+                stringByAppendingPathComponent:[NSString stringWithFormat:@"chimera-camera-%@.jpg",
+                                                                          NSUUID.UUID.UUIDString]];
+            NSError *writeError;
+            if (![resultData writeToFile:path options:NSDataWritingAtomic error:&writeError]) {
+              callback(kUIMethodOperationError, @{
+                @"code" : @"capture/write-failed",
+                @"message" : writeError.localizedDescription ?: @"Could not write the captured photo."
+              });
+              return;
+            }
+
+            NSMutableDictionary *result = [@{
+              @"path" : path,
+              @"width" : @((NSInteger)(image.size.width * image.scale)),
+              @"height" : @((NSInteger)(image.size.height * image.scale)),
+              @"orientation" : @"up",
+              @"mime" : @"image/jpeg",
+            } mutableCopy];
+            if (includeBase64) {
+              result[@"base64"] = [resultData base64EncodedStringWithOptions:0];
+            }
+            callback(kUIMethodSuccess, result);
+          });
         }];
 
     [self->_photoOutput capturePhotoWithSettings:settings delegate:delegate];
@@ -181,8 +229,6 @@ LYNX_UI_METHOD(capturePhoto) {
 
 #pragma mark - Session
 
-/// Snapshot props on the caller thread, then reconcile the capture session on
-/// the session queue. Idempotent, so every prop change can just call it.
 - (void)syncSession {
   BOOL active = _active;
   NSString *facing = [_facing copy];

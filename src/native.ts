@@ -2,8 +2,10 @@ import { createMockCameraModule, type MockCameraOptions } from './mock.js'
 import type {
   CameraAdapter,
   CameraDevice,
+  CameraErrorEvent,
   CameraPermissions,
   CapturePhotoOptions,
+  ImageOutputOptions,
   PermissionStatus,
   PickPhotoOptions,
   PhotoFile,
@@ -32,7 +34,7 @@ interface NativeCameraModuleShape {
 }
 
 interface NativeErrorResult {
-  error?: string | { code?: string; message?: string }
+  error?: string | Partial<Pick<CameraErrorEvent, 'code' | 'message'>>
 }
 
 interface LegacyCaptureResult {
@@ -381,18 +383,19 @@ function rejectIfNativeError(result: unknown): void {
 }
 
 function captureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {
-  const native: Record<string, unknown> = {
+  return {
+    ...imageOutputOptionsToNative(options),
     flash: options?.flash ?? 'off',
     enableShutterSound: options?.enableShutterSound ?? true,
-    quality: clampQuality(options?.quality),
     facing: options?.facing ?? 'back',
-    includeBase64: options?.includeBase64 ?? false,
   }
-  if (options?.maxDimension !== undefined) native.maxDimension = options.maxDimension
-  return native
 }
 
 function pickOptionsToNative(options: PickPhotoOptions | undefined): Record<string, unknown> {
+  return imageOutputOptionsToNative(options)
+}
+
+function imageOutputOptionsToNative(options: ImageOutputOptions | undefined): Record<string, unknown> {
   const native: Record<string, unknown> = {
     quality: clampQuality(options?.quality),
     includeBase64: options?.includeBase64 ?? false,

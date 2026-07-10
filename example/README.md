@@ -1,7 +1,8 @@
 # Chimera Camera Example
 
-This example app exists to validate package integration, not to demonstrate a
-finished product UI.
+This example app validates the complete `0.1` application flow: explicit
+native/mock detection, capture, JavaScript preview, and a host-provided upload
+mutation.
 
 Files:
 
@@ -12,11 +13,17 @@ Files:
   will not build in a ReactLynx project.
 - `mock-camera-demo.ts` — minimal console-only mock walkthrough.
 
-The first milestone for this app is a native bridge spike:
+`CameraDemo` accepts an `uploadPhoto(photo)` prop so the consuming app can wire
+its own uploader without coupling this package to a networking library. Its
+acceptance flow is:
 
-- Render a placeholder native `camera-view`.
-- Call one imperative native method from JavaScript.
-- Receive one native event in JavaScript.
+- Render the native `camera-view` preview.
+- Receive its `ready`/`error` events.
+- Call `ping()` and `capturePhoto()` imperatively from JavaScript.
+- Switch front/back cameras and close/reopen the session.
+- Capture through the module-level system camera path.
+- Preview a bounded base64 result and pass the same `PhotoFile` to the host's
+  upload mutation.
 
 The native element and JS handle for the spike exist
 (`ios/ChimeraCameraView.m`, `createCameraViewHandle` from the package root); in
@@ -33,6 +40,7 @@ const camera = createCameraViewHandle('#camera')
 console.log(await camera.ping()) // { ok: true }
 ```
 
-Once that bridge is proven on iOS and Android, this app should become the manual
-acceptance target for preview, permissions, photo capture, video recording,
-zoom, torch, and tap-to-focus.
+Preview, capture, front/back switching, and close/reopen were exercised on a
+physical iPhone on 2026-07-10. This app remains the manual acceptance target
+for the focused iOS checks, future Android parity, video recording, zoom,
+torch, and tap-to-focus tracked in `ROADMAP.md`.

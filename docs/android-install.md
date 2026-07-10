@@ -24,7 +24,8 @@ them.
 
 4. Register the native module/view in the Lynx host app.
 
-V1 keeps this manual until Lynx has a standard native package autolinking story.
+This remains manual only because Chimera Camera has not yet migrated to Lynx's
+current native-library/autolink tooling; that migration is planned for 0.2.
 
 ## Testing
 

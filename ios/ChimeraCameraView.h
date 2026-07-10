@@ -11,7 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///     `error` `{ code, message }`,
 ///   - methods: `ping()` -> `{ ok: true }` (bridge check), `capturePhoto()`
 ///     -> writes a JPEG to a temp file and returns `{ path, width, height,
-///     orientation, mime }`.
+///     orientation, mime }`; capture supports bounded opt-in base64 via
+///     `includeBase64` and `maxDimension`.
 ///
 /// The element registers itself as `camera-view` via LYNX_LAZY_REGISTER_UI
 /// when this file is compiled into the host target. Frontend usage:

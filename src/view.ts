@@ -1,4 +1,5 @@
 import type {
+  CameraPingResult,
   CameraViewMethods,
   CapturePhotoOptions,
   PhotoFile,
@@ -79,14 +80,14 @@ export interface CameraViewHandle extends CameraViewMethods {
 
 /**
  * Wrap a rendered `<camera-view>` element in the typed `CameraViewMethods`
- * surface. Only `ping()` is implemented natively today (bridge spike);
- * remaining methods reject at the native layer until the V1 milestones land.
+ * surface. iOS currently implements `ping()` and `capturePhoto()`; remaining
+ * methods reject at the native layer until the later V1 milestones land.
  */
 export function createCameraViewHandle(selector: string): CameraViewHandle {
   return {
     selector,
 
-    async ping(): Promise<{ ok: true }> {
+    async ping(): Promise<CameraPingResult> {
       return invokeCameraViewMethod(selector, 'ping')
     },
 

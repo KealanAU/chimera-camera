@@ -273,8 +273,8 @@ The repository should include:
 
 ## Current Status
 
-See [ROADMAP.md](ROADMAP.md) for milestone-level status and known debt, and
-[TODO.md](TODO.md) for the working task list.
+See [ROADMAP.md](ROADMAP.md) for the single project-status, release-plan,
+working-task, and known-debt checklist.
 [V0.md](V0.md) is the contract for what ships today; [V1.md](V1.md) is the
 target contract for the native `camera-view` element.
 
@@ -283,12 +283,13 @@ Working today:
 - TypeScript API, mock adapter, fixtures, and install checks.
 - iOS `CameraModule`: permission checks/requests, device enumeration, and
   interim photo capture through the system camera UI
-  (`UIImagePickerController`). This is a stepping stone that lets apps ship
-  photo capture before the `camera-view` path is proven on device.
+  (`UIImagePickerController`).
 - iOS `camera-view`: embedded AVFoundation live preview (`active`, `facing`,
   `resizeMode` props; `ready`/`error` events) with `capturePhoto()` writing a
   JPEG to a temp file and returning its path. Custom camera UI can now be
-  layered over the preview in Lynx. Awaiting on-device verification.
+  layered over the preview in Lynx. Preview, capture, front/back switching,
+  and close/reopen were exercised successfully on a physical iPhone on
+  2026-07-10; focused bridge, lifecycle, and error-case acceptance remains.
 
 Not started yet:
 
