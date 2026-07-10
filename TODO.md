@@ -28,10 +28,11 @@ state there when a block completes.
 
 ## Bridge spike on a real device (M2 — the de-risking work)
 
-- [ ] Set up an iOS Lynx host app that compiles this package's `ios/` sources
-      (LynxExplorer cannot; see `docs/ios-install.md`).
-- [ ] Compile `LynxCameraView.h/.m` — written against documented Lynx macros
-      but never built; expect header/import or lifecycle fixes.
+- [x] Set up an iOS Lynx host app that compiles this package's `ios/` sources
+      (ExampleHost dev shell: consumer-app/app/native/ios-host, XcodeGen +
+      CocoaPods, Lynx 3.9.0).
+- [x] Compile `LynxCameraView.h/.m` and `LynxCameraModule.swift` — both build
+      clean on Xcode 26 with `use_modular_headers!` (simulator SDK).
 - [ ] On device: render `<camera-view>`, confirm `bindready` fires and
       `createCameraViewHandle('#camera').ping()` returns `{ ok: true }`.
 - [ ] Register `LynxCameraModule`, add `Info.plist` keys, and confirm

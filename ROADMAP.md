@@ -44,9 +44,10 @@ Acceptance criteria in V1.md ("Bridge Spike Acceptance Criteria"):
 - [x] JS surface: `CAMERA_VIEW_TAG`, `invokeCameraViewMethod`,
       `createCameraViewHandle` in `src/view.ts`, with tests against a fake
       SelectorQuery bridge.
-- [ ] Compile the element in a real iOS Lynx host app (the ObjC files are
-      written against the documented Lynx macros but have not been built yet
-      — expect import/lifecycle fixes on first compile).
+- [x] Compile in a real iOS Lynx host app: both `LynxCameraModule.swift` and
+      `LynxCameraView.m` build clean against Lynx 3.9.0 pods / Xcode 26
+      (ExampleHost dev shell, simulator SDK, 2026-07-10). Requires
+      `use_modular_headers!` in the host Podfile for the Swift module.
 - [ ] Verify on device: props reach native, `ping()` returns `{ ok: true }`,
       `bindready` fires in JavaScript.
 - [ ] Android equivalent (`Behavior`/`LynxUI`, `@LynxUIMethod`,

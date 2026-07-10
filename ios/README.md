@@ -20,8 +20,11 @@ Sources:
   in `LynxConfig`. This is the V0 surface (see `V0.md`).
 - `LynxCameraView.h` / `LynxCameraView.m` — the `camera-view` bridge-spike
   element (see `V1.md`). Self-registers via `LYNX_LAZY_REGISTER_UI` when
-  compiled into the target; no bootstrap call needed. Not yet verified in a
-  host app build — expect to fix imports/lifecycle details on first compile.
+  compiled into the target; no bootstrap call needed.
+
+Both compile clean against Lynx 3.9.0 pods on Xcode 26. The Swift module
+needs `use_modular_headers!` in the host Podfile (for `import Lynx`).
+Runtime behavior on device is still being verified.
 
 For LynxExplorer, use `@kealanau/lynx-camera/mock`. Explorer cannot compile and
 register native Swift from an installed npm package at runtime.
