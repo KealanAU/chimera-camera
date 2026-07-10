@@ -41,6 +41,21 @@ state there when a block completes.
 
 ## V0 debt (keep 0.1.x honest)
 
+- [ ] Audit 2026-07-10: `SystemCameraCapture.present` can hang the JS promise
+      forever — `present(picker)` is fire-and-forget; if UIKit refuses the
+      presentation (presenter mid-transition, another picker up), no delegate
+      fires and `retainSelf` leaks. Guard in-flight captures, use the
+      present-completion handler, and fail via callback.
+- [ ] Audit 2026-07-10: `topViewController()` requires `.foregroundActive` —
+      cold-start captures race scene activation; accept `foregroundInactive`
+      or retry briefly.
+- [ ] Audit 2026-07-10: downscale captures in the module (max-dimension cap)
+      — full 12 MP JPEGs are 4–8 MB of base64 across the bridge.
+- [ ] Audit 2026-07-10 (minor): check `isCameraDeviceAvailable(.front)`
+      before setting `picker.cameraDevice`; dispatch `requestPermission`
+      callbacks to the main queue; module ignores `flash`/`enableShutterSound`
+      that the JS adapter sends.
+
 - [ ] Write the captured JPEG to a temp file in Swift and return a real
       `path` (keep `base64` optional) — removes the 3–8 MB bridge payload
       and the `memory://` pseudo-path.
