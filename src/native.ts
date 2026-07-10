@@ -56,6 +56,7 @@ export interface CreateCameraAdapterOptions {
 export type CameraInstallStatusCode =
   | 'mock'
   | 'installed'
+  | 'legacy-capture-only'
   | 'native-modules-missing'
   | 'native-module-missing'
   | 'native-methods-missing'
@@ -84,12 +85,18 @@ export function createCameraAdapter(options?: CreateCameraAdapterOptions & { opt
 export function createCameraAdapter(options: CreateCameraAdapterOptions & { optional: boolean }): CameraAdapter | null
 export function createCameraAdapter(options: CreateCameraAdapterOptions = {}): CameraAdapter | null {
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
-  if (nativeModule) return createNativeCameraAdapter(nativeModule)
+  // A registered module must actually be able to capture — otherwise a
+  // half-registered host would look "available" and only fail at capture time.
+  if (nativeModule && hasCaptureMethod(nativeModule)) return createNativeCameraAdapter(nativeModule)
   if (options.mock) {
     return createMockCameraModule(options.mock === true ? undefined : options.mock)
   }
   if (options.optional) return null
   throw new Error(getCameraInstallStatus(options).message)
+}
+
+function hasCaptureMethod(nativeModule: NativeCameraModuleShape): boolean {
+  return typeof nativeModule.capturePhoto === 'function' || typeof nativeModule.capture === 'function'
 }
 
 export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {}): CameraInstallStatus {
@@ -132,6 +139,22 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
   }
 
   const missingMethods = requiredNativeMethods.filter((method) => typeof nativeModule[method] !== 'function')
+  if (missingMethods.length > 0 && typeof nativeModule.capture === 'function') {
+    // Hosts that only implement the deprecated `capture(options, callback)`
+    // shape still work through the adapter's legacy fallback; report them as
+    // usable so status checks agree with what createCameraAdapter accepts.
+    return {
+      ok: true,
+      code: 'legacy-capture-only',
+      nativeModuleName,
+      jsVersion: LYNX_CAMERA_JS_VERSION,
+      missingMethods,
+      message:
+        `NativeModules.${nativeModuleName} only implements the deprecated legacy capture(options, callback) method. ` +
+        'Photo capture works; permissions/device queries degrade to defaults. ' +
+        "Upgrade the host to this package's native module (see docs/ios-install.md) before the legacy fallback is removed in 0.2.0.",
+    }
+  }
   if (missingMethods.length > 0) {
     return {
       ok: false,

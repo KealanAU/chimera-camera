@@ -55,6 +55,30 @@ test('reports which required methods are missing', () => {
   assert.ok(status.missingMethods.includes('capturePhoto'))
 })
 
+test('reports legacy-capture-only for a capture()-only host', () => {
+  globalThis.NativeModules = { CameraModule: { capture: (_o, cb) => cb({}) } }
+  const status = getCameraInstallStatus()
+  assert.equal(status.ok, true)
+  assert.equal(status.code, 'legacy-capture-only')
+  assert.ok(status.missingMethods.includes('capturePhoto'))
+  assert.match(status.message, /deprecated/)
+})
+
+test('createCameraAdapter accepts a legacy capture()-only host', async () => {
+  globalThis.NativeModules = {
+    CameraModule: { capture: (_o, cb) => cb({ base64: 'aGVsbG8=', width: 1, height: 1 }) },
+  }
+  const adapter = createCameraAdapter()
+  const photo = await adapter.capturePhoto()
+  assert.equal(photo.base64, 'aGVsbG8=')
+})
+
+test('createCameraAdapter rejects a registered module that cannot capture', () => {
+  globalThis.NativeModules = { CameraModule: { getPermissions: (cb) => cb({}) } }
+  assert.throws(() => createCameraAdapter(), /missing required methods/)
+  assert.equal(createCameraAdapter({ optional: true }), null)
+})
+
 test('reports installed for a complete native module', () => {
   globalThis.NativeModules = { CameraModule: completeNativeModule() }
   const status = getCameraInstallStatus()
