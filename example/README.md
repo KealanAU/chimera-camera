@@ -3,6 +3,15 @@
 This example app exists to validate package integration, not to demonstrate a
 finished product UI.
 
+Files:
+
+- `CameraDemo.tsx` — ReactLynx demo for a standard `create-rspeedy` project.
+  Copy it in as `src/App.tsx`. This is the one to use with Lynx Go /
+  LynxExplorer (see `docs/lynx-explorer.md` for the full quickstart).
+- `MockCameraDemo.vue` — the same demo for Vue-based Lynx setups only; it
+  will not build in a ReactLynx project.
+- `mock-camera-demo.ts` — minimal console-only mock walkthrough.
+
 The first milestone for this app is a native bridge spike:
 
 - Render a placeholder native `camera-view`.

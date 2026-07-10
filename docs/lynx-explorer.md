@@ -10,6 +10,42 @@ hosts, with a message listing the native setup steps and pointing at the mock.
 When debugging on device, render `getCameraInstallStatus().code` into your UI
 — console logs are only visible with Lynx DevTool connected.
 
+## Run The Demo In Lynx Go
+
+Lynx Go does not load source files directly — it loads a compiled bundle from
+a dev server. The path that works end to end:
+
+```sh
+# 1. Create a standard ReactLynx project (if you don't have one)
+pnpm create rspeedy@latest camera-demo
+cd camera-demo
+
+# 2. Install this package. It is NOT on npm yet — use the local tarball:
+pnpm add /path/to/lynx-camera/kealanau-lynx-camera-0.1.0-alpha.0.tgz
+
+# 3. Replace src/App.tsx with the ReactLynx demo:
+cp node_modules/@kealanau/lynx-camera/example/CameraDemo.tsx src/App.tsx
+
+# 4. Start the dev server and scan its QR code with Lynx Go
+pnpm dev
+```
+
+Requirements for the QR step: the phone and computer must be on the same
+Wi-Fi network, and macOS's firewall must allow incoming connections for the
+dev server. If scanning does nothing, open the bundle URL shown by `pnpm dev`
+in the phone browser to check reachability.
+
+Expected result on Lynx Go: an orange `MOCK ADAPTER` badge,
+`Install: native-module-missing`, the full explanation box, and a working
+mock capture. A green `NATIVE CAMERA` badge only appears in a custom host
+app that compiles this package's `ios/` sources.
+
+Note: `example/MockCameraDemo.vue` is the same demo for Vue-based Lynx
+setups only. A standard `create-rspeedy` project is ReactLynx — use
+`CameraDemo.tsx` there; a `.vue` file will not build.
+
+## Mock Adapter Basics
+
 Use these hosts with the mock adapter first:
 
 ```ts
@@ -38,13 +74,13 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@kealanau/lynx-camera/example/MockCameraDemo.vue
+node_modules/@kealanau/lynx-camera/example/CameraDemo.tsx      (ReactLynx — standard)
+node_modules/@kealanau/lynx-camera/example/MockCameraDemo.vue  (Vue-Lynx setups only)
 ```
 
-The demo shows the recommended host-detection pattern: it renders the
-install-status badge and message on screen, uses the real camera when the
-native module is registered, and falls back to the mock (visibly) on hosts
-like Lynx Go.
+Both show the recommended host-detection pattern: render the install-status
+badge and message on screen, use the real camera when the native module is
+registered, and fall back to the mock (visibly) on hosts like Lynx Go.
 
 Real iPhone camera testing requires a custom iOS Lynx host app that compiles the
 package's `ios/` files, registers `LynxCameraModule`, and includes camera
