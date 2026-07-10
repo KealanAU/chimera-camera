@@ -12,8 +12,8 @@ import {
   getCameraInstallStatus,
   type CameraAdapter,
   type PhotoFile,
-} from '@kealanau/lynx-camera'
-import { createMockCameraModule } from '@kealanau/lynx-camera/mock'
+} from '@kealanau/chimera-camera'
+import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
 // The pattern for hosts like Lynx Go: check install status first, use the
 // real camera when the native module is registered, and fall back to the
@@ -61,7 +61,7 @@ export function CameraDemo() {
 
   return (
     <view style={{ width: '100%', minHeight: '100%', padding: '24px', backgroundColor: '#111111' }}>
-      <text style={{ color: '#ffffff', fontSize: '28px', fontWeight: 'bold' }}>Lynx Camera Demo</text>
+      <text style={{ color: '#ffffff', fontSize: '28px', fontWeight: 'bold' }}>Chimera Camera Demo</text>
 
       <view
         style={{

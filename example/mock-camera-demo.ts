@@ -14,5 +14,5 @@ async function runMockCameraDemo() {
 }
 
 void runMockCameraDemo().then((result) => {
-  console.log('[lynx-camera mock demo]', result)
+  console.log('[chimera-camera mock demo]', result)
 })

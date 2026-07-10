@@ -86,7 +86,7 @@ test('capturePhoto falls back to the legacy capture method', async () => {
   })
   const photo = await adapter.capturePhoto({ flash: 'on', quality: 0.5, facing: 'front' })
   assert.deepEqual(photo, {
-    path: 'memory://lynx-camera/capture.jpg',
+    path: 'memory://chimera-camera/capture.jpg',
     width: 10,
     height: 20,
     orientation: 'up',

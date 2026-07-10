@@ -1,5 +1,5 @@
 {
-  "name": "@kealanau/lynx-camera",
+  "name": "@kealanau/chimera-camera",
   "version": "0.1.0-alpha.0",
   "description": "A Lynx-native camera surface with plain TypeScript APIs and native iOS/Android hooks.",
   "license": "MIT",

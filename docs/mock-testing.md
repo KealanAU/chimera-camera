@@ -1,6 +1,6 @@
 # Mock Testing
 
-`@kealanau/lynx-camera/mock` provides a dev-only camera adapter for Lynx
+`@kealanau/chimera-camera/mock` provides a dev-only camera adapter for Lynx
 Explorer, web preview, tests, and apps that have not wired native iOS/Android
 camera code yet.
 
@@ -15,7 +15,7 @@ During early development, link the package from the local workspace:
 ```json
 {
   "dependencies": {
-    "@kealanau/lynx-camera": "file:../../lynx-camera"
+    "@kealanau/chimera-camera": "file:../../chimera-camera"
   }
 }
 ```
@@ -23,15 +23,15 @@ During early development, link the package from the local workspace:
 After an alpha publish:
 
 ```sh
-pnpm add @kealanau/lynx-camera@alpha
+pnpm add @kealanau/chimera-camera@alpha
 ```
 
 ## Basic Usage
 
 ```ts
-import { getNativeCameraModule } from '@kealanau/lynx-camera'
-import { createMockCameraModule } from '@kealanau/lynx-camera/mock'
-import type { CameraAdapter } from '@kealanau/lynx-camera'
+import { getNativeCameraModule } from '@kealanau/chimera-camera'
+import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
+import type { CameraAdapter } from '@kealanau/chimera-camera'
 
 const camera: CameraAdapter =
   getNativeCameraModule<CameraAdapter>() ?? createMockCameraModule()
@@ -43,7 +43,7 @@ const photo = await camera.capturePhoto()
 Or use the package adapter helper:
 
 ```ts
-import { createCameraAdapter } from '@kealanau/lynx-camera'
+import { createCameraAdapter } from '@kealanau/chimera-camera'
 
 const camera = createCameraAdapter({ mock: true })
 ```
@@ -59,7 +59,7 @@ The default mock returns:
 ## Custom Fixtures
 
 ```ts
-import { createMockCameraModule } from '@kealanau/lynx-camera/mock'
+import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
 export const camera = createMockCameraModule({
   permissions: {
@@ -83,9 +83,9 @@ that boundary can resolve a real native module first and fall back to the mock i
 development:
 
 ```ts
-import { getNativeCameraModule } from '@kealanau/lynx-camera'
-import { createMockCameraModule } from '@kealanau/lynx-camera/mock'
-import type { CameraAdapter } from '@kealanau/lynx-camera'
+import { getNativeCameraModule } from '@kealanau/chimera-camera'
+import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
+import type { CameraAdapter } from '@kealanau/chimera-camera'
 
 const camera =
   getNativeCameraModule<CameraAdapter>() ??

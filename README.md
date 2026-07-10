@@ -1,6 +1,6 @@
-# Lynx Camera
+# Chimera Camera
 
-`lynx-camera` is a planned Lynx-native camera package inspired by
+`chimera-camera` is a planned Lynx-native camera package inspired by
 [`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera).
 
 Thanks to Marc Rousavy and the VisionCamera contributors for building and
@@ -29,7 +29,7 @@ React Native compatibility and web support are intentionally out of scope for
 this project.
 
 For app development before native iOS/Android wiring is complete, the package
-ships a mock adapter at `@kealanau/lynx-camera/mock`. It lets Lynx apps exercise
+ships a mock adapter at `@kealanau/chimera-camera/mock`. It lets Lynx apps exercise
 permission, device, photo, and recording flows in Explorer, web preview, or unit
 tests without touching device hardware.
 
@@ -40,7 +40,7 @@ requires a custom iOS Lynx host app that compiles and registers the package's
 The package also exposes install checks:
 
 ```ts
-import { assertCameraInstalledAsync, getCameraInstallStatusAsync } from '@kealanau/lynx-camera'
+import { assertCameraInstalledAsync, getCameraInstallStatusAsync } from '@kealanau/chimera-camera'
 
 const status = await getCameraInstallStatusAsync()
 await assertCameraInstalledAsync()

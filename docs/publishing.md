@@ -3,7 +3,7 @@
 The package is scoped as:
 
 ```text
-@kealanau/lynx-camera
+@kealanau/chimera-camera
 ```
 
 ## Local Validation
@@ -36,7 +36,7 @@ npm publish --access public --tag alpha --provenance
 ## Installing In A Lynx App
 
 ```sh
-pnpm add @kealanau/lynx-camera@alpha
+pnpm add @kealanau/chimera-camera@alpha
 ```
 
 The npm package includes JavaScript, TypeScript declarations, docs, and native

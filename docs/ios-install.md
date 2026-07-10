@@ -8,13 +8,13 @@ files on disk, but the Lynx host app still needs to compile and register them.
 1. Install the package:
 
    ```sh
-   pnpm add @kealanau/lynx-camera@alpha
+   pnpm add @kealanau/chimera-camera@alpha
    ```
 
 2. Add the package's `ios/` files to the iOS app target:
 
-   - `LynxCameraModule.swift` — the `CameraModule` native module.
-   - `LynxCameraView.h` + `LynxCameraView.m` — the `camera-view` element
+   - `ChimeraCameraModule.swift` — the `CameraModule` native module.
+   - `ChimeraCameraView.h` + `ChimeraCameraView.m` — the `camera-view` element
      (bridge spike). It self-registers via `LYNX_LAZY_REGISTER_UI` when
      compiled into the target; no bootstrap call needed.
 
@@ -29,12 +29,12 @@ files on disk, but the Lynx host app still needs to compile and register them.
 
 4. Register the native module in the Lynx bootstrap.
 
-   The Swift class is `LynxCameraModule`, and it registers itself to JavaScript
+   The Swift class is `ChimeraCameraModule`, and it registers itself to JavaScript
    as `CameraModule`.
 
    ```swift
    let config = LynxConfig(provider: templateProvider)
-   config.register(LynxCameraModule.self)
+   config.register(ChimeraCameraModule.self)
    ```
 
 The exact bootstrap location depends on the host app's Lynx setup. V1 will keep
@@ -48,7 +48,7 @@ From JavaScript:
 import {
   assertCameraInstalledAsync,
   getCameraInstallStatusAsync,
-} from '@kealanau/lynx-camera'
+} from '@kealanau/chimera-camera'
 
 const status = await getCameraInstallStatusAsync()
 console.log(status)
@@ -66,7 +66,7 @@ To verify the `camera-view` bridge spike, render the element and ping it:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@kealanau/lynx-camera'
+import { createCameraViewHandle } from '@kealanau/chimera-camera'
 
 const camera = createCameraViewHandle('#camera')
 console.log(await camera.ping()) // { ok: true }

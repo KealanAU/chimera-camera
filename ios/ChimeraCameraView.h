@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///   const photo = await camera.capturePhoto({ quality: 0.9 })
 ///
 /// Recording, zoom, torch, and tap-to-focus are not implemented yet (M5).
-@interface LynxCameraView : LynxUI <UIView *>
+@interface ChimeraCameraView : LynxUI <UIView *>
 @end
 
 NS_ASSUME_NONNULL_END

@@ -9,7 +9,7 @@ them.
 1. Install the package:
 
    ```sh
-   pnpm add @kealanau/lynx-camera@alpha
+   pnpm add @kealanau/chimera-camera@alpha
    ```
 
 2. Add the package's `android/` source to the host app build.

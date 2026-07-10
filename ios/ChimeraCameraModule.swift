@@ -4,14 +4,14 @@ import Lynx
 import UIKit
 
 @objcMembers
-public final class LynxCameraModule: NSObject, LynxModule {
+public final class ChimeraCameraModule: NSObject, LynxModule {
     private static let nativeVersion = "0.1.0-alpha.0"
 
     public static var name: String { "CameraModule" }
 
     public static var methodLookup: [String: String] {
         [
-            "getLynxCameraNativeVersion": NSStringFromSelector(#selector(getLynxCameraNativeVersion(_:))),
+            "getChimeraCameraNativeVersion": NSStringFromSelector(#selector(getChimeraCameraNativeVersion(_:))),
             "getPermissions": NSStringFromSelector(#selector(getPermissions(_:))),
             "requestCameraPermission": NSStringFromSelector(#selector(requestCameraPermission(_:))),
             "requestMicrophonePermission": NSStringFromSelector(#selector(requestMicrophonePermission(_:))),
@@ -29,7 +29,7 @@ public final class LynxCameraModule: NSObject, LynxModule {
         super.init()
     }
 
-    public func getLynxCameraNativeVersion(_ callback: @escaping LynxCallbackBlock) {
+    public func getChimeraCameraNativeVersion(_ callback: @escaping LynxCallbackBlock) {
         callback(Self.nativeVersion)
     }
 
@@ -190,7 +190,7 @@ private final class SystemCameraCapture: NSObject, UIImagePickerControllerDelega
         }
 
         completion([
-            "path": "memory://lynx-camera/capture.jpg",
+            "path": "memory://chimera-camera/capture.jpg",
             "width": Int(image.size.width * image.scale),
             "height": Int(image.size.height * image.scale),
             "orientation": "up",

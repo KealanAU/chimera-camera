@@ -1,4 +1,4 @@
-# Lynx Camera Example
+# Chimera Camera Example
 
 This example app exists to validate package integration, not to demonstrate a
 finished product UI.
@@ -19,7 +19,7 @@ The first milestone for this app is a native bridge spike:
 - Receive one native event in JavaScript.
 
 The native element and JS handle for the spike exist
-(`ios/LynxCameraView.m`, `createCameraViewHandle` from the package root); in
+(`ios/ChimeraCameraView.m`, `createCameraViewHandle` from the package root); in
 a host app that compiles the iOS sources this looks like:
 
 ```tsx
@@ -27,7 +27,7 @@ a host app that compiles the iOS sources this looks like:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@kealanau/lynx-camera'
+import { createCameraViewHandle } from '@kealanau/chimera-camera'
 
 const camera = createCameraViewHandle('#camera')
 console.log(await camera.ping()) // { ok: true }

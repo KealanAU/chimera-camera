@@ -27,7 +27,7 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraA
   const devices = options.devices ?? defaultMockDevices()
   const permissions = options.permissions ?? { camera: 'authorized', microphone: 'authorized' }
   const photo = options.photo ?? SAMPLE_PHOTO_FIXTURE
-  const recordingPath = options.recordingPath ?? 'mock://lynx-camera/video.mp4'
+  const recordingPath = options.recordingPath ?? 'mock://chimera-camera/video.mp4'
   const recordingDurationMs = options.recordingDurationMs ?? 1000
   const captureDelayMs = options.captureDelayMs ?? 0
 

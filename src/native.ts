@@ -16,12 +16,12 @@ import type {
 
 declare const NativeModules: Record<string, unknown> | undefined
 
-export const LYNX_CAMERA_JS_VERSION = '0.1.0-alpha.0'
+export const CHIMERA_CAMERA_JS_VERSION = '0.1.0-alpha.0'
 
 type NativeCallback<T> = (result: T) => void
 
 interface NativeCameraModuleShape {
-  getLynxCameraNativeVersion?: (callback: NativeCallback<string | NativeErrorResult>) => unknown
+  getChimeraCameraNativeVersion?: (callback: NativeCallback<string | NativeErrorResult>) => unknown
   getPermissions?: (callback: NativeCallback<CameraPermissions | NativeErrorResult>) => unknown
   requestCameraPermission?: (callback: NativeCallback<PermissionStatus | NativeErrorResult>) => unknown
   requestMicrophonePermission?: (callback: NativeCallback<PermissionStatus | NativeErrorResult>) => unknown
@@ -109,10 +109,10 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
       ok: true,
       code: 'mock',
       nativeModuleName,
-      jsVersion: LYNX_CAMERA_JS_VERSION,
+      jsVersion: CHIMERA_CAMERA_JS_VERSION,
       nativeVersion: 'mock',
       missingMethods: [],
-      message: '@kealanau/lynx-camera is running with the mock adapter.',
+      message: '@kealanau/chimera-camera is running with the mock adapter.',
     }
   }
 
@@ -149,7 +149,7 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
       ok: true,
       code: 'legacy-capture-only',
       nativeModuleName,
-      jsVersion: LYNX_CAMERA_JS_VERSION,
+      jsVersion: CHIMERA_CAMERA_JS_VERSION,
       missingMethods,
       message:
         `NativeModules.${nativeModuleName} only implements the deprecated legacy capture(options, callback) method. ` +
@@ -162,7 +162,7 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
       ok: false,
       code: 'native-methods-missing',
       nativeModuleName,
-      jsVersion: LYNX_CAMERA_JS_VERSION,
+      jsVersion: CHIMERA_CAMERA_JS_VERSION,
       missingMethods,
       message: createInstallErrorMessage(
         nativeModuleName,
@@ -177,9 +177,9 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
     ok: true,
     code: 'installed',
     nativeModuleName,
-    jsVersion: LYNX_CAMERA_JS_VERSION,
+    jsVersion: CHIMERA_CAMERA_JS_VERSION,
     missingMethods: [],
-    message: '@kealanau/lynx-camera native module is registered.',
+    message: '@kealanau/chimera-camera native module is registered.',
   }
 }
 
@@ -190,10 +190,10 @@ export async function getCameraInstallStatusAsync(
   if (!status.ok || status.code === 'mock') return status
 
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
-  if (!nativeModule?.getLynxCameraNativeVersion) return status
+  if (!nativeModule?.getChimeraCameraNativeVersion) return status
 
-  const nativeVersion = await callNative(nativeModule.getLynxCameraNativeVersion.bind(nativeModule))
-  if (nativeVersion !== LYNX_CAMERA_JS_VERSION) {
+  const nativeVersion = await callNative(nativeModule.getChimeraCameraNativeVersion.bind(nativeModule))
+  if (nativeVersion !== CHIMERA_CAMERA_JS_VERSION) {
     return {
       ...status,
       ok: false,
@@ -201,7 +201,7 @@ export async function getCameraInstallStatusAsync(
       nativeVersion,
       message: createInstallErrorMessage(
         status.nativeModuleName,
-        `Native module version ${nativeVersion} does not match JS package version ${LYNX_CAMERA_JS_VERSION}.`,
+        `Native module version ${nativeVersion} does not match JS package version ${CHIMERA_CAMERA_JS_VERSION}.`,
       ),
     }
   }
@@ -301,7 +301,7 @@ export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape)
 }
 
 const requiredNativeMethods = [
-  'getLynxCameraNativeVersion',
+  'getChimeraCameraNativeVersion',
   'getPermissions',
   'requestCameraPermission',
   'requestMicrophonePermission',
@@ -318,7 +318,7 @@ function createMissingStatus(
     ok: false,
     code,
     nativeModuleName,
-    jsVersion: LYNX_CAMERA_JS_VERSION,
+    jsVersion: CHIMERA_CAMERA_JS_VERSION,
     missingMethods: [...requiredNativeMethods],
     message: createInstallErrorMessage(nativeModuleName, reason),
   }
@@ -326,17 +326,17 @@ function createMissingStatus(
 
 function createInstallErrorMessage(nativeModuleName: string, reason: string): string {
   return [
-    '@kealanau/lynx-camera native module is not installed correctly.',
+    '@kealanau/chimera-camera native module is not installed correctly.',
     '',
     reason,
     '',
     `Expected native module: NativeModules.${nativeModuleName}`,
-    `JS package version: ${LYNX_CAMERA_JS_VERSION}`,
+    `JS package version: ${CHIMERA_CAMERA_JS_VERSION}`,
     '',
     'For iOS:',
-    '- Add node_modules/@kealanau/lynx-camera/ios/LynxCameraModule.swift to your Xcode target.',
+    '- Add node_modules/@kealanau/chimera-camera/ios/ChimeraCameraModule.swift to your Xcode target.',
     '- Add NSCameraUsageDescription to Info.plist.',
-    '- Register LynxCameraModule in your LynxConfig.',
+    '- Register ChimeraCameraModule in your LynxConfig.',
     '',
     'For Android:',
     '- Add the package Android source/module to the host Gradle build.',
@@ -408,7 +408,7 @@ function legacyCaptureToPhoto(result: LegacyCaptureResult): PhotoFile {
   if (result.error) throw new Error(result.error)
   if (!result.base64) throw new Error('Camera returned no image data.')
   return {
-    path: 'memory://lynx-camera/capture.jpg',
+    path: 'memory://chimera-camera/capture.jpg',
     width: result.width ?? 0,
     height: result.height ?? 0,
     orientation: 'up',

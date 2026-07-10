@@ -15,7 +15,7 @@ state there when a block completes.
       without running tests).
 - [ ] Publish: `gh workflow run release.yml -f tag=alpha`.
 - [ ] Confirm install from the registry in a scratch dir:
-      `pnpm add @kealanau/lynx-camera@alpha`.
+      `pnpm add @kealanau/chimera-camera@alpha`.
 
 ## Prove the mock flow in the consuming app
 
@@ -31,11 +31,11 @@ state there when a block completes.
 - [x] Set up an iOS Lynx host app that compiles this package's `ios/` sources
       (ExampleHost dev shell: consumer-app/app/native/ios-host, XcodeGen +
       CocoaPods, Lynx 3.9.0).
-- [x] Compile `LynxCameraView.h/.m` and `LynxCameraModule.swift` — both build
+- [x] Compile `ChimeraCameraView.h/.m` and `ChimeraCameraModule.swift` — both build
       clean on Xcode 26 with `use_modular_headers!` (simulator SDK).
 - [ ] On device: render `<camera-view>`, confirm `bindready` fires and
       `createCameraViewHandle('#camera').ping()` returns `{ ok: true }`.
-- [ ] Register `LynxCameraModule`, add `Info.plist` keys, and confirm
+- [ ] Register `ChimeraCameraModule`, add `Info.plist` keys, and confirm
       `assertCameraInstalledAsync()` passes on device.
 - [ ] Capture a real photo through the system camera path end to end.
 
@@ -67,7 +67,7 @@ state there when a block completes.
 ## Android (M3)
 
 - [ ] Kotlin `CameraModule`: permissions, device enumeration,
-      `getLynxCameraNativeVersion`, interim capture — mirror the iOS method
+      `getChimeraCameraNativeVersion`, interim capture — mirror the iOS method
       list so the install check passes.
 - [ ] Extend the version-sync test to cover the Kotlin source once it exists.
 

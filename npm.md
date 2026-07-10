@@ -1,4 +1,4 @@
-# The npm side of lynx-camera
+# The npm side of chimera-camera
 
 This is a plain-language tour of where this package sits with npm today, what
 publishing would actually do, and how the consuming app would consume the published
@@ -9,7 +9,7 @@ this file is the why and the when.
 
 The package lives in a private GitHub repo and has never been published to
 npm. Nobody can `npm install` it yet. the consuming app consumes it as a sibling
-checkout: the app's iOS host project points straight at `../lynx-camera/ios`
+checkout: the app's iOS host project points straight at `../chimera-camera/ios`
 on disk, and there is also a local `.tgz` tarball from a previous `npm pack`
 run, which is just a dry-run of what npm would receive. Nothing has left your
 machine.
@@ -17,7 +17,7 @@ machine.
 ## What publishing actually means
 
 Publishing uploads a tarball of the package to the npm registry under the
-`@kealanau` scope, so the full name is `@kealanau/lynx-camera`. One thing
+`@kealanau` scope, so the full name is `@kealanau/chimera-camera`. One thing
 worth being clear-eyed about: the privacy of the GitHub repo has no bearing on
 the privacy of the npm package. They are separate systems. The repo can stay
 private forever, but the moment you publish with `--access public` (which is
@@ -71,12 +71,12 @@ Once the package is on npm, the consuming app drops the sibling-checkout depende
 two moves. First, in the app:
 
 ```sh
-pnpm add @kealanau/lynx-camera@alpha
+pnpm add @kealanau/chimera-camera@alpha
 ```
 
-Then in `consumer-app/app/native/ios-host/project.yml`, swap the LynxCamera source
-path from `../../../../lynx-camera/ios` to
-`../../node_modules/@kealanau/lynx-camera/ios`. There is already a comment in
+Then in `consumer-app/app/native/ios-host/project.yml`, swap the ChimeraCamera source
+path from `../../../../chimera-camera/ios` to
+`../../node_modules/@kealanau/chimera-camera/ios`. There is already a comment in
 that file marking this exact swap, so future-you will find it.
 
 ## Versioning
@@ -84,7 +84,7 @@ that file marking this exact swap, so future-you will find it.
 The current version is `0.1.0-alpha.0`. The `-alpha.0` suffix is a prerelease
 identifier, and publishing under the `alpha` dist-tag means people only get it
 if they explicitly ask for `@alpha` — a plain `npm install
-@kealanau/lynx-camera` would not pick it up. That is the right posture while
+@kealanau/chimera-camera` would not pick it up. That is the right posture while
 the API and native wiring are still moving (the roadmap has the bridge spike
 in progress and Android not started).
 

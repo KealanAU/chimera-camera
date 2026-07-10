@@ -24,7 +24,7 @@ export type {
 } from './types.js'
 
 export {
-  LYNX_CAMERA_JS_VERSION,
+  CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,
   assertCameraInstalledAsync,
   createCameraAdapter,

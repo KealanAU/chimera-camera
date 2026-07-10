@@ -1,4 +1,4 @@
-#import "LynxCameraView.h"
+#import "ChimeraCameraView.h"
 
 #import <AVFoundation/AVFoundation.h>
 #import <Lynx/LynxComponentRegistry.h>
@@ -9,11 +9,11 @@
 
 /// UIView backed by an AVCaptureVideoPreviewLayer, so the preview always
 /// tracks the view's bounds without manual frame syncing.
-@interface LynxCameraPreviewView : UIView
+@interface ChimeraCameraPreviewView : UIView
 @property(nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
 @end
 
-@implementation LynxCameraPreviewView
+@implementation ChimeraCameraPreviewView
 + (Class)layerClass {
   return [AVCaptureVideoPreviewLayer class];
 }
@@ -24,13 +24,13 @@
 
 /// AVCapturePhotoOutput does not retain its delegate; this retains itself
 /// until the capture completes (same pattern as SystemCameraCapture).
-@interface LynxCameraPhotoDelegate : NSObject <AVCapturePhotoCaptureDelegate>
+@interface ChimeraCameraPhotoDelegate : NSObject <AVCapturePhotoCaptureDelegate>
 - (instancetype)initWithCompletion:(void (^)(NSData *_Nullable data, NSError *_Nullable error))completion;
 @end
 
-@implementation LynxCameraPhotoDelegate {
+@implementation ChimeraCameraPhotoDelegate {
   void (^_completion)(NSData *_Nullable, NSError *_Nullable);
-  LynxCameraPhotoDelegate *_retainSelf;
+  ChimeraCameraPhotoDelegate *_retainSelf;
 }
 
 - (instancetype)initWithCompletion:(void (^)(NSData *_Nullable, NSError *_Nullable))completion {
@@ -50,7 +50,7 @@
 
 @end
 
-@implementation LynxCameraView {
+@implementation ChimeraCameraView {
   NSString *_facing;
   BOOL _active;
   NSString *_resizeMode;
@@ -67,9 +67,9 @@ LYNX_LAZY_REGISTER_UI("camera-view")
 
 - (UIView *)createView {
   _facing = @"back";
-  _sessionQueue = dispatch_queue_create("com.kealanau.lynx-camera.session", DISPATCH_QUEUE_SERIAL);
+  _sessionQueue = dispatch_queue_create("com.kealanau.chimera-camera.session", DISPATCH_QUEUE_SERIAL);
 
-  LynxCameraPreviewView *view = [[LynxCameraPreviewView alloc] init];
+  ChimeraCameraPreviewView *view = [[ChimeraCameraPreviewView alloc] init];
   view.backgroundColor = [UIColor blackColor];
   view.clipsToBounds = YES;
   view.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
@@ -99,7 +99,7 @@ LYNX_PROP_SETTER("active", setActive, BOOL) {
 
 LYNX_PROP_SETTER("resizeMode", setResizeMode, NSString *) {
   _resizeMode = value;
-  ((LynxCameraPreviewView *)self.view).previewLayer.videoGravity =
+  ((ChimeraCameraPreviewView *)self.view).previewLayer.videoGravity =
       [value isEqualToString:@"contain"] ? AVLayerVideoGravityResizeAspect
                                          : AVLayerVideoGravityResizeAspectFill;
 }
@@ -139,8 +139,8 @@ LYNX_UI_METHOD(capturePhoto) {
       AVVideoCompressionPropertiesKey : @{AVVideoQualityKey : @(quality)}
     }];
 
-    LynxCameraPhotoDelegate *delegate =
-        [[LynxCameraPhotoDelegate alloc] initWithCompletion:^(NSData *data, NSError *error) {
+    ChimeraCameraPhotoDelegate *delegate =
+        [[ChimeraCameraPhotoDelegate alloc] initWithCompletion:^(NSData *data, NSError *error) {
           if (!data) {
             callback(kUIMethodOperationError, @{
               @"code" : @"capture/failed",
@@ -150,7 +150,7 @@ LYNX_UI_METHOD(capturePhoto) {
           }
 
           NSString *path = [NSTemporaryDirectory()
-              stringByAppendingPathComponent:[NSString stringWithFormat:@"lynx-camera-%@.jpg",
+              stringByAppendingPathComponent:[NSString stringWithFormat:@"chimera-camera-%@.jpg",
                                                                         NSUUID.UUID.UUIDString]];
           NSError *writeError;
           if (![data writeToFile:path options:NSDataWritingAtomic error:&writeError]) {
@@ -232,7 +232,7 @@ LYNX_UI_METHOD(capturePhoto) {
     }
     AVCaptureSession *session = self->_session;
     dispatch_async(dispatch_get_main_queue(), ^{
-      ((LynxCameraPreviewView *)self.view).previewLayer.session = session;
+      ((ChimeraCameraPreviewView *)self.view).previewLayer.session = session;
     });
   }
 

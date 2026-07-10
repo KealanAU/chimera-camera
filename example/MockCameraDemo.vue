@@ -1,6 +1,6 @@
 <template>
   <view class="screen">
-    <text class="title">Lynx Camera Demo</text>
+    <text class="title">Chimera Camera Demo</text>
 
     <view class="badge" :class="install.ok ? 'badgeNative' : 'badgeMock'">
       <text class="badgeText">{{ install.ok ? 'NATIVE CAMERA' : 'MOCK ADAPTER' }}</text>
@@ -35,8 +35,8 @@ import {
   getCameraInstallStatus,
   type CameraAdapter,
   type PhotoFile,
-} from '@kealanau/lynx-camera'
-import { createMockCameraModule } from '@kealanau/lynx-camera/mock'
+} from '@kealanau/chimera-camera'
+import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
 // The pattern for hosts like Lynx Go / LynxExplorer: check the install
 // status first, use the real adapter when it exists, and fall back to the

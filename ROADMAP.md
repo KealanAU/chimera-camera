@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestone-level status for `lynx-camera`. The contract for what ships today
+Milestone-level status for `chimera-camera`. The contract for what ships today
 is [V0.md](V0.md); the target contract for the native view is [V1.md](V1.md);
 the long-form plan lives in [README.md](README.md). Update this file whenever
 a milestone changes state so the plan docs never have to guess.
@@ -10,14 +10,14 @@ a milestone changes state so the plan docs never have to guess.
 ### M0 — Package foundation and mock adapter — ✅ Done
 
 - TypeScript package layout, public types, build, CI, and release workflows.
-- Mock adapter at `@kealanau/lynx-camera/mock` with photo fixtures.
+- Mock adapter at `@kealanau/chimera-camera/mock` with photo fixtures.
 - Install and testing guides under `docs/`.
 
 ### M1 — iOS module with system-camera capture (interim) — ✅ Done
 
 Formal contract: [V0.md](V0.md).
 
-- `ios/LynxCameraModule.swift` registers as `CameraModule`: permission
+- `ios/ChimeraCameraModule.swift` registers as `CameraModule`: permission
   status/request for camera and microphone, device enumeration.
 - `capturePhoto()` presents the system camera UI (`UIImagePickerController`)
   and returns the captured JPEG.
@@ -39,13 +39,13 @@ Known differences from the V1 contract, to be resolved in M4/M5:
 Acceptance criteria in V1.md ("Bridge Spike Acceptance Criteria"):
 
 - [x] iOS `camera-view` placeholder element written
-      (`ios/LynxCameraView.h/.m`: `facing`/`active` props, `ping()` method,
+      (`ios/ChimeraCameraView.h/.m`: `facing`/`active` props, `ping()` method,
       `ready` detail event).
 - [x] JS surface: `CAMERA_VIEW_TAG`, `invokeCameraViewMethod`,
       `createCameraViewHandle` in `src/view.ts`, with tests against a fake
       SelectorQuery bridge.
-- [x] Compile in a real iOS Lynx host app: both `LynxCameraModule.swift` and
-      `LynxCameraView.m` build clean against Lynx 3.9.0 pods / Xcode 26
+- [x] Compile in a real iOS Lynx host app: both `ChimeraCameraModule.swift` and
+      `ChimeraCameraView.m` build clean against Lynx 3.9.0 pods / Xcode 26
       (ExampleHost dev shell, simulator SDK, 2026-07-10). Requires
       `use_modular_headers!` in the host Podfile for the Swift module.
 - [ ] Verify on device: props reach native, `ping()` returns `{ ok: true }`,
@@ -64,7 +64,7 @@ bridge, and the native halves remain unproven until a host app compiles them.
 ### M4 — Embedded live preview — 🚧 In progress (iOS done, Android not started)
 
 - [x] iOS: `AVCaptureVideoPreviewLayer` inside `camera-view`
-      (`ios/LynxCameraView.m`): `active` bound to session start/stop,
+      (`ios/ChimeraCameraView.m`): `active` bound to session start/stop,
       `facing` switches the input live, `resizeMode` maps to video gravity,
       `ready` `{ deviceId }` / `error` `{ code, message }` detail events,
       permission checked (and requested if undetermined) before start.

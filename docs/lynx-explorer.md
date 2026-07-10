@@ -21,10 +21,10 @@ pnpm create rspeedy@latest camera-demo
 cd camera-demo
 
 # 2. Install this package. It is NOT on npm yet — use the local tarball:
-pnpm add /path/to/lynx-camera/kealanau-lynx-camera-0.1.0-alpha.0.tgz
+pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.1.0-alpha.0.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
-cp node_modules/@kealanau/lynx-camera/example/CameraDemo.tsx src/App.tsx
+cp node_modules/@kealanau/chimera-camera/example/CameraDemo.tsx src/App.tsx
 
 # 4. Start the dev server and scan its QR code with Lynx Go
 pnpm dev
@@ -49,7 +49,7 @@ setups only. A standard `create-rspeedy` project is ReactLynx — use
 Use these hosts with the mock adapter first:
 
 ```ts
-import { createCameraAdapter } from '@kealanau/lynx-camera'
+import { createCameraAdapter } from '@kealanau/chimera-camera'
 
 const camera = createCameraAdapter({ mock: true })
 ```
@@ -57,7 +57,7 @@ const camera = createCameraAdapter({ mock: true })
 The install checker also reports mock mode:
 
 ```ts
-import { getCameraInstallStatus } from '@kealanau/lynx-camera'
+import { getCameraInstallStatus } from '@kealanau/chimera-camera'
 
 console.log(getCameraInstallStatus({ mock: true }))
 ```
@@ -74,8 +74,8 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@kealanau/lynx-camera/example/CameraDemo.tsx      (ReactLynx — standard)
-node_modules/@kealanau/lynx-camera/example/MockCameraDemo.vue  (Vue-Lynx setups only)
+node_modules/@kealanau/chimera-camera/example/CameraDemo.tsx      (ReactLynx — standard)
+node_modules/@kealanau/chimera-camera/example/MockCameraDemo.vue  (Vue-Lynx setups only)
 ```
 
 Both show the recommended host-detection pattern: render the install-status
@@ -83,13 +83,13 @@ badge and message on screen, use the real camera when the native module is
 registered, and fall back to the mock (visibly) on hosts like Lynx Go.
 
 Real iPhone camera testing requires a custom iOS Lynx host app that compiles the
-package's `ios/` files, registers `LynxCameraModule`, and includes camera
+package's `ios/` files, registers `ChimeraCameraModule`, and includes camera
 permission keys in `Info.plist`.
 
 ## Recommended Test Order
 
 1. LynxExplorer + mock adapter.
 2. the consuming app app flow with mock capture.
-3. Custom iOS host with `ios/LynxCameraModule.swift` registered.
+3. Custom iOS host with `ios/ChimeraCameraModule.swift` registered.
 4. Real iPhone system-camera capture through `CameraModule.capturePhoto`.
 5. Later: native `camera-view` live preview once that component exists.

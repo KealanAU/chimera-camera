@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test, { afterEach } from 'node:test'
 
 import {
-  LYNX_CAMERA_JS_VERSION,
+  CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,
   createCameraAdapter,
   getCameraInstallStatus,
@@ -10,7 +10,7 @@ import {
 } from '../dist/index.js'
 
 const REQUIRED_METHODS = [
-  'getLynxCameraNativeVersion',
+  'getChimeraCameraNativeVersion',
   'getPermissions',
   'requestCameraPermission',
   'requestMicrophonePermission',
@@ -23,7 +23,7 @@ function completeNativeModule(overrides = {}) {
   for (const method of REQUIRED_METHODS) {
     module[method] = (callback) => callback({})
   }
-  module.getLynxCameraNativeVersion = (callback) => callback(LYNX_CAMERA_JS_VERSION)
+  module.getChimeraCameraNativeVersion = (callback) => callback(CHIMERA_CAMERA_JS_VERSION)
   return { ...module, ...overrides }
 }
 
@@ -103,13 +103,13 @@ test('async status verifies the native version', async () => {
   globalThis.NativeModules = { CameraModule: completeNativeModule() }
   const status = await getCameraInstallStatusAsync()
   assert.equal(status.ok, true)
-  assert.equal(status.nativeVersion, LYNX_CAMERA_JS_VERSION)
+  assert.equal(status.nativeVersion, CHIMERA_CAMERA_JS_VERSION)
 })
 
 test('async status flags a native/JS version mismatch', async () => {
   globalThis.NativeModules = {
     CameraModule: completeNativeModule({
-      getLynxCameraNativeVersion: (callback) => callback('9.9.9'),
+      getChimeraCameraNativeVersion: (callback) => callback('9.9.9'),
     }),
   }
   const status = await getCameraInstallStatusAsync()
