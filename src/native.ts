@@ -352,15 +352,22 @@ function captureOptionsToNative(options: CapturePhotoOptions | undefined): Recor
   return {
     flash: options?.flash ?? 'off',
     enableShutterSound: options?.enableShutterSound ?? true,
+    quality: clampQuality(options?.quality),
+    facing: options?.facing ?? 'back',
   }
 }
 
 function legacyCaptureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {
   return {
-    quality: 0.9,
-    facing: 'back',
+    quality: clampQuality(options?.quality),
+    facing: options?.facing ?? 'back',
     flash: options?.flash ?? 'off',
   }
+}
+
+function clampQuality(quality: number | undefined): number {
+  if (quality === undefined || Number.isNaN(quality)) return 0.9
+  return Math.min(1, Math.max(0, quality))
 }
 
 function legacyCaptureToPhoto(result: LegacyCaptureResult): PhotoFile {

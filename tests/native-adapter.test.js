@@ -60,7 +60,20 @@ test('capturePhoto prefers the modern native method and applies defaults', async
   const photo = await adapter.capturePhoto()
   assert.equal(photo.path, 'file:///photo.jpg')
   assert.equal(legacyCalled, false)
-  assert.deepEqual(received, { flash: 'off', enableShutterSound: true })
+  assert.deepEqual(received, { flash: 'off', enableShutterSound: true, quality: 0.9, facing: 'back' })
+})
+
+test('capturePhoto passes quality and facing through, clamped to 0..1', async () => {
+  let received = null
+  const adapter = createNativeCameraAdapter({
+    capturePhoto: (options, callback) => {
+      received = options
+      callback({ path: 'file:///photo.jpg' })
+    },
+  })
+  await adapter.capturePhoto({ quality: 1.7, facing: 'front' })
+  assert.equal(received.quality, 1)
+  assert.equal(received.facing, 'front')
 })
 
 test('capturePhoto falls back to the legacy capture method', async () => {
@@ -71,7 +84,7 @@ test('capturePhoto falls back to the legacy capture method', async () => {
       callback({ base64: 'aGVsbG8=', width: 10, height: 20 })
     },
   })
-  const photo = await adapter.capturePhoto({ flash: 'on' })
+  const photo = await adapter.capturePhoto({ flash: 'on', quality: 0.5, facing: 'front' })
   assert.deepEqual(photo, {
     path: 'memory://lynx-camera/capture.jpg',
     width: 10,
@@ -80,7 +93,7 @@ test('capturePhoto falls back to the legacy capture method', async () => {
     mime: 'image/jpeg',
     base64: 'aGVsbG8=',
   })
-  assert.deepEqual(received, { quality: 0.9, facing: 'back', flash: 'on' })
+  assert.deepEqual(received, { quality: 0.5, facing: 'front', flash: 'on' })
 })
 
 test('legacy capture errors and empty payloads reject', async () => {

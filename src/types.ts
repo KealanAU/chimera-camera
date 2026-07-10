@@ -35,6 +35,13 @@ export interface CameraPermissions {
 export interface CapturePhotoOptions {
   flash?: FlashMode
   enableShutterSound?: boolean
+  /** JPEG quality 0..1. Honored by the V0 system-camera path. Default 0.9. */
+  quality?: number
+  /**
+   * Which camera the V0 system-camera capture opens with. V1 view-session
+   * capture uses the `camera-view` `facing` prop instead of this option.
+   */
+  facing?: 'front' | 'back'
 }
 
 export interface StartRecordingOptions {
