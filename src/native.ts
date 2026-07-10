@@ -5,6 +5,7 @@ import type {
   CameraPermissions,
   CapturePhotoOptions,
   PermissionStatus,
+  PickPhotoOptions,
   PhotoFile,
   Point,
   StartRecordingOptions,
@@ -26,6 +27,7 @@ interface NativeCameraModuleShape {
   requestMicrophonePermission?: (callback: NativeCallback<PermissionStatus | NativeErrorResult>) => unknown
   getAvailableCameraDevices?: (callback: NativeCallback<CameraDevice[] | NativeErrorResult>) => unknown
   capturePhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
+  pickPhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
   capture?: (options: Record<string, unknown>, callback: NativeCallback<LegacyCaptureResult>) => unknown
 }
 
@@ -265,6 +267,15 @@ export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape)
       }
 
       throw new Error('CameraModule.capturePhoto is not available.')
+    },
+
+    async pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile> {
+      // Optional on purpose: hosts compiled before this method exist happily
+      // without it, so it is not in requiredNativeMethods.
+      if (!nativeModule.pickPhoto) throw new Error('CameraModule.pickPhoto is not available.')
+      return callNative((callback) =>
+        nativeModule.pickPhoto?.({ quality: options?.quality ?? 0.9 }, callback),
+      )
     },
 
     async startRecording(_options?: StartRecordingOptions): Promise<void> {

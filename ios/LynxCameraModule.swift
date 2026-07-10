@@ -17,6 +17,7 @@ public final class LynxCameraModule: NSObject, LynxModule {
             "requestMicrophonePermission": NSStringFromSelector(#selector(requestMicrophonePermission(_:))),
             "getAvailableCameraDevices": NSStringFromSelector(#selector(getAvailableCameraDevices(_:))),
             "capturePhoto": NSStringFromSelector(#selector(capturePhoto(_:callback:))),
+            "pickPhoto": NSStringFromSelector(#selector(pickPhoto(_:callback:))),
         ]
     }
 
@@ -88,6 +89,21 @@ public final class LynxCameraModule: NSObject, LynxModule {
         }
     }
 
+    /// Picks an existing photo from the library through the system picker.
+    /// Same result shape as `capturePhoto` (base64 JPEG + dimensions); no
+    /// photo-library permission is needed for picker-mediated access.
+    public func pickPhoto(_ options: [String: Any], callback: @escaping LynxCallbackBlock) {
+        let quality = (options["quality"] as? NSNumber)?.doubleValue ?? 0.9
+
+        DispatchQueue.main.async {
+            SystemCameraCapture.present(
+                quality: CGFloat(quality), facing: "back", source: .photoLibrary
+            ) { result in
+                callback(result)
+            }
+        }
+    }
+
     private func requestPermission(for mediaType: AVMediaType, callback: @escaping LynxCallbackBlock) {
         AVCaptureDevice.requestAccess(for: mediaType) { _ in
             callback(self.permissionStatus(for: mediaType))
@@ -134,8 +150,12 @@ private final class SystemCameraCapture: NSObject, UIImagePickerControllerDelega
         self.completion = completion
     }
 
-    static func present(quality: CGFloat, facing: String, completion: @escaping ([String: Any]) -> Void) {
-        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+    static func present(
+        quality: CGFloat, facing: String,
+        source: UIImagePickerController.SourceType = .camera,
+        completion: @escaping ([String: Any]) -> Void
+    ) {
+        guard UIImagePickerController.isSourceTypeAvailable(source) else {
             completion(["error": ["code": "camera/unavailable", "message": "Camera is not available on this device."]])
             return
         }
@@ -149,8 +169,10 @@ private final class SystemCameraCapture: NSObject, UIImagePickerControllerDelega
         capture.retainSelf = capture
 
         let picker = UIImagePickerController()
-        picker.sourceType = .camera
-        picker.cameraDevice = facing == "front" ? .front : .rear
+        picker.sourceType = source
+        if source == .camera {
+            picker.cameraDevice = facing == "front" ? .front : .rear
+        }
         picker.delegate = capture
 
         presentingViewController.present(picker, animated: true)

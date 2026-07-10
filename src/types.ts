@@ -122,8 +122,15 @@ export interface CameraViewMethods {
   setTorch(mode: TorchMode): Promise<void>
 }
 
+export interface PickPhotoOptions {
+  /** JPEG re-encode quality 0..1. Default 0.9. */
+  quality?: number
+}
+
 export interface CameraAdapter extends CameraModule {
   capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
+  /** Picks an existing photo via the system library picker (no permission needed). */
+  pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile>
   startRecording(options?: StartRecordingOptions): Promise<void>
   stopRecording(): Promise<VideoFile>
   focusAtPoint(point: Point): Promise<void>

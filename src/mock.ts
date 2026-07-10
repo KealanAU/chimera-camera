@@ -5,6 +5,7 @@ import type {
   CameraPermissions,
   CapturePhotoOptions,
   PermissionStatus,
+  PickPhotoOptions,
   PhotoFile,
   Point,
   StartRecordingOptions,
@@ -56,6 +57,11 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraA
     },
 
     async capturePhoto(_options?: CapturePhotoOptions): Promise<PhotoFile> {
+      await delay(captureDelayMs)
+      return { ...photo }
+    },
+
+    async pickPhoto(_options?: PickPhotoOptions): Promise<PhotoFile> {
       await delay(captureDelayMs)
       return { ...photo }
     },
