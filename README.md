@@ -284,10 +284,13 @@ Working today:
 - iOS `CameraModule`: permission checks/requests, device enumeration, and
   interim photo capture through the system camera UI
   (`UIImagePickerController`). This is a stepping stone that lets apps ship
-  photo capture before the `camera-view` bridge exists.
+  photo capture before the `camera-view` path is proven on device.
+- iOS `camera-view`: embedded AVFoundation live preview (`active`, `facing`,
+  `resizeMode` props; `ready`/`error` events) with `capturePhoto()` writing a
+  JPEG to a temp file and returning its path. Custom camera UI can now be
+  layered over the preview in Lynx. Awaiting on-device verification.
 
 Not started yet:
 
-- The `camera-view` native element and bridge spike — next up.
 - Android native source.
-- Embedded live preview, video recording, and camera controls.
+- Video recording, zoom, torch, and tap-to-focus.

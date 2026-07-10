@@ -61,17 +61,23 @@ bridge, and the native halves remain unproven until a host app compiles them.
 - Kotlin `CameraModule`: permissions, device enumeration, interim capture.
 - `android/` currently contains no source; iOS is deliberately sequenced first.
 
-### M4 — Embedded live preview — ⬜ Not started
+### M4 — Embedded live preview — 🚧 In progress (iOS done, Android not started)
 
-- `AVCaptureVideoPreviewLayer` (iOS) and `androidx.camera.view.PreviewView`
-  (Android) inside `camera-view`.
-- `active` prop bound to session lifecycle; `onReady` / `onError` events.
+- [x] iOS: `AVCaptureVideoPreviewLayer` inside `camera-view`
+      (`ios/LynxCameraView.m`): `active` bound to session start/stop,
+      `facing` switches the input live, `resizeMode` maps to video gravity,
+      `ready` `{ deviceId }` / `error` `{ code, message }` detail events,
+      permission checked (and requested if undetermined) before start.
+- [ ] Verify on device: preview renders, facing switch works, `ready` fires.
+- [ ] Android: `androidx.camera.view.PreviewView` equivalent.
 
-### M5 — Capture, recording, and controls on the view — ⬜ Not started
+### M5 — Capture, recording, and controls on the view — 🚧 In progress
 
-- `capturePhoto()` writing to a real local file path.
-- `startRecording(options)` / `stopRecording()`.
-- Zoom, torch, and tap-to-focus with predictable unsupported-control errors.
+- [x] iOS `capturePhoto()` on the view: `AVCapturePhotoOutput` JPEG written to
+      a temp file, returns `{ path, width, height, orientation, mime }` — no
+      base64 across the bridge (resolves the M1 debt for the view path).
+- [ ] `startRecording(options)` / `stopRecording()`.
+- [ ] Zoom, torch, and tap-to-focus with predictable unsupported-control errors.
 
 ### M6 — Hardening and device acceptance — ⬜ Not started
 
