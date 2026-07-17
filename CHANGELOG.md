@@ -3,7 +3,15 @@
 All notable changes to Chimera Camera are documented here. Until the API is
 stable, prerelease entries may include breaking changes.
 
-## 0.1.0-alpha.0 — Unreleased
+## 0.2.0-alpha.0 — Unreleased
+
+- Remove the deprecated `capture(options, callback)` compatibility path.
+- Preserve native failure codes with the exported `ChimeraCameraError` class.
+- Reject missing native methods with `camera/method-unavailable` instead of
+  returning placeholder permission and device results.
+- Prefer physical wide-angle cameras for default device selection.
+
+## 0.1.0-alpha.0
 
 Initial iOS-only alpha for validating the Lynx-native camera architecture.
 Android support, autolinking, recording, and native camera controls are not

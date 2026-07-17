@@ -28,6 +28,8 @@ export type {
   VideoFile,
 } from './types.js'
 
+export { ChimeraCameraError } from './types.js'
+
 export {
   CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,

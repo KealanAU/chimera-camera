@@ -9,9 +9,17 @@ Files:
 - `CameraDemo.tsx` — ReactLynx demo for a standard `create-rspeedy` project.
   Copy it in as `src/App.tsx`. This is the one to use with Lynx Go /
   LynxExplorer (see `docs/lynx-explorer.md` for the full quickstart).
-- `MockCameraDemo.vue` — the same demo for Vue-based Lynx setups only; it
-  will not build in a ReactLynx project.
+- `MockCameraDemo.vue` — Vue SFC targeting the pre-alpha Vue Lynx project
+  created with `npm create vue-lynx@latest`. It is not part of the verified
+  ReactLynx acceptance path.
 - `mock-camera-demo.ts` — minimal console-only mock walkthrough.
+
+There is no Svelte-on-Lynx example. Framework validation beyond ReactLynx is
+tracked for `0.3`.
+
+The planned `0.3` harness is one Sparkling app containing separate ReactLynx
+and Vue Lynx page bundles. Sparkling owns the native shell and routing; each
+framework keeps its own build entry and consumes the same camera package.
 
 `CameraDemo` accepts an `uploadPhoto(photo)` prop so the consuming app can wire
 its own uploader without coupling this package to a networking library. Its

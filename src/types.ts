@@ -20,12 +20,26 @@ export interface Point {
 export interface CameraDevice {
   id: string
   localizedName: string
+  /** Stable native camera kind used to prefer physical wide-angle cameras. */
+  deviceType?: 'wide-angle' | 'ultra-wide' | 'telephoto' | 'dual' | 'dual-wide' | 'triple' | 'external' | 'unknown'
   position: CameraPosition
   minZoom: number
   maxZoom: number
   hasFlash: boolean
   hasTorch: boolean
   supportsFocusMetering: boolean
+}
+
+export class ChimeraCameraError extends Error {
+  readonly code: string
+  readonly cause?: unknown
+
+  constructor(code: string, message: string, cause?: unknown) {
+    super(message)
+    this.name = 'ChimeraCameraError'
+    this.code = code
+    this.cause = cause
+  }
 }
 
 export interface CameraPermissions {

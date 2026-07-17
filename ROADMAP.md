@@ -129,18 +129,18 @@ Android.
       rendered `CameraViewHandle` session.
 - [ ] Decide how to deprecate the V0 combined `CameraAdapter` before adding
       more view-session controls.
-- [ ] Preserve structured native error codes in JavaScript instead of reducing
+- [x] Preserve structured native error codes in JavaScript instead of reducing
       failures to message-only `Error` objects.
 - [ ] Normalize prop defaults, result/event shapes, and unsupported-feature
       errors across iOS and Android.
 
 ### 0.2 cleanup
 
-- [ ] Remove the deprecated legacy `capture(options, callback)` fallback and
+- [x] Remove the deprecated legacy `capture(options, callback)` fallback and
       `legacy-capture-only` install status.
-- [ ] Replace soft degradation for missing native methods with documented,
+- [x] Replace soft degradation for missing native methods with documented,
       coded behavior.
-- [ ] Prefer the plain wide-angle device in `getDefaultCamera()` rather than
+- [x] Prefer the plain wide-angle device in `getDefaultCamera()` rather than
       relying on discovery order.
 
 ### 0.2 exit criteria
@@ -166,10 +166,11 @@ imperative TypeScript API.
 
 ### Framework-neutral acceptance
 
-- [ ] ReactLynx example exercises the complete native view surface.
-- [ ] Vue-on-Lynx example performs the same flow without a React dependency.
-- [ ] Svelte-on-Lynx example performs the same flow without React/Vue runtime
-      dependencies.
+- [ ] Add one Sparkling demo shell with separate ReactLynx and Vue Lynx page
+      bundles sharing the same native camera registration.
+- [ ] ReactLynx page exercises the complete native view surface.
+- [ ] Vue Lynx page performs the same flow without a React dependency.
+- [ ] Add a Svelte page only when a maintained Svelte-on-Lynx toolchain exists.
 - [ ] Plain TypeScript documentation explains the underlying custom element,
       events, and SelectorQuery contract.
 - [ ] Keep framework helpers thin and optional; add them only where lifecycle
@@ -241,10 +242,5 @@ the cross-platform Lynx surface is stable.
 
 ## Known debt
 
-- `createNativeCameraAdapter()` soft-degrades when individual native methods
-  are missing; callers must opt into install checks to notice partial hosts.
-- Native coded errors are currently flattened to ordinary JS `Error` messages.
-- `getDefaultCamera()` can select a dual/triple virtual camera before the plain
-  wide-angle camera because it trusts discovery order.
 - The package is not yet configured for Lynx autolinking, so current native
   installation still requires manual host integration.

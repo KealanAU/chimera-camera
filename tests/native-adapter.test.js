@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createNativeCameraAdapter } from '../dist/index.js'
+import { ChimeraCameraError, createNativeCameraAdapter } from '../dist/index.js'
 
 test('resolves callback-style native results', async () => {
   const adapter = createNativeCameraAdapter({
@@ -33,33 +33,46 @@ test('normalizes coded native errors, preferring message over code', async () =>
   const codeOnly = createNativeCameraAdapter({
     capturePhoto: (_options, callback) => callback({ error: { code: 'camera/unavailable' } }),
   })
-  await assert.rejects(codeOnly.capturePhoto(), /camera\/unavailable/)
+  await assert.rejects(codeOnly.capturePhoto(), (error) => {
+    assert.ok(error instanceof ChimeraCameraError)
+    assert.equal(error.code, 'camera/unavailable')
+    return true
+  })
 })
 
-test('soft-degrades when individual native methods are missing', async () => {
+test('missing native methods reject with a stable coded error', async () => {
   const adapter = createNativeCameraAdapter({})
-  assert.deepEqual(await adapter.getPermissions(), { camera: 'not-determined', microphone: 'not-determined' })
-  assert.equal(await adapter.requestCameraPermission(), 'not-determined')
-  assert.equal(await adapter.requestMicrophonePermission(), 'not-determined')
-  assert.deepEqual(await adapter.getAvailableCameraDevices(), [])
-  assert.equal(await adapter.getDefaultCamera('back'), null)
+  await assert.rejects(adapter.getPermissions(), (error) => {
+    assert.ok(error instanceof ChimeraCameraError)
+    assert.equal(error.code, 'camera/method-unavailable')
+    return true
+  })
+  await assert.rejects(adapter.requestCameraPermission(), /requestCameraPermission/)
+  await assert.rejects(adapter.requestMicrophonePermission(), /requestMicrophonePermission/)
+  await assert.rejects(adapter.getAvailableCameraDevices(), /getAvailableCameraDevices/)
+  await assert.rejects(adapter.getDefaultCamera('back'), /getAvailableCameraDevices/)
+})
+
+test('getDefaultCamera prefers the physical wide-angle device', async () => {
+  const adapter = createNativeCameraAdapter({
+    getAvailableCameraDevices: (callback) => callback([
+      { id: 'triple', localizedName: 'Back Triple', position: 'back', deviceType: 'triple' },
+      { id: 'wide', localizedName: 'Back Wide', position: 'back', deviceType: 'wide-angle' },
+    ]),
+  })
+  assert.equal((await adapter.getDefaultCamera('back')).id, 'wide')
 })
 
 test('capturePhoto prefers the modern native method and applies defaults', async () => {
   let received = null
-  let legacyCalled = false
   const adapter = createNativeCameraAdapter({
     capturePhoto: (options, callback) => {
       received = options
       callback({ path: 'file:///photo.jpg', width: 100, height: 200 })
     },
-    capture: () => {
-      legacyCalled = true
-    },
   })
   const photo = await adapter.capturePhoto()
   assert.equal(photo.path, 'file:///photo.jpg')
-  assert.equal(legacyCalled, false)
   assert.deepEqual(received, {
     flash: 'off',
     enableShutterSound: true,
@@ -97,38 +110,6 @@ test('pickPhoto passes options through with defaults', async () => {
   assert.deepEqual(received, { quality: 0.9, includeBase64: false })
   await adapter.pickPhoto({ quality: 0.5, includeBase64: true, maxDimension: 800 })
   assert.deepEqual(received, { quality: 0.5, includeBase64: true, maxDimension: 800 })
-})
-
-test('capturePhoto falls back to the legacy capture method', async () => {
-  let received = null
-  const adapter = createNativeCameraAdapter({
-    capture: (options, callback) => {
-      received = options
-      callback({ base64: 'aGVsbG8=', width: 10, height: 20 })
-    },
-  })
-  const photo = await adapter.capturePhoto({ flash: 'on', quality: 0.5, facing: 'front' })
-  assert.deepEqual(photo, {
-    path: 'memory://chimera-camera/capture.jpg',
-    width: 10,
-    height: 20,
-    orientation: 'up',
-    mime: 'image/jpeg',
-    base64: 'aGVsbG8=',
-  })
-  assert.deepEqual(received, { quality: 0.5, facing: 'front', flash: 'on' })
-})
-
-test('legacy capture errors and empty payloads reject', async () => {
-  const failing = createNativeCameraAdapter({
-    capture: (_options, callback) => callback({ error: 'denied by user' }),
-  })
-  await assert.rejects(failing.capturePhoto(), /denied by user/)
-
-  const empty = createNativeCameraAdapter({
-    capture: (_options, callback) => callback({}),
-  })
-  await assert.rejects(empty.capturePhoto(), /no image data/)
 })
 
 test('capturePhoto rejects when no native capture method exists', async () => {

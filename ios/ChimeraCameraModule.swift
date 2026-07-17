@@ -5,7 +5,7 @@ import UIKit
 
 @objcMembers
 public final class ChimeraCameraModule: NSObject, LynxModule {
-    private static let nativeVersion = "0.1.0-alpha.0"
+    private static let nativeVersion = "0.2.0-alpha.0"
 
     public static var name: String { "CameraModule" }
 
@@ -66,6 +66,7 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
             [
                 "id": device.uniqueID,
                 "localizedName": device.localizedName,
+                "deviceType": cameraDeviceType(device.deviceType),
                 "position": cameraPosition(device.position),
                 "minZoom": device.minAvailableVideoZoomFactor,
                 "maxZoom": device.maxAvailableVideoZoomFactor,
@@ -127,6 +128,18 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
             return "unspecified"
         @unknown default:
             return "unspecified"
+        }
+    }
+
+    private func cameraDeviceType(_ type: AVCaptureDevice.DeviceType) -> String {
+        switch type {
+        case .builtInWideAngleCamera: return "wide-angle"
+        case .builtInUltraWideCamera: return "ultra-wide"
+        case .builtInTelephotoCamera: return "telephoto"
+        case .builtInDualCamera: return "dual"
+        case .builtInDualWideCamera: return "dual-wide"
+        case .builtInTripleCamera: return "triple"
+        default: return "unknown"
         }
     }
 }

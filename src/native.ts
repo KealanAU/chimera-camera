@@ -1,4 +1,5 @@
 import { createMockCameraModule, type MockCameraOptions } from './mock.js'
+import { ChimeraCameraError } from './types.js'
 import type {
   CameraAdapter,
   CameraDevice,
@@ -18,7 +19,7 @@ import type {
 
 declare const NativeModules: Record<string, unknown> | undefined
 
-export const CHIMERA_CAMERA_JS_VERSION = '0.1.0-alpha.0'
+export const CHIMERA_CAMERA_JS_VERSION = '0.2.0-alpha.0'
 
 type NativeCallback<T> = (result: T) => void
 
@@ -30,19 +31,10 @@ interface NativeCameraModuleShape {
   getAvailableCameraDevices?: (callback: NativeCallback<CameraDevice[] | NativeErrorResult>) => unknown
   capturePhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
   pickPhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
-  capture?: (options: Record<string, unknown>, callback: NativeCallback<LegacyCaptureResult>) => unknown
 }
 
 interface NativeErrorResult {
   error?: string | Partial<Pick<CameraErrorEvent, 'code' | 'message'>>
-}
-
-interface LegacyCaptureResult {
-  base64?: string
-  width?: number
-  height?: number
-  mime?: string
-  error?: string
 }
 
 export interface CreateCameraAdapterOptions {
@@ -60,7 +52,6 @@ export interface CreateCameraAdapterOptions {
 export type CameraInstallStatusCode =
   | 'mock'
   | 'installed'
-  | 'legacy-capture-only'
   | 'native-modules-missing'
   | 'native-module-missing'
   | 'native-methods-missing'
@@ -100,7 +91,7 @@ export function createCameraAdapter(options: CreateCameraAdapterOptions = {}): C
 }
 
 function hasCaptureMethod(nativeModule: NativeCameraModuleShape): boolean {
-  return typeof nativeModule.capturePhoto === 'function' || typeof nativeModule.capture === 'function'
+  return typeof nativeModule.capturePhoto === 'function'
 }
 
 export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {}): CameraInstallStatus {
@@ -143,22 +134,6 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
   }
 
   const missingMethods = requiredNativeMethods.filter((method) => typeof nativeModule[method] !== 'function')
-  if (missingMethods.length > 0 && typeof nativeModule.capture === 'function') {
-    // Hosts that only implement the deprecated `capture(options, callback)`
-    // shape still work through the adapter's legacy fallback; report them as
-    // usable so status checks agree with what createCameraAdapter accepts.
-    return {
-      ok: true,
-      code: 'legacy-capture-only',
-      nativeModuleName,
-      jsVersion: CHIMERA_CAMERA_JS_VERSION,
-      missingMethods,
-      message:
-        `NativeModules.${nativeModuleName} only implements the deprecated legacy capture(options, callback) method. ` +
-        'Photo capture works; permissions/device queries degrade to defaults. ' +
-        "Upgrade the host to this package's native module (see docs/ios-install.md) before the legacy fallback is removed in 0.2.0.",
-    }
-  }
   if (missingMethods.length > 0) {
     return {
       ok: false,
@@ -227,54 +202,40 @@ export async function assertCameraInstalledAsync(options: CreateCameraAdapterOpt
 export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape): CameraAdapter {
   return {
     async getPermissions(): Promise<CameraPermissions> {
-      if (!nativeModule.getPermissions) {
-        return {
-          camera: 'not-determined',
-          microphone: 'not-determined',
-        }
-      }
+      requireNativeMethod(nativeModule.getPermissions, 'getPermissions')
       return callNative(nativeModule.getPermissions.bind(nativeModule))
     },
 
     async requestCameraPermission(): Promise<PermissionStatus> {
-      if (!nativeModule.requestCameraPermission) return 'not-determined'
+      requireNativeMethod(nativeModule.requestCameraPermission, 'requestCameraPermission')
       return callNative(nativeModule.requestCameraPermission.bind(nativeModule))
     },
 
     async requestMicrophonePermission(): Promise<PermissionStatus> {
-      if (!nativeModule.requestMicrophonePermission) return 'not-determined'
+      requireNativeMethod(nativeModule.requestMicrophonePermission, 'requestMicrophonePermission')
       return callNative(nativeModule.requestMicrophonePermission.bind(nativeModule))
     },
 
     async getAvailableCameraDevices(): Promise<CameraDevice[]> {
-      if (!nativeModule.getAvailableCameraDevices) return []
+      requireNativeMethod(nativeModule.getAvailableCameraDevices, 'getAvailableCameraDevices')
       return callNative(nativeModule.getAvailableCameraDevices.bind(nativeModule))
     },
 
     async getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null> {
       const devices = await this.getAvailableCameraDevices()
-      return devices.find((device) => device.position === position) ?? null
+      const matching = devices.filter((device) => device.position === position)
+      return matching.find((device) => device.deviceType === 'wide-angle') ?? matching[0] ?? null
     },
 
     async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {
-      if (nativeModule.capturePhoto) {
-        return callNative((callback) => nativeModule.capturePhoto?.(captureOptionsToNative(options), callback))
-      }
-
-      if (nativeModule.capture) {
-        const legacy = await callNative<LegacyCaptureResult>((callback) =>
-          nativeModule.capture?.(legacyCaptureOptionsToNative(options), callback),
-        )
-        return legacyCaptureToPhoto(legacy)
-      }
-
-      throw new Error('CameraModule.capturePhoto is not available.')
+      requireNativeMethod(nativeModule.capturePhoto, 'capturePhoto')
+      return callNative((callback) => nativeModule.capturePhoto?.(captureOptionsToNative(options), callback))
     },
 
     async pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile> {
       // Optional on purpose: hosts compiled before this method exist happily
       // without it, so it is not in requiredNativeMethods.
-      if (!nativeModule.pickPhoto) throw new Error('CameraModule.pickPhoto is not available.')
+      if (!nativeModule.pickPhoto) throw unavailableMethodError('pickPhoto')
       return callNative((callback) => nativeModule.pickPhoto?.(pickOptionsToNative(options), callback))
     },
 
@@ -378,8 +339,16 @@ function rejectIfNativeError(result: unknown): void {
   if (!result || typeof result !== 'object' || !('error' in result)) return
   const error = (result as NativeErrorResult).error
   if (!error) return
-  if (typeof error === 'string') throw new Error(error)
-  throw new Error(error.message ?? error.code ?? 'Camera native error')
+  if (typeof error === 'string') throw new ChimeraCameraError('camera/native-error', error)
+  throw new ChimeraCameraError(error.code ?? 'camera/native-error', error.message ?? error.code ?? 'Camera native error')
+}
+
+function requireNativeMethod<T>(method: T | undefined, name: string): asserts method is T {
+  if (!method) throw unavailableMethodError(name)
+}
+
+function unavailableMethodError(name: string): ChimeraCameraError {
+  return new ChimeraCameraError('camera/method-unavailable', `CameraModule.${name} is not available.`)
 }
 
 function captureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {
@@ -404,28 +373,7 @@ function imageOutputOptionsToNative(options: ImageOutputOptions | undefined): Re
   return native
 }
 
-function legacyCaptureOptionsToNative(options: CapturePhotoOptions | undefined): Record<string, unknown> {
-  return {
-    quality: clampQuality(options?.quality),
-    facing: options?.facing ?? 'back',
-    flash: options?.flash ?? 'off',
-  }
-}
-
 function clampQuality(quality: number | undefined): number {
   if (quality === undefined || Number.isNaN(quality)) return 0.9
   return Math.min(1, Math.max(0, quality))
-}
-
-function legacyCaptureToPhoto(result: LegacyCaptureResult): PhotoFile {
-  if (result.error) throw new Error(result.error)
-  if (!result.base64) throw new Error('Camera returned no image data.')
-  return {
-    path: 'memory://chimera-camera/capture.jpg',
-    width: result.width ?? 0,
-    height: result.height ?? 0,
-    orientation: 'up',
-    mime: result.mime ?? 'image/jpeg',
-    base64: result.base64,
-  }
 }
