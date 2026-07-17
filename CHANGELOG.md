@@ -5,6 +5,9 @@ stable, prerelease entries may include breaking changes.
 
 ## 0.2.0-alpha.0 — Unreleased
 
+- Guard the framework-neutral core: a test fails if any React/Vue/Svelte
+  runtime import leaks into the published `dist`, and the README states which
+  surface (module vs. view session) owns each operation.
 - Normalize the native contract across platforms
   (`docs/native-contract.md`): `camera-view` method failures now reject with
   `ChimeraCameraError` carrying the native `.code`, matching the module surface.

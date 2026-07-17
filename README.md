@@ -72,6 +72,21 @@ powers iOS.
 
 The React Native package itself should not be a runtime dependency.
 
+### Surface ownership
+
+The core has two surfaces, and each operation belongs to exactly one:
+
+- **Module** (`createCameraModule()` → `CameraModuleClient`): stateless, one-shot
+  operations that need no rendered view — permissions, device discovery,
+  system-camera capture, and photo-library picking.
+- **Session** (`createCameraViewHandle()` → `CameraViewHandle`): controls tied to
+  a live `<camera-view>` preview — view capture, recording, focus, zoom, torch,
+  and `ping()`.
+
+The V0 combined `CameraAdapter` merged both and is deprecated (removed in 1.0).
+The normalized cross-platform contract lives in
+[docs/native-contract.md](docs/native-contract.md).
+
 ## Repository Shape
 
 Use a package-root layout:

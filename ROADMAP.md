@@ -123,10 +123,13 @@ Android.
 
 ### Clarify the framework-neutral core
 
-- [ ] Keep the root package free of React, Vue, and Svelte runtime imports.
-- [ ] Make ownership explicit: permissions/device discovery/photo picking are
+- [x] Keep the root package free of React, Vue, and Svelte runtime imports.
+      Enforced by `tests/framework-free.test.js`, which fails if any UI runtime
+      import leaks into `dist`.
+- [x] Make ownership explicit: permissions/device discovery/photo picking are
       module operations; capture/recording/focus/zoom/torch belong to a
-      rendered `CameraViewHandle` session.
+      rendered `CameraViewHandle` session. Split enforced in types and factories;
+      stated in the README "Surface ownership" section.
 - [x] Decide how to deprecate the V0 combined `CameraAdapter` before adding
       more view-session controls. Split into `CameraModuleClient`
       (`createCameraModule`/`createNativeCameraModule`) for module operations
