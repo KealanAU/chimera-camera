@@ -4,11 +4,13 @@ This is the single source of truth for project status, release gates, working
 tasks, and known debt. Do not create separate TODO or per-version checklist
 files; update this document when implementation or device evidence changes.
 
-[V0.md](V0.md) defines the current `0.1.x` behavior. [V1.md](V1.md) defines the
-target native `camera-view` contract. [README.md](README.md) explains the
-project and architecture without duplicating the working checklist here.
+The normalized native contract lives in
+[docs/native-contract.md](docs/native-contract.md). The original planning specs
+[V0.md](docs/archive/V0.md) and [V1.md](docs/archive/V1.md) are archived under
+`docs/archive/`. [README.md](README.md) explains the project and architecture
+without duplicating the working checklist here.
 
-Last reconciled: 2026-07-10.
+Last reconciled: 2026-07-18.
 
 ## Current checkpoint
 
@@ -89,13 +91,21 @@ The iOS module, native element, preview, front/back switching, close/reopen,
 and both capture paths work on a physical iPhone; capture results feed the
 preview/upload boundary and current limitations are explicit.
 
-## 0.2 — Autolinked package and Android photo parity
+## 0.2 — Android photo parity
 
-**Goal:** installing the npm package gives a Lynx host discoverable native
-modules/elements on both platforms, with the same photo contract on iOS and
-Android.
+**Goal:** the same photo contract on iOS and Android through manual host
+integration, so a Lynx host can render a preview and capture a photo the same
+way on both platforms. Autolinked distribution is deferred (see below).
 
-### Lynx native-library packaging
+### Lynx native-library packaging (deferred — not a 0.2 gate)
+
+Autolinking is a distribution convenience, not an architecture gate: it removes
+the per-host manual native wiring, nothing more. npm install already delivers
+the JS plus `ios/`/`android/` sources; manual integration works today (iOS is
+device-proven). With a single in-house consumer (the consuming app), this buys little, so
+it is deferred until an external consumer needs zero-setup installs — realistically
+a 1.0 distribution task. The install/version diagnostics stay the safety net for
+manually integrated hosts.
 
 - [ ] Migrate to Lynx native-library/autolink conventions using tooling from
       the same Lynx release channel as the consuming app.
@@ -105,7 +115,7 @@ Android.
       surfaces without copying sources or registering them by hand.
 - [ ] Update install, publishing, platform, and npm documentation for the
       autolinked flow.
-- [ ] Retain useful install/version diagnostics for absent, stale, or
+- [x] Retain useful install/version diagnostics for absent, stale, or
       mismatched native builds.
 
 ### Android module and element
@@ -154,8 +164,9 @@ Android.
 
 ### 0.2 exit criteria
 
-A clean iOS or Android Lynx host can install and autolink the package, render a
-preview, and capture a photo through the same framework-independent contract.
+A manually integrated iOS or Android Lynx host renders a preview and captures a
+photo through the same framework-independent contract. Autolinked, zero-setup
+installation is explicitly out of scope for 0.2.
 
 ## 0.3 — Complete view sessions and prove framework portability
 
@@ -251,5 +262,7 @@ the cross-platform Lynx surface is stable.
 
 ## Known debt
 
-- The package is not yet configured for Lynx autolinking, so current native
-  installation still requires manual host integration.
+- The package is not configured for Lynx autolinking, so native installation
+  requires manual host integration. Deferred by decision (2026-07-18): manual
+  integration is the supported path until an external consumer needs zero-setup
+  installs. Revisit as a 1.0 distribution task.

@@ -289,9 +289,10 @@ The repository should include:
 ## Current Status
 
 See [ROADMAP.md](ROADMAP.md) for the single project-status, release-plan,
-working-task, and known-debt checklist.
-[V0.md](V0.md) is the contract for what ships today; [V1.md](V1.md) is the
-target contract for the native `camera-view` element.
+working-task, and known-debt checklist. The normalized native contract lives in
+[docs/native-contract.md](docs/native-contract.md); the original planning specs
+are archived at [docs/archive/V0.md](docs/archive/V0.md) and
+[docs/archive/V1.md](docs/archive/V1.md).
 
 Working today:
 

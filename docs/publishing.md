@@ -40,7 +40,7 @@ pnpm add @kealanau/chimera-camera@alpha
 ```
 
 The npm package includes JavaScript, TypeScript declarations, docs, and native
-source under `ios/` and `android/`. This package has not yet been migrated to
-Lynx's native-library/autolink conventions, so current host apps must compile
-and register the native source manually. Autolink packaging is tracked in
-`ROADMAP.md` for 0.2.
+source under `ios/` and `android/`. This package is not configured for Lynx's
+native-library/autolink conventions, so host apps compile and register the
+native source manually. Autolink packaging is deferred as a distribution task
+(see `ROADMAP.md`).

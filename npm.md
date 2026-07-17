@@ -57,13 +57,13 @@ is the cheapest way to catch a stray file before it becomes public.
 ## What ships in the tarball
 
 The `files` list in package.json controls this: `dist/` (the compiled JS and
-type declarations), `ios/` and `android/` (native sources), `docs/`,
-`example/`, plus the README, V1.md, LICENSE, and third-party notices. Note
-that the native code ships as plain source, not as a prebuilt framework. The
-package is not yet configured for Lynx autolinking, so a host app that installs
-it still has to compile and register the `ios/` (and eventually `android/`)
-sources itself — exactly what the consuming app's ios-host project does today, just from
-a different path.
+type declarations), `ios/` and `android/` (native sources), `docs/` (including
+the archived planning specs), `example/`, plus the README, LICENSE, and
+third-party notices. Note that the native code ships as plain source, not as a
+prebuilt framework. The package is not configured for Lynx autolinking (deferred
+as a distribution task — see `ROADMAP.md`), so a host app that installs it
+compiles and registers the `ios/` (and eventually `android/`) sources itself —
+exactly what the consuming app's ios-host project does today, just from a different path.
 
 ## Switching the consuming app over
 

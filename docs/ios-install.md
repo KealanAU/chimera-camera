@@ -37,9 +37,9 @@ files on disk, but the Lynx host app still needs to compile and register them.
    config.register(ChimeraCameraModule.self)
    ```
 
-The exact bootstrap location depends on the host app's Lynx setup. This remains
-manual only because Chimera Camera has not yet migrated to Lynx's current
-native-library/autolink tooling; that migration is planned for 0.2.
+The exact bootstrap location depends on the host app's Lynx setup. Manual
+registration is the supported path: autolink packaging is deferred as a
+distribution task (see `ROADMAP.md`).
 
 ## Verify Registration
 
