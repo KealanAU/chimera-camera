@@ -5,6 +5,11 @@ stable, prerelease entries may include breaking changes.
 
 ## 0.2.0-alpha.0 — Unreleased
 
+- Add a first, **experimental and not-device-audited** Android implementation:
+  Kotlin `CameraModule` (version, permissions, device discovery, system
+  capture/pick) and a CameraX `camera-view` (preview, `ping`, `capturePhoto`,
+  ready/error events), matching `docs/native-contract.md`. Not yet compiled or
+  run — see the platform support matrix and `docs/android-testing.md`.
 - Guard the framework-neutral core: a test fails if any React/Vue/Svelte
   runtime import leaks into the published `dist`, and the README states which
   surface (module vs. view session) owns each operation.

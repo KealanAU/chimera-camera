@@ -11,6 +11,19 @@ import { CHIMERA_CAMERA_JS_VERSION } from '../dist/index.js'
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
 const swift = readFileSync(new URL('../ios/ChimeraCameraModule.swift', import.meta.url), 'utf8')
 const cameraView = readFileSync(new URL('../ios/ChimeraCameraView.m', import.meta.url), 'utf8')
+const kotlin = readFileSync(
+  new URL('../android/src/main/java/com/kealanau/chimeracamera/ChimeraCameraModule.kt', import.meta.url),
+  'utf8',
+)
+
+const requiredNativeMethods = [
+  'getChimeraCameraNativeVersion',
+  'getPermissions',
+  'requestCameraPermission',
+  'requestMicrophonePermission',
+  'getAvailableCameraDevices',
+  'capturePhoto',
+]
 
 test('package.json version matches CHIMERA_CAMERA_JS_VERSION', () => {
   assert.equal(pkg.version, CHIMERA_CAMERA_JS_VERSION)
@@ -24,16 +37,21 @@ test('iOS nativeVersion matches CHIMERA_CAMERA_JS_VERSION', () => {
 })
 
 test('iOS module registers every method the install check requires', () => {
-  const required = [
-    'getChimeraCameraNativeVersion',
-    'getPermissions',
-    'requestCameraPermission',
-    'requestMicrophonePermission',
-    'getAvailableCameraDevices',
-    'capturePhoto',
-  ]
-  for (const method of required) {
+  for (const method of requiredNativeMethods) {
     assert.ok(swift.includes(`"${method}"`), `methodLookup is missing "${method}"`)
+  }
+})
+
+test('Android nativeVersion matches CHIMERA_CAMERA_JS_VERSION', () => {
+  assert.ok(
+    kotlin.includes(`NATIVE_VERSION = "${CHIMERA_CAMERA_JS_VERSION}"`),
+    `ChimeraCameraModule.kt must declare NATIVE_VERSION = "${CHIMERA_CAMERA_JS_VERSION}"`,
+  )
+})
+
+test('Android module exposes every method the install check requires', () => {
+  for (const method of requiredNativeMethods) {
+    assert.ok(kotlin.includes(`fun ${method}(`), `ChimeraCameraModule.kt is missing fun ${method}(`)
   }
 })
 

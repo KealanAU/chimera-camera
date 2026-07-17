@@ -15,6 +15,18 @@ native ideas and MIT-licensed source, then replace the React Native/Nitro-facing
 surface with a plain JavaScript API that Lynx apps can use from React, Vue,
 Svelte, or any other JS integration layer.
 
+## Platform support
+
+| Platform | Status | Verified                                                        |
+| -------- | ------ | --------------------------------------------------------------- |
+| iOS      | Alpha  | Device-proven on a physical iPhone (preview, capture, switch).  |
+| Android  | Experimental | Native code written to the contract; **not device-audited** — emulator-testable only (see [docs/android-testing.md](docs/android-testing.md)). |
+| Mock     | Stable | Framework-neutral JS double for all hosts.                      |
+
+Android ships as experimental on purpose: the Kotlin/CameraX surface matches
+`docs/native-contract.md` and the iOS behavior, but has not been run on a real
+device. Do not treat Android as supported until it has passed device acceptance.
+
 ## Why This Exists
 
 Lynx does not currently appear to have a maintained, drop-in camera package with

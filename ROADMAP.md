@@ -17,8 +17,9 @@ Last reconciled: 2026-07-18.
 Chimera Camera is at the end of the iOS `0.1` implementation and partway
 through physical-device acceptance. It is no longer just a bridge placeholder:
 the repository contains a real AVFoundation preview and view-session photo
-capture. Android, autolinking, recording, and native camera controls have not
-started.
+capture. Android has a first, unverified Kotlin/CameraX implementation (written
+2026-07-18) that has not been compiled or run. Autolinking (deferred), recording,
+and native camera controls have not started.
 
 ### Implemented and verified in the repository
 
@@ -120,14 +121,22 @@ manually integrated hosts.
 
 ### Android module and element
 
-- [ ] Kotlin `CameraModule`: permissions, device discovery, native version,
+A first unverified implementation exists under `android/src/main` (written
+2026-07-18), matching `docs/native-contract.md` and the iOS behavior. It has not
+been compiled or run — the boxes below stay unchecked until emulator/device
+verification (see `docs/android-testing.md`). Each source carries an `UNVERIFIED`
+header listing what to confirm.
+
+- [~] Kotlin `CameraModule`: permissions, device discovery, native version,
       system capture, and photo picking where supported by the contract.
-- [ ] Add Kotlin/native-version coverage to the synchronization tests.
-- [ ] Register `camera-view` with bridge `ping()` and `ready`/`error` events.
-- [ ] Implement CameraX live preview with iOS-equivalent `active`, `facing`,
-      and `resizeMode` behavior.
-- [ ] Implement CameraX view-session photo capture with matching `PhotoFile`
-      semantics and error codes.
+      *(written, unverified)*
+- [x] Add Kotlin/native-version coverage to the synchronization tests.
+- [~] Register `camera-view` with bridge `ping()` and `ready`/`error` events.
+      *(written, unverified)*
+- [~] Implement CameraX live preview with iOS-equivalent `active`, `facing`,
+      and `resizeMode` behavior. *(written, unverified)*
+- [~] Implement CameraX view-session photo capture with matching `PhotoFile`
+      semantics and error codes. *(written, unverified)*
 - [ ] Compile in a real Android Lynx host and pass the flow on a physical
       device.
 
