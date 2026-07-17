@@ -5,6 +5,11 @@ stable, prerelease entries may include breaking changes.
 
 ## 0.2.0-alpha.0 — Unreleased
 
+- Split the combined `CameraAdapter` into `CameraModuleClient`
+  (`createCameraModule` / `createNativeCameraModule`) for module operations and
+  `CameraViewHandle` for live-session controls. `CameraAdapter`,
+  `createCameraAdapter`, and `createNativeCameraAdapter` are deprecated,
+  unchanged at runtime, and scheduled for removal in 1.0.
 - Remove the deprecated `capture(options, callback)` compatibility path.
 - Preserve native failure codes with the exported `ChimeraCameraError` class.
 - Reject missing native methods with `camera/method-unavailable` instead of

@@ -127,8 +127,11 @@ Android.
 - [ ] Make ownership explicit: permissions/device discovery/photo picking are
       module operations; capture/recording/focus/zoom/torch belong to a
       rendered `CameraViewHandle` session.
-- [ ] Decide how to deprecate the V0 combined `CameraAdapter` before adding
-      more view-session controls.
+- [x] Decide how to deprecate the V0 combined `CameraAdapter` before adding
+      more view-session controls. Split into `CameraModuleClient`
+      (`createCameraModule`/`createNativeCameraModule`) for module operations
+      and `CameraViewHandle` for live-session controls; `CameraAdapter` and its
+      factories are `@deprecated`, unchanged at runtime, and removed in 1.0.
 - [x] Preserve structured native error codes in JavaScript instead of reducing
       failures to message-only `Error` objects.
 - [ ] Normalize prop defaults, result/event shapes, and unsupported-feature

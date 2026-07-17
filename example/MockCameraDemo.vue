@@ -34,15 +34,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import {
-  createCameraAdapter,
+  createCameraModule,
   getCameraInstallStatus,
-  type CameraAdapter,
+  type CameraModuleClient,
   type PhotoFile,
 } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
 const cameraInstallStatus = getCameraInstallStatus()
-const cameraAdapter: CameraAdapter = createCameraAdapter({ optional: true }) ?? createMockCameraModule()
+const cameraModule: CameraModuleClient = createCameraModule({ optional: true }) ?? createMockCameraModule()
 
 const busy = ref(false)
 const permission = ref('unknown')
@@ -68,8 +68,8 @@ const capturedPhotoPreviewSource = computed(() => {
 
 onMounted(async () => {
   try {
-    const permissions = await cameraAdapter.getPermissions()
-    const devices = await cameraAdapter.getAvailableCameraDevices()
+    const permissions = await cameraModule.getPermissions()
+    const devices = await cameraModule.getAvailableCameraDevices()
     permission.value = permissions.camera
     cameraName.value = devices[0]?.localizedName ?? 'No camera'
   } catch (e) {
@@ -81,7 +81,7 @@ async function capture() {
   busy.value = true
   error.value = null
   try {
-    capturedPhoto.value = await cameraAdapter.capturePhoto({ includeBase64: true, maxDimension: 1600 })
+    capturedPhoto.value = await cameraModule.capturePhoto({ includeBase64: true, maxDimension: 1600 })
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {

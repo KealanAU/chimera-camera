@@ -1,17 +1,17 @@
 import { useEffect, useState } from '@lynx-js/react'
 
 import {
-  createCameraAdapter,
+  createCameraModule,
   createCameraViewHandle,
   getCameraInstallStatus,
-  type CameraAdapter,
+  type CameraModuleClient,
   type PhotoFile,
   type TargetCameraPosition,
 } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
 const cameraInstallStatus = getCameraInstallStatus()
-const cameraAdapter: CameraAdapter = createCameraAdapter({ optional: true }) ?? createMockCameraModule()
+const cameraModule: CameraModuleClient = createCameraModule({ optional: true }) ?? createMockCameraModule()
 
 export interface CameraDemoProps {
   uploadPhoto?: (photo: PhotoFile) => Promise<void>
@@ -32,8 +32,8 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
   useEffect(() => {
     void (async () => {
       try {
-        const permissions = await cameraAdapter.getPermissions()
-        const devices = await cameraAdapter.getAvailableCameraDevices()
+        const permissions = await cameraModule.getPermissions()
+        const devices = await cameraModule.getAvailableCameraDevices()
         setPermission(permissions.camera)
         setCameraName(devices[0]?.localizedName ?? 'No camera')
       } catch (e) {
@@ -46,7 +46,7 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
     setBusy(true)
     setError(null)
     try {
-      setCapturedPhoto(await cameraAdapter.capturePhoto({ includeBase64: true, maxDimension: 1600 }))
+      setCapturedPhoto(await cameraModule.capturePhoto({ includeBase64: true, maxDimension: 1600 }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {

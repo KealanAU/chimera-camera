@@ -29,23 +29,23 @@ pnpm add @kealanau/chimera-camera@alpha
 ## Basic Usage
 
 ```ts
-import { getNativeCameraModule } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
-import type { CameraAdapter } from '@kealanau/chimera-camera'
+import type { CameraModuleClient } from '@kealanau/chimera-camera'
 
-const camera: CameraAdapter =
-  getNativeCameraModule<CameraAdapter>() ?? createMockCameraModule()
+const camera: CameraModuleClient =
+  createCameraModule({ optional: true }) ?? createMockCameraModule()
 
 const permissions = await camera.getPermissions()
 const photo = await camera.capturePhoto()
 ```
 
-Or use the package adapter helper:
+Or force the mock explicitly:
 
 ```ts
-import { createCameraAdapter } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@kealanau/chimera-camera'
 
-const camera = createCameraAdapter({ mock: true })
+const camera = createCameraModule({ mock: true })
 ```
 
 The default mock returns:
@@ -83,12 +83,12 @@ that boundary can resolve a real native module first and fall back to the mock i
 development:
 
 ```ts
-import { getNativeCameraModule } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
-import type { CameraAdapter } from '@kealanau/chimera-camera'
+import type { CameraModuleClient } from '@kealanau/chimera-camera'
 
-const camera =
-  getNativeCameraModule<CameraAdapter>() ??
+const camera: CameraModuleClient | null =
+  createCameraModule({ optional: true }) ??
   (import.meta.env.DEV ? createMockCameraModule() : null)
 ```
 

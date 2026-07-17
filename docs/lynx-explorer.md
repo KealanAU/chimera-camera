@@ -5,7 +5,7 @@ compile and register native Swift/Kotlin source from an npm package at
 runtime. The camera these hosts use to scan QR codes is their own compiled-in
 feature — it is not reachable from your card's JavaScript.
 
-Because of that, `createCameraAdapter()` without options **throws** in these
+Because of that, `createCameraModule()` without options **throws** in these
 hosts, with a message listing the native setup steps and pointing at the mock.
 When debugging on device, render `getCameraInstallStatus().code` into your UI
 — console logs are only visible with Lynx DevTool connected.
@@ -49,9 +49,9 @@ A standard `create-rspeedy` project is ReactLynx and uses `CameraDemo.tsx`.
 Use these hosts with the mock adapter first:
 
 ```ts
-import { createCameraAdapter } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@kealanau/chimera-camera'
 
-const camera = createCameraAdapter({ mock: true })
+const camera = createCameraModule({ mock: true })
 ```
 
 The install checker also reports mock mode:

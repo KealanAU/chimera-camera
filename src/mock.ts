@@ -1,8 +1,9 @@
 import { SAMPLE_PHOTO_FIXTURE } from './fixtures.js'
 import type {
-  CameraAdapter,
+  CameraModuleClient,
   CameraDevice,
   CameraPermissions,
+  CameraSessionMethods,
   CapturePhotoOptions,
   PermissionStatus,
   PickPhotoOptions,
@@ -23,7 +24,9 @@ export interface MockCameraOptions {
   captureDelayMs?: number
 }
 
-export function createMockCameraModule(options: MockCameraOptions = {}): CameraAdapter {
+// A mock stands in for a full device, so it doubles both the stateless module
+// surface and a live session — no rendered `<camera-view>` needed under test.
+export function createMockCameraModule(options: MockCameraOptions = {}): CameraModuleClient & CameraSessionMethods {
   const devices = options.devices ?? defaultMockDevices()
   const permissions = options.permissions ?? { camera: 'authorized', microphone: 'authorized' }
   const photo = options.photo ?? SAMPLE_PHOTO_FIXTURE

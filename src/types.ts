@@ -150,7 +150,26 @@ export interface CameraViewMethods extends CameraSessionMethods {
 
 export type PickPhotoOptions = ImageOutputOptions
 
-export interface CameraAdapter extends CameraModule, CameraSessionMethods {
+/**
+ * Stateless module surface: one-shot operations that need no rendered view —
+ * permissions, device discovery, system-camera capture, and system
+ * photo-library picking. Live-session controls (recording, focus, zoom, torch)
+ * are deliberately absent; they belong to a rendered `<camera-view>` reached
+ * through `createCameraViewHandle()`.
+ */
+export interface CameraModuleClient extends CameraModule {
+  /** System-camera photo capture. Opens the OS camera UI; no rendered view needed. */
+  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
   /** Picks an existing photo via the system library picker (no permission needed). */
   pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile>
 }
+
+/**
+ * @deprecated The V0 combined adapter merges the stateless module surface with
+ * live-session controls (`startRecording`/`stopRecording`/`focusAtPoint`/
+ * `setZoom`/`setTorch`) that have no session on a module object and only throw.
+ * Use `createCameraModule()` for permissions, device discovery, system capture,
+ * and picking, and `createCameraViewHandle()` for live-session controls.
+ * Scheduled for removal in 1.0.
+ */
+export interface CameraAdapter extends CameraModuleClient, CameraSessionMethods {}

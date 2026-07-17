@@ -4,6 +4,7 @@ import type {
   CameraAdapter,
   CameraDevice,
   CameraErrorEvent,
+  CameraModuleClient,
   CameraPermissions,
   CapturePhotoOptions,
   ImageOutputOptions,
@@ -76,12 +77,30 @@ export function getNativeCameraModule<T = NativeCameraModuleShape>(name = 'Camer
   }
 }
 
+export function createCameraModule(options?: CreateCameraAdapterOptions & { optional?: false }): CameraModuleClient
+export function createCameraModule(options: CreateCameraAdapterOptions & { optional: boolean }): CameraModuleClient | null
+export function createCameraModule(options: CreateCameraAdapterOptions = {}): CameraModuleClient | null {
+  const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
+  // A registered module must actually be able to capture — otherwise a
+  // half-registered host would look "available" and only fail at capture time.
+  if (nativeModule && hasCaptureMethod(nativeModule)) return createNativeCameraModule(nativeModule)
+  if (options.mock) {
+    return createMockCameraModule(options.mock === true ? undefined : options.mock)
+  }
+  if (options.optional) return null
+  throw new Error(getCameraInstallStatus(options).message)
+}
+
+/**
+ * @deprecated Returns the V0 combined {@link CameraAdapter}, whose
+ * live-session controls only throw on a module object. Use
+ * {@link createCameraModule} for module operations and `createCameraViewHandle()`
+ * for live-session controls. Scheduled for removal in 1.0.
+ */
 export function createCameraAdapter(options?: CreateCameraAdapterOptions & { optional?: false }): CameraAdapter
 export function createCameraAdapter(options: CreateCameraAdapterOptions & { optional: boolean }): CameraAdapter | null
 export function createCameraAdapter(options: CreateCameraAdapterOptions = {}): CameraAdapter | null {
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
-  // A registered module must actually be able to capture — otherwise a
-  // half-registered host would look "available" and only fail at capture time.
   if (nativeModule && hasCaptureMethod(nativeModule)) return createNativeCameraAdapter(nativeModule)
   if (options.mock) {
     return createMockCameraModule(options.mock === true ? undefined : options.mock)
@@ -199,7 +218,7 @@ export async function assertCameraInstalledAsync(options: CreateCameraAdapterOpt
   if (!status.ok) throw new Error(status.message)
 }
 
-export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape): CameraAdapter {
+export function createNativeCameraModule(nativeModule: NativeCameraModuleShape): CameraModuleClient {
   return {
     async getPermissions(): Promise<CameraPermissions> {
       requireNativeMethod(nativeModule.getPermissions, 'getPermissions')
@@ -238,6 +257,18 @@ export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape)
       if (!nativeModule.pickPhoto) throw unavailableMethodError('pickPhoto')
       return callNative((callback) => nativeModule.pickPhoto?.(pickOptionsToNative(options), callback))
     },
+  }
+}
+
+/**
+ * @deprecated Wraps an already-resolved native module in the V0 combined
+ * {@link CameraAdapter}. Its live-session methods only throw here. Use
+ * {@link createNativeCameraModule} for module operations and
+ * `createCameraViewHandle()` for live-session controls. Removed in 1.0.
+ */
+export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape): CameraAdapter {
+  return {
+    ...createNativeCameraModule(nativeModule),
 
     async startRecording(_options?: StartRecordingOptions): Promise<void> {
       throw new Error('CameraModule.startRecording is not available yet.')
@@ -308,7 +339,7 @@ function createInstallErrorMessage(nativeModuleName: string, reason: string): st
     '- The real camera cannot work in these hosts: they cannot compile this',
     '  package\'s native source, even though the host app itself uses a camera',
     '  (e.g. to scan QR codes).',
-    '- Use createCameraAdapter({ mock: true }) or createMockCameraModule().',
+    '- Use createCameraModule({ mock: true }) or createMockCameraModule().',
     '',
     'See docs/ios-install.md, docs/android-install.md, and docs/lynx-explorer.md.',
   ].join('\n')
