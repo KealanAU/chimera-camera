@@ -134,8 +134,11 @@ Android.
       factories are `@deprecated`, unchanged at runtime, and removed in 1.0.
 - [x] Preserve structured native error codes in JavaScript instead of reducing
       failures to message-only `Error` objects.
-- [ ] Normalize prop defaults, result/event shapes, and unsupported-feature
-      errors across iOS and Android.
+- [x] Normalize prop defaults, result/event shapes, and unsupported-feature
+      errors across iOS and Android. Canonical contract in
+      [docs/native-contract.md](docs/native-contract.md); the view surface now
+      throws `ChimeraCameraError` with native `.code`s like the module surface.
+      Android must conform to the documented contract when implemented.
 
 ### 0.2 cleanup
 

@@ -3,6 +3,7 @@ import test, { afterEach } from 'node:test'
 
 import {
   CAMERA_VIEW_TAG,
+  ChimeraCameraError,
   createCameraViewHandle,
   invokeCameraViewMethod,
   isCameraViewBridgeAvailable,
@@ -72,6 +73,23 @@ test('invoke normalizes fail payloads into Errors', async () => {
 
   installFakeLynx((call) => call.fail(undefined))
   await assert.rejects(invokeCameraViewMethod('#camera', 'ping'), /ping\(\) on "#camera" failed/)
+})
+
+test('invoke preserves native error codes as ChimeraCameraError, matching the module surface', async () => {
+  installFakeLynx((call) => call.fail({ code: 'capture/not-active', message: 'camera-view is not active.' }))
+  await assert.rejects(invokeCameraViewMethod('#camera', 'capturePhoto'), (error) => {
+    assert.ok(error instanceof ChimeraCameraError)
+    assert.equal(error.code, 'capture/not-active')
+    return true
+  })
+
+  // Numeric Lynx transport codes are not contract codes; fall back to the shared generic.
+  installFakeLynx((call) => call.fail({ code: 4, data: 'method not found' }))
+  await assert.rejects(invokeCameraViewMethod('#camera', 'ping'), (error) => {
+    assert.ok(error instanceof ChimeraCameraError)
+    assert.equal(error.code, 'camera/native-error')
+    return true
+  })
 })
 
 test('handle.ping() round-trips through the fake bridge', async () => {

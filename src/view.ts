@@ -1,3 +1,4 @@
+import { ChimeraCameraError } from './types.js'
 import type {
   CameraPingResult,
   CameraViewMethods,
@@ -117,14 +118,21 @@ export function createCameraViewHandle(selector: string): CameraViewHandle {
   }
 }
 
+// Match the module surface: view-session failures surface as ChimeraCameraError
+// carrying the native `code`, so JS handles both the same way. Numeric Lynx
+// transport codes are not contract codes, so only string codes are adopted.
 function normalizeInvokeError(selector: string, method: string, error: unknown): Error {
   if (error instanceof Error) return error
   if (error && typeof error === 'object') {
     const { code, message, data } = error as { code?: unknown; message?: unknown; data?: unknown }
     const reason = message ?? data ?? code
-    if (reason !== undefined) {
-      return new Error(`camera-view ${method}() on "${selector}" failed: ${String(reason)}`)
-    }
+    return new ChimeraCameraError(
+      typeof code === 'string' ? code : 'camera/native-error',
+      reason !== undefined
+        ? `camera-view ${method}() on "${selector}" failed: ${String(reason)}`
+        : `camera-view ${method}() on "${selector}" failed.`,
+      error,
+    )
   }
-  return new Error(`camera-view ${method}() on "${selector}" failed.`)
+  return new ChimeraCameraError('camera/native-error', `camera-view ${method}() on "${selector}" failed.`)
 }

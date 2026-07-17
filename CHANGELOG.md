@@ -5,6 +5,9 @@ stable, prerelease entries may include breaking changes.
 
 ## 0.2.0-alpha.0 — Unreleased
 
+- Normalize the native contract across platforms
+  (`docs/native-contract.md`): `camera-view` method failures now reject with
+  `ChimeraCameraError` carrying the native `.code`, matching the module surface.
 - Split the combined `CameraAdapter` into `CameraModuleClient`
   (`createCameraModule` / `createNativeCameraModule`) for module operations and
   `CameraViewHandle` for live-session controls. `CameraAdapter`,
