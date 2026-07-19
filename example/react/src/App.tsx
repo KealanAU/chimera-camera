@@ -145,7 +145,11 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
 
       {!cameraInstallStatus.ok && (
         <view style={{ marginTop: '16px', padding: '12px', backgroundColor: '#2b1a12', borderRadius: '8px' }}>
-          <text style={{ color: '#ffb38a', fontSize: '12px' }}>{cameraInstallStatus.message}</text>
+          <text style={{ color: '#ffb38a', fontSize: '13px' }}>
+            Mock mode — expected in Lynx Go / LynxExplorer, which can't load the native camera. The capture
+            button below uses the mock adapter; a live camera needs a custom iOS/Android host. See
+            docs/lynx-explorer.md.
+          </text>
         </view>
       )}
 
