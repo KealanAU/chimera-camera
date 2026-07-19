@@ -54,8 +54,35 @@ uploads, and cleans up these files, and when base64 is the right fallback.
 | ------------------- | ----------------------------- | ------------- |
 | `ready`             | `{ deviceId: string }`        | implemented   |
 | `error`             | `{ code: string, message }`   | implemented   |
-| `recordingStarted`  | `{ path?: string }`           | reserved, 0.3 |
-| `recordingFinished` | `{ file: VideoFile }`         | reserved, 0.3 |
+| `recordingStarted`  | `{ path?: string }`           | 0.3           |
+| `recordingFinished` | `{ file: VideoFile }`         | 0.3           |
+
+## View-session controls and recording (0.3)
+
+These `camera-view` methods require an active session (`active={true}` and a
+`ready` event). Called before then they reject with `capture/not-active`.
+
+### Controls
+
+| Method                | Params                     | Behavior / errors                                            |
+| --------------------- | -------------------------- | ------------------------------------------------------------ |
+| `setZoom(value)`      | `{ value: number }`        | Clamped to the device's `[minZoom, maxZoom]`; out-of-range clamps rather than rejecting. |
+| `setTorch(mode)`      | `{ mode: 'on' \| 'off' }`  | `camera/unsupported` when `hasTorch === false`.              |
+| `focusAtPoint(point)` | `{ x: number, y: number }` | Point in preview space, `0..1` on each axis. `camera/unsupported` when `supportsFocusMetering === false`. |
+
+`zoom` and `torch` are also props; setting the prop and calling the method are
+equivalent, and the last write wins.
+
+### Recording
+
+| Method             | Params                                                              | Behavior / errors                                             |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `startRecording()` | `{ enableAudio?, maxDurationMs?, maxFileSizeBytes? }`                | Records to a temp file. `recording/in-progress` if already recording. With `enableAudio`, microphone permission must be granted or it rejects `camera/permission-denied` (request it via the module first). Emits `recordingStarted` with the output `path` on success. |
+| `stopRecording()`  | —                                                                   | Resolves a `VideoFile` and emits `recordingFinished` with that file. `recording/not-active` if nothing is recording. `recording/failed` on a pipeline error; `capture/write-failed` if the file cannot be finalized. |
+
+`maxDurationMs` / `maxFileSizeBytes` are best-effort native limits; hitting one
+stops recording as if `stopRecording()` were called (a `recordingFinished` event
+fires). Output paths follow [output-transport.md](output-transport.md).
 
 ## Error codes
 
@@ -73,13 +100,16 @@ codes are not contract codes and normalize to `camera/native-error`.
 | `camera/permission-denied` | view          | Camera permission denied (request via module).   |
 | `camera/no-presenter`      | module (iOS)  | No view controller to present the system UI.     |
 | `camera/present-failed`    | module (iOS)  | System camera UI failed to present.              |
-| `camera/unsupported`       | reserved      | Feature unsupported by device (e.g. torch), 0.3. |
+| `camera/unsupported`       | view          | Torch/focus unsupported by the device (0.3).     |
 | `capture/not-active`       | view          | View not active/ready; set `active` and await.   |
 | `capture/in-progress`      | module + view | Another capture is already running.              |
 | `capture/cancelled`        | module        | User cancelled the system capture.               |
 | `capture/failed`           | view          | Capture pipeline failed.                          |
 | `capture/encode-failed`    | module        | Could not read or encode the image.              |
 | `capture/write-failed`     | module + view | Could not write the temp file.                   |
+| `recording/in-progress`    | view          | `startRecording` while already recording (0.3).  |
+| `recording/not-active`     | view          | `stopRecording` with nothing recording (0.3).    |
+| `recording/failed`         | view          | Recording pipeline failed (0.3).                 |
 
 Platform-specific codes (`camera/no-presenter`, `camera/present-failed`) may have
 no Android equivalent; Android reports its own presentation failures under
