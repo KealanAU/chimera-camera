@@ -1,7 +1,9 @@
 package com.kealanau.chimeracamera
 
 import android.content.Context
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
@@ -31,7 +33,8 @@ import java.util.UUID
  * A CameraX-backed `camera-view` element. Owns its own LifecycleRegistry because
  * a Lynx UI is not a LifecycleOwner. Implements the same minimal surface as iOS:
  * active/facing/resizeMode props, ping(), capturePhoto(), and ready/error events.
- * Recording/zoom/torch/focus are 0.3 and intentionally absent, matching iOS.
+ * The 0.3 view-session controls (zoom/torch/focus) and video recording are now
+ * implemented below — also UNVERIFIED, matching iOS ChimeraCameraView.m.
  */
 class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), LifecycleOwner {
 
@@ -39,6 +42,7 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
     private var active = false
     private var facing = "back"
     private var imageCapture: ImageCapture? = null
+    private var camera: Camera? = null
     private var readyDeviceId: String? = null
     private var captureInProgress = false
 
@@ -116,10 +120,62 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         )
     }
 
+    @LynxUIMethod
+    fun setZoom(params: ReadableMap, callback: Callback) {
+        val cam = camera
+        if (!active || cam == null) {
+            callback.invoke(1, notActive())
+            return
+        }
+        // Contract: clamp rather than reject.
+        val value = if (params.hasKey("value")) params.getDouble("value").toFloat() else 1f
+        val zoomState = cam.cameraInfo.zoomState.value
+        val min = zoomState?.minZoomRatio ?: 1f
+        val max = zoomState?.maxZoomRatio ?: 1f
+        cam.cameraControl.setZoomRatio(value.coerceIn(min, max))
+        callback.invoke(0, JavaOnlyMap())
+    }
+
+    @LynxUIMethod
+    fun setTorch(params: ReadableMap, callback: Callback) {
+        val cam = camera
+        if (!active || cam == null) {
+            callback.invoke(1, notActive())
+            return
+        }
+        if (!cam.cameraInfo.hasFlashUnit()) {
+            callback.invoke(1, failDetail("camera/unsupported", "This camera has no controllable torch."))
+            return
+        }
+        val on = params.hasKey("mode") && params.getString("mode") == "on"
+        cam.cameraControl.enableTorch(on)
+        callback.invoke(0, JavaOnlyMap())
+    }
+
+    @LynxUIMethod
+    fun focusAtPoint(params: ReadableMap, callback: Callback) {
+        val cam = camera
+        if (!active || cam == null) {
+            callback.invoke(1, notActive())
+            return
+        }
+        // Point arrives in preview space (0..1); scale into PreviewView coords.
+        val x = (if (params.hasKey("x")) params.getDouble("x").toFloat() else 0.5f) * view.width
+        val y = (if (params.hasKey("y")) params.getDouble("y").toFloat() else 0.5f) * view.height
+        val action = FocusMeteringAction.Builder(view.meteringPointFactory.createPoint(x, y)).build()
+        if (!cam.cameraInfo.isFocusMeteringSupported(action)) {
+            callback.invoke(1, failDetail("camera/unsupported", "Focus at point is not supported by this camera."))
+            return
+        }
+        cam.cameraControl.startFocusAndMetering(action)
+        callback.invoke(0, JavaOnlyMap())
+    }
+
     private fun syncSession() {
         if (!active) {
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
             readyDeviceId = null
+            camera = null
             return
         }
         val providerFuture = ProcessCameraProvider.getInstance(view.context)
@@ -146,6 +202,7 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
             return
         }
         imageCapture = capture
+        this.camera = camera
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
         // CameraX has no stable per-device id here; use the facing as the id so
@@ -176,5 +233,8 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         detail.putString("message", message)
         return detail
     }
+
+    private fun notActive(): JavaOnlyMap =
+        failDetail("capture/not-active", "camera-view is not active; set active={true} and wait for the ready event.")
 
 }
