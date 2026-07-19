@@ -40,6 +40,8 @@
       class="cameraView"
       @ready="verifyCameraViewBridge"
       @error="onCameraViewError"
+      @recordingstarted="controlStatus = 'recordingStarted event'"
+      @recordingfinished="onRecordingFinished"
     />
 
     <view class="preview">
@@ -57,6 +59,29 @@
         {{ busy ? 'Working...' : cameraInstallStatus.ok ? 'Capture embedded photo' : 'Capture mock photo' }}
       </text>
     </view>
+
+    <!-- Session controls — drive the full CameraViewMethods surface (recording,
+         zoom, torch, focus) against the live view or the mock. -->
+    <text class="sectionHeader">
+      Session controls ({{ cameraInstallStatus.ok ? 'live camera-view' : 'mock' }}) — zoom {{ zoom }}x, torch
+      {{ torch }}: {{ controlStatus }}
+    </text>
+    <view class="secondaryButton" :style="{ background: recording ? '#c92a2a' : '#333333' }" @tap="toggleRecording">
+      <text class="secondaryButtonText">{{ recording ? 'Stop recording' : 'Start recording (audio)' }}</text>
+    </view>
+    <view class="secondaryButton" @tap="nudgeZoom(1)">
+      <text class="secondaryButtonText">Zoom in (+1x)</text>
+    </view>
+    <view class="secondaryButton" @tap="nudgeZoom(-1)">
+      <text class="secondaryButtonText">Zoom out (-1x)</text>
+    </view>
+    <view class="secondaryButton" @tap="toggleTorch">
+      <text class="secondaryButtonText">Turn torch {{ torch === 'on' ? 'off' : 'on' }}</text>
+    </view>
+    <view class="secondaryButton" @tap="focusCenter">
+      <text class="secondaryButtonText">Focus center</text>
+    </view>
+    <text v-if="lastVideo" class="meta">Last video: {{ lastVideo.path }} ({{ lastVideo.durationMs ?? 0 }}ms)</text>
 
     <template v-if="cameraInstallStatus.ok">
       <view class="secondaryButton" @tap="toggleFacing">
@@ -85,8 +110,11 @@ import {
   createCameraViewHandle,
   getCameraInstallStatus,
   type CameraModuleClient,
+  type CameraSessionMethods,
   type PhotoFile,
   type TargetCameraPosition,
+  type TorchMode,
+  type VideoFile,
 } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
@@ -103,6 +131,17 @@ const permission = ref('unknown')
 const cameraName = ref('unknown')
 const capturedPhoto = ref<PhotoFile | null>(null)
 const error = ref<string | null>(null)
+
+// Session controls (0.3) run against the live camera-view when native is present,
+// or the mock adapter otherwise — both implement CameraSessionMethods, so the same
+// buttons drive either. Recording/zoom/torch/focus are real on the mock, so they're
+// exercisable end-to-end in Lynx Go without a device.
+const session: CameraSessionMethods = cameraInstallStatus.ok ? createCameraViewHandle('#camera') : cameraModule
+const recording = ref(false)
+const lastVideo = ref<VideoFile | null>(null)
+const zoom = ref(1)
+const torch = ref<TorchMode>('off')
+const controlStatus = ref('idle')
 
 const status = computed(() => {
   if (error.value) return error.value
@@ -190,6 +229,63 @@ async function uploadCapturedPhoto() {
     busy.value = false
   }
 }
+
+function onRecordingFinished(event: { detail?: { file?: VideoFile } }) {
+  if (event.detail?.file) lastVideo.value = event.detail.file
+}
+
+async function toggleRecording() {
+  try {
+    if (recording.value) {
+      const video = await session.stopRecording()
+      recording.value = false
+      lastVideo.value = video
+      controlStatus.value = `recorded ${video.durationMs ?? 0}ms`
+    } else {
+      await session.startRecording({ enableAudio: true })
+      recording.value = true
+      controlStatus.value = 'recording…'
+    }
+  } catch (e) {
+    recording.value = false
+    controlStatus.value = toMessage(e)
+  }
+}
+
+async function nudgeZoom(delta: number) {
+  const next = Math.max(1, Math.min(8, zoom.value + delta))
+  try {
+    await session.setZoom(next)
+    zoom.value = next
+    controlStatus.value = `zoom ${next}x`
+  } catch (e) {
+    controlStatus.value = toMessage(e)
+  }
+}
+
+async function toggleTorch() {
+  const next: TorchMode = torch.value === 'on' ? 'off' : 'on'
+  try {
+    await session.setTorch(next)
+    torch.value = next
+    controlStatus.value = `torch ${next}`
+  } catch (e) {
+    controlStatus.value = toMessage(e)
+  }
+}
+
+async function focusCenter() {
+  try {
+    await session.focusAtPoint({ x: 0.5, y: 0.5 })
+    controlStatus.value = 'focused center'
+  } catch (e) {
+    controlStatus.value = toMessage(e)
+  }
+}
+
+function toMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e)
+}
 </script>
 
 <style scoped>
@@ -232,6 +328,13 @@ async function uploadCapturedPhoto() {
   margin-top: 12px;
   color: #d7d7d7;
   font-size: 16px;
+}
+
+.sectionHeader {
+  margin-top: 12px;
+  color: #8ab4f8;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .installBox {

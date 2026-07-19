@@ -19,8 +19,11 @@ import {
   createCameraViewHandle,
   getCameraInstallStatus,
   type CameraModuleClient,
+  type CameraSessionMethods,
   type PhotoFile,
   type TargetCameraPosition,
+  type TorchMode,
+  type VideoFile,
 } from '@kealanau/chimera-camera'
 import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
 
@@ -42,6 +45,66 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
   const [cameraName, setCameraName] = useState('unknown')
   const [capturedPhoto, setCapturedPhoto] = useState<PhotoFile | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Session controls (0.3) run against the live camera-view when native is
+  // present, or the mock adapter otherwise — both implement CameraSessionMethods,
+  // so the same buttons drive either one. Recording/zoom/torch/focus are real on
+  // the mock, so they're exercisable end-to-end in Lynx Go without a device.
+  const session: CameraSessionMethods = cameraInstallStatus.ok ? createCameraViewHandle('#camera') : cameraModule
+  const [recording, setRecording] = useState(false)
+  const [lastVideo, setLastVideo] = useState<VideoFile | null>(null)
+  const [zoom, setZoom] = useState(1)
+  const [torch, setTorch] = useState<TorchMode>('off')
+  const [controlStatus, setControlStatus] = useState('idle')
+
+  async function toggleRecording() {
+    try {
+      if (recording) {
+        const video = await session.stopRecording()
+        setRecording(false)
+        setLastVideo(video)
+        setControlStatus(`recorded ${video.durationMs ?? 0}ms`)
+      } else {
+        await session.startRecording({ enableAudio: true })
+        setRecording(true)
+        setControlStatus('recording…')
+      }
+    } catch (e) {
+      setRecording(false)
+      setControlStatus(toMessage(e))
+    }
+  }
+
+  async function nudgeZoom(delta: number) {
+    const next = Math.max(1, Math.min(8, zoom + delta))
+    try {
+      await session.setZoom(next)
+      setZoom(next)
+      setControlStatus(`zoom ${next}x`)
+    } catch (e) {
+      setControlStatus(toMessage(e))
+    }
+  }
+
+  async function toggleTorch() {
+    const next: TorchMode = torch === 'on' ? 'off' : 'on'
+    try {
+      await session.setTorch(next)
+      setTorch(next)
+      setControlStatus(`torch ${next}`)
+    } catch (e) {
+      setControlStatus(toMessage(e))
+    }
+  }
+
+  async function focusCenter() {
+    try {
+      await session.focusAtPoint({ x: 0.5, y: 0.5 })
+      setControlStatus('focused center')
+    } catch (e) {
+      setControlStatus(toMessage(e))
+    }
+  }
 
   useEffect(() => {
     void (async () => {
@@ -163,6 +226,10 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
           binderror={(event: { detail?: { message?: string } }) =>
             setError(event.detail?.message ?? 'camera-view failed')
           }
+          bindrecordingstarted={() => setControlStatus('recordingStarted event')}
+          bindrecordingfinished={(event: { detail?: { file?: VideoFile } }) => {
+            if (event.detail?.file) setLastVideo(event.detail.file)
+          }}
           style={{ marginTop: '24px', width: '100%', height: '320px', borderRadius: '8px' }}
         />
       )}
@@ -202,6 +269,35 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
         </text>
       </view>
 
+      {/* Session controls — drive the full CameraViewMethods surface (recording,
+          zoom, torch, focus) against the live view or the mock. */}
+      <text style={{ ...metaStyle, color: '#8ab4f8', fontWeight: 'bold' }}>
+        Session controls ({cameraInstallStatus.ok ? 'live camera-view' : 'mock'}) — zoom {zoom}x, torch {torch}: {controlStatus}
+      </text>
+      <view
+        bindtap={toggleRecording}
+        style={{ ...secondaryButtonStyle, backgroundColor: recording ? '#c92a2a' : '#333333' }}
+      >
+        <text style={secondaryButtonTextStyle}>{recording ? 'Stop recording' : 'Start recording (audio)'}</text>
+      </view>
+      <view bindtap={() => nudgeZoom(1)} style={secondaryButtonStyle}>
+        <text style={secondaryButtonTextStyle}>Zoom in (+1x)</text>
+      </view>
+      <view bindtap={() => nudgeZoom(-1)} style={secondaryButtonStyle}>
+        <text style={secondaryButtonTextStyle}>Zoom out (-1x)</text>
+      </view>
+      <view bindtap={toggleTorch} style={secondaryButtonStyle}>
+        <text style={secondaryButtonTextStyle}>Turn torch {torch === 'on' ? 'off' : 'on'}</text>
+      </view>
+      <view bindtap={focusCenter} style={secondaryButtonStyle}>
+        <text style={secondaryButtonTextStyle}>Focus center</text>
+      </view>
+      {lastVideo && (
+        <text style={metaStyle}>
+          Last video: {lastVideo.path} ({lastVideo.durationMs ?? 0}ms)
+        </text>
+      )}
+
       {cameraInstallStatus.ok && (
         <>
           <view bindtap={() => setFacing(facing === 'back' ? 'front' : 'back')} style={secondaryButtonStyle}>
@@ -225,6 +321,10 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       )}
     </view>
   )
+}
+
+function toMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e)
 }
 
 const metaStyle = { marginTop: '12px', color: '#d7d7d7', fontSize: '16px' }

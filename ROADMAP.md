@@ -225,8 +225,10 @@ imperative TypeScript API.
       What remains is folding both under one shared Sparkling native registration
       — layout in `example/README.md`)*
 - [~] ReactLynx page exercises the complete native view surface.
-      *(`example/react/src/App.tsx` exercises the implemented surface — preview,
-      ping, capture, switch, close/reopen; recording/controls await native work)*
+      *(`example/react/src/App.tsx` drives the full `CameraViewMethods` surface —
+      preview, ping, capture, switch, close/reopen, plus recording, zoom, torch,
+      and focus. Recording/controls run against the mock today and against the
+      native view once a host compiles it; the Vue app has the same controls.)*
 - [~] Vue Lynx page performs the same flow without a React dependency.
       *(`example/vue` is a runnable vue-lynx app — `pnpm --filter @chimera-camera/vue
       run dev` boots and compiles the bundle in mock mode, driving the same core with

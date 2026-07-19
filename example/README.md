@@ -7,11 +7,12 @@ mutation.
 Files:
 
 - `react/` — a runnable ReactLynx app (rspeedy). Its `src/App.tsx` drives the
-  native `camera-view` surface (preview, `ready`/`error`, `ping()`,
-  `capturePhoto()`, front/back switch, close/reopen), falling back to the mock
-  adapter in hosts without native camera. Run it with
-  `pnpm --filter @chimera-camera/react run dev` and scan the QR code with Lynx
-  Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
+  full `camera-view` surface (preview, `ready`/`error`, `ping()`,
+  `capturePhoto()`, front/back switch, close/reopen, plus recording, zoom, torch,
+  and focus), falling back to the mock adapter in hosts without native camera —
+  so the session controls are exercisable end-to-end against the mock in Lynx Go.
+  Run it with `pnpm --filter @chimera-camera/react run dev` and scan the QR code
+  with Lynx Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
 - `vue/` — a runnable Vue Lynx app (`vue-lynx` + rspeedy). Its `src/App.vue`
   drives the **same** `camera-view` element and `createCameraViewHandle` contract
   as the React app with no React dependency — the 0.3 framework-portability proof.
