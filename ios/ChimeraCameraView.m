@@ -227,6 +227,120 @@ LYNX_UI_METHOD(capturePhoto) {
   });
 }
 
+#pragma mark - View-session controls (0.3, UNVERIFIED)
+
+// The methods below (zoom/torch/focus and recording) are the 0.3 session
+// controls. They match docs/native-contract.md but have NOT been compiled or run
+// on a device — the preview/photo path above remains the device-proven surface.
+// All device configuration runs on _sessionQueue, like capture.
+
+LYNX_UI_METHOD(setZoom) {
+  double value = [params[@"value"] doubleValue];
+  dispatch_async(_sessionQueue, ^{
+    AVCaptureDevice *device = self->_input.device;
+    if (!device || !self->_session.isRunning) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/not-active",
+        @"message" : @"camera-view is not active; set active={true} and wait for the ready event."
+      });
+      return;
+    }
+    // Contract: clamp rather than reject. iOS min zoom factor is 1.0.
+    CGFloat maxZoom = device.activeFormat.videoMaxZoomFactor;
+    CGFloat clamped = MIN(MAX((CGFloat)value, (CGFloat)1.0), maxZoom);
+    NSError *error;
+    if ([device lockForConfiguration:&error]) {
+      device.videoZoomFactor = clamped;
+      [device unlockForConfiguration];
+      callback(kUIMethodSuccess, @{});
+    } else {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/native-error",
+        @"message" : error.localizedDescription ?: @"Could not set zoom."
+      });
+    }
+  });
+}
+
+LYNX_UI_METHOD(setTorch) {
+  BOOL on = [params[@"mode"] isEqualToString:@"on"];
+  AVCaptureTorchMode mode = on ? AVCaptureTorchModeOn : AVCaptureTorchModeOff;
+  dispatch_async(_sessionQueue, ^{
+    AVCaptureDevice *device = self->_input.device;
+    if (!device || !self->_session.isRunning) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/not-active",
+        @"message" : @"camera-view is not active; set active={true} and wait for the ready event."
+      });
+      return;
+    }
+    if (!device.hasTorch || ![device isTorchModeSupported:mode]) {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/unsupported",
+        @"message" : @"This camera has no controllable torch."
+      });
+      return;
+    }
+    NSError *error;
+    if ([device lockForConfiguration:&error]) {
+      device.torchMode = mode;
+      [device unlockForConfiguration];
+      callback(kUIMethodSuccess, @{});
+    } else {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/native-error",
+        @"message" : error.localizedDescription ?: @"Could not set torch."
+      });
+    }
+  });
+}
+
+LYNX_UI_METHOD(focusAtPoint) {
+  // Point arrives in preview space (0..1). A fuller impl would map it through
+  // previewLayer captureDevicePointOfInterestForPoint: for exact device coords;
+  // the first cut passes it through, which is close for portrait.
+  CGPoint point = CGPointMake([params[@"x"] doubleValue], [params[@"y"] doubleValue]);
+  dispatch_async(_sessionQueue, ^{
+    AVCaptureDevice *device = self->_input.device;
+    if (!device || !self->_session.isRunning) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/not-active",
+        @"message" : @"camera-view is not active; set active={true} and wait for the ready event."
+      });
+      return;
+    }
+    if (!device.isFocusPointOfInterestSupported && !device.isExposurePointOfInterestSupported) {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/unsupported",
+        @"message" : @"Focus at point is not supported by this camera."
+      });
+      return;
+    }
+    NSError *error;
+    if ([device lockForConfiguration:&error]) {
+      if (device.isFocusPointOfInterestSupported) {
+        device.focusPointOfInterest = point;
+        if ([device isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+          device.focusMode = AVCaptureFocusModeAutoFocus;
+        }
+      }
+      if (device.isExposurePointOfInterestSupported) {
+        device.exposurePointOfInterest = point;
+        if ([device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+          device.exposureMode = AVCaptureExposureModeContinuousAutoExposure;
+        }
+      }
+      [device unlockForConfiguration];
+      callback(kUIMethodSuccess, @{});
+    } else {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/native-error",
+        @"message" : error.localizedDescription ?: @"Could not set focus."
+      });
+    }
+  });
+}
+
 #pragma mark - Session
 
 - (void)syncSession {
