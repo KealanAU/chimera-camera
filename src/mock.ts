@@ -1,4 +1,5 @@
 import { SAMPLE_PHOTO_FIXTURE } from './fixtures.js'
+import { ChimeraCameraError } from './types.js'
 import type {
   CameraModuleClient,
   CameraDevice,
@@ -69,7 +70,17 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
       return mockPhotoResult(photo, options?.includeBase64)
     },
 
-    async startRecording(_options?: StartRecordingOptions): Promise<void> {
+    async startRecording(options?: StartRecordingOptions): Promise<void> {
+      // Mirror the native contract's rejections so apps exercise these paths.
+      if (recordingStartedAt !== null) {
+        throw new ChimeraCameraError('recording/in-progress', 'A recording is already in progress.')
+      }
+      if (options?.enableAudio && permissions.microphone !== 'authorized') {
+        throw new ChimeraCameraError(
+          'camera/permission-denied',
+          'Microphone permission is required for audio recording; request it via CameraModule.',
+        )
+      }
       recordingStartedAt = Date.now()
     },
 

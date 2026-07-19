@@ -234,8 +234,12 @@ imperative TypeScript API.
 - [x] Keep framework helpers thin and optional; add them only where lifecycle
       differences require them. Both demos drive the core directly through the
       package and `createCameraViewHandle`; no framework wrapper is needed.
-- [ ] Add contract tests asserting equivalent normalized behavior through each
-      binding.
+- [~] Add contract tests asserting equivalent normalized behavior through each
+      binding. *(`tests/contract.test.js` pins the shared imperative surface —
+      method params, result shapes, and every view error code — plus the mock's
+      recording-error parity; all frameworks drive this same handle with no
+      wrapper, so this is the binding-neutral layer. Running the assertions
+      through live React/Vue/Svelte runtimes still needs the Lynx toolchain.)*
 
 ### Output transport
 

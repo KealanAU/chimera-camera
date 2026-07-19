@@ -353,6 +353,8 @@ LYNX_UI_METHOD(focusAtPoint) {
 
 LYNX_UI_METHOD(startRecording) {
   BOOL enableAudio = [params[@"enableAudio"] boolValue];
+  double maxDurationMs = [params[@"maxDurationMs"] doubleValue];
+  long long maxFileSizeBytes = [params[@"maxFileSizeBytes"] longLongValue];
   dispatch_async(_sessionQueue, ^{
     if (!self->_session.isRunning || !self->_input) {
       callback(kUIMethodInvalidStateError, @{
@@ -412,6 +414,12 @@ LYNX_UI_METHOD(startRecording) {
       });
       return;
     }
+
+    // Best-effort native limits, matching Android's setDurationLimit/setFileSizeLimit.
+    // Hitting either stops recording as if stopRecording() were called.
+    self->_movieOutput.maxRecordedDuration =
+        maxDurationMs > 0 ? CMTimeMakeWithSeconds(maxDurationMs / 1000.0, 600) : kCMTimePositiveInfinity;
+    self->_movieOutput.maxRecordedFileSize = maxFileSizeBytes > 0 ? maxFileSizeBytes : 0;
 
     AVCaptureConnection *connection = [self->_movieOutput connectionWithMediaType:AVMediaTypeVideo];
     if (connection.isVideoOrientationSupported) {
