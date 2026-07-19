@@ -217,10 +217,14 @@ imperative TypeScript API.
 
 ### Output transport
 
-- [ ] Settle how apps display and upload native photo/video paths without
-      making multi-megabyte base64 strings the default bridge payload.
-- [ ] Document file lifetime and cleanup ownership, with explicit base64 and
+- [x] Settle how apps display and upload native photo/video paths without
+      making multi-megabyte base64 strings the default bridge payload. Settled in
+      [docs/output-transport.md](docs/output-transport.md): the path is the
+      payload; base64 is an opt-in `maxDimension`-bounded fallback. Photo paths
+      are exercised today; video paths are contract-level until recording lands.
+- [x] Document file lifetime and cleanup ownership, with explicit base64 and
       `maxDimension` fallback guidance where native paths cannot be consumed.
+      See [docs/output-transport.md](docs/output-transport.md#file-lifetime-and-cleanup-ownership).
 
 ### 0.3 exit criteria
 

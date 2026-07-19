@@ -101,6 +101,14 @@ The V0 combined `CameraAdapter` merged both and is deprecated (removed in 1.0).
 The normalized cross-platform contract lives in
 [docs/native-contract.md](docs/native-contract.md).
 
+### Capture output
+
+Captures return a **native file path**, not base64. Display a real capture with
+`file://${photo.path}`, upload by streaming the file at that path, and treat the
+temp file as yours to persist or delete. base64 is an opt-in,
+`maxDimension`-bounded fallback for mock/web previews or JSON transports. Full
+rules and file-lifetime ownership: [docs/output-transport.md](docs/output-transport.md).
+
 ## Repository Shape
 
 Use a package-root layout:

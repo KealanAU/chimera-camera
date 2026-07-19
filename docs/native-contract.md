@@ -44,6 +44,10 @@ Applied natively. A platform must use these when the prop is unset.
 
 `VideoFile` (recording, 0.3): `{ path, durationMs?, sizeBytes? }`.
 
+Paths are **bare temp-file paths with no scheme**. See
+[output-transport.md](output-transport.md) for how a host displays (`file://`),
+uploads, and cleans up these files, and when base64 is the right fallback.
+
 ## Event payloads (`camera-view`)
 
 | Event               | Detail                        | Status        |
