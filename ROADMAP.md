@@ -14,15 +14,24 @@ Last reconciled: 2026-07-19.
 
 ## Current checkpoint
 
-Chimera Camera has completed the `0.2` implementation and is now kicking off
+Chimera Camera has completed the `0.2` implementation and is partway through
 `0.3` (session controls and framework portability). iOS is device-proven
 (preview, capture, front/back switch, and close/reopen on a physical iPhone).
 Android has a full Kotlin/CameraX implementation written to the same contract as
 iOS; it is **believed correct but has not been compiled or run**, so it stays
 experimental. By project decision (2026-07-19) the Android device audit is
 carried forward as a follow-up acceptance task rather than a 0.2 blocker — see
-Known debt. Autolinking (deferred), recording, and native camera controls have
-not started.
+Known debt.
+
+The 0.3 groundwork that needs no device or Lynx toolchain is done and documented:
+the output-transport story ([output-transport.md](docs/output-transport.md)), the
+plain-TypeScript `camera-view`/SelectorQuery contract
+([framework-integration.md](docs/framework-integration.md)), the recording and
+controls native contract ([native-contract.md](docs/native-contract.md)), and the
+ReactLynx + Vue demo scaffolds (`example/`). What remains for 0.3 is device-bound
+(native recording, zoom, torch, focus, output orientation) or toolchain-bound
+(building the Sparkling React/Vue bundles, adding a Svelte page). Autolinking
+stays deferred; native recording and controls have not started.
 
 ### Implemented and verified in the repository
 
