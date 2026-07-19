@@ -1,0 +1,22 @@
+{
+  "name": "@chimera-camera/vue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rspeedy dev",
+    "build": "rspeedy build",
+    "preview": "rspeedy preview"
+  },
+  "dependencies": {
+    "@kealanau/chimera-camera": "workspace:*",
+    "vue": "^3.5.40",
+    "vue-lynx": "^0.5.1"
+  },
+  "devDependencies": {
+    "@lynx-js/qrcode-rsbuild-plugin": "^0.4.0",
+    "@lynx-js/rspeedy": "^0.14.0",
+    "@rsbuild/plugin-vue": "^1.2.9",
+    "typescript": "^5.9.3"
+  }
+}

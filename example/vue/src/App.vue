@@ -1,12 +1,13 @@
 <!--
-  Vue Lynx port of CameraDemo.tsx. Drives the SAME native `camera-view` element
-  and `createCameraViewHandle` contract as the ReactLynx demo, with no React
-  dependency — the 0.3 framework-portability proof.
+  Vue Lynx port of the ReactLynx demo (example/react/src/App.tsx). Drives the
+  SAME native `camera-view` element and `createCameraViewHandle` contract with no
+  React dependency — the 0.3 framework-portability proof.
 
-  UNVERIFIED: written against the pre-alpha Vue Lynx toolchain
-  (`npm create vue-lynx@latest`); not yet built or run. Native-element event
+  This is the runnable Vue Lynx app's `src/App.vue`; `src/index.ts` mounts it.
+  Run it with `pnpm --filter @chimera-camera/vue run dev`. Native-element event
   bindings use Vue Lynx's `@event` convention (maps to the native `bind<event>`,
-  same as `@tap` -> `bindtap`).
+  same as `@tap` -> `bindtap`). Reactivity is imported from `vue-lynx` (not `vue`)
+  so it runs in the Lynx runtime rather than the DOM runtime.
 -->
 <template>
   <view class="screen">
@@ -23,7 +24,11 @@
     <text class="status">{{ status }}</text>
 
     <view v-if="!cameraInstallStatus.ok" class="installBox">
-      <text class="installText">{{ cameraInstallStatus.message }}</text>
+      <text class="installText">
+        Mock mode — expected in Lynx Go / LynxExplorer, which can't load the native camera. The capture
+        button below uses the mock adapter; a live camera needs a custom iOS/Android host. See
+        docs/lynx-explorer.md.
+      </text>
     </view>
 
     <camera-view
@@ -74,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue-lynx'
 import {
   createCameraModule,
   createCameraViewHandle,

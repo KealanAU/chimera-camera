@@ -12,10 +12,11 @@ Files:
   adapter in hosts without native camera. Run it with
   `pnpm --filter @chimera-camera/react run dev` and scan the QR code with Lynx
   Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
-- `CameraDemo.vue` — Vue Lynx port of the same page, driving the **same**
-  `camera-view` element and `createCameraViewHandle` contract with no React
-  dependency — the 0.3 framework-portability proof. **Unverified**: written
-  against `npm create vue-lynx@latest`, not yet built or run.
+- `vue/` — a runnable Vue Lynx app (`vue-lynx` + rspeedy). Its `src/App.vue`
+  drives the **same** `camera-view` element and `createCameraViewHandle` contract
+  as the React app with no React dependency — the 0.3 framework-portability proof.
+  Run it with `pnpm --filter @chimera-camera/vue run dev`. Boots and compiles in
+  mock mode; the native-backed flow needs a host, same as React.
 - `MockCameraDemo.vue` — module-only Vue demo (mock/system `capturePhoto`, no
   rendered `camera-view`). The minimal Vue + mock walkthrough.
 - `mock-camera-demo.ts` — minimal console-only mock walkthrough.
@@ -31,16 +32,17 @@ so they share a single native camera registration:
 ```
 sparkling-app/
   react/    -> mounts react/src/App.tsx    (ReactLynx build — runnable today)
-  vue/      -> mounts CameraDemo.vue        (Vue Lynx build)
+  vue/      -> mounts vue/src/App.vue       (Vue Lynx build — runnable today)
   native/   -> registers CameraModule + camera-view once, shared by both
 ```
 
 Sparkling owns the native shell and routing; each framework keeps its own build
 entry and consumes the same `@kealanau/chimera-camera` package and the same
-registered native surface. The ReactLynx bundle is a runnable rspeedy app today
-(`pnpm --filter @chimera-camera/react run dev`); folding it plus the Vue bundle
-under a single shared native registration still needs the Sparkling host and is
-the remaining 0.3 acceptance step.
+registered native surface. Both bundles are runnable rspeedy apps today
+(`pnpm --filter @chimera-camera/react run dev`,
+`pnpm --filter @chimera-camera/vue run dev`) and each drives the same core with
+its own framework. What remains is folding them under a single *shared* native
+registration in one Sparkling host — the remaining 0.3 acceptance step.
 
 `CameraDemo` accepts an `uploadPhoto(photo)` prop so the consuming app can wire
 its own uploader without coupling this package to a networking library. Its

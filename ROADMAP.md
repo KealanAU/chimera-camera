@@ -219,16 +219,19 @@ imperative TypeScript API.
 ### Framework-neutral acceptance
 
 - [~] Add one Sparkling demo shell with separate ReactLynx and Vue Lynx page
-      bundles sharing the same native camera registration. *(`example/react` is a
-      runnable rspeedy ReactLynx app — `pnpm --filter @chimera-camera/react run dev`
-      boots the dev server and compiles the bundle; the Vue bundle and folding
-      both under one shared Sparkling native registration still need the toolchain
+      bundles sharing the same native camera registration. *(`example/react` and
+      `example/vue` are both runnable rspeedy apps that boot and compile their
+      bundles — each drives the same core with its own framework, no shared React.
+      What remains is folding both under one shared Sparkling native registration
       — layout in `example/README.md`)*
 - [~] ReactLynx page exercises the complete native view surface.
       *(`example/react/src/App.tsx` exercises the implemented surface — preview,
       ping, capture, switch, close/reopen; recording/controls await native work)*
 - [~] Vue Lynx page performs the same flow without a React dependency.
-      *(`example/CameraDemo.vue`, written but not built or run — unverified)*
+      *(`example/vue` is a runnable vue-lynx app — `pnpm --filter @chimera-camera/vue
+      run dev` boots and compiles the bundle in mock mode, driving the same core with
+      no React; on its own pinned rsbuild-1.x toolchain since vue-lynx 0.5.1 predates
+      rspeedy 0.16. Native-backed flow still needs a host, like React's.)*
 - [ ] Add a Svelte page only when a maintained Svelte-on-Lynx toolchain exists.
 - [x] Plain TypeScript documentation explains the underlying custom element,
       events, and SelectorQuery contract. See
