@@ -48,6 +48,9 @@
 
 @end
 
+@interface ChimeraCameraView () <AVCaptureFileOutputRecordingDelegate>
+@end
+
 @implementation ChimeraCameraView {
   NSString *_facing;
   BOOL _active;
@@ -60,6 +63,13 @@
   AVCapturePhotoOutput *_photoOutput;
   NSString *_readyDeviceId;
   BOOL _captureInProgress;
+
+  // Recording state (0.3, UNVERIFIED). Added lazily on first startRecording so
+  // the device-proven photo path is untouched for callers that never record.
+  AVCaptureMovieFileOutput *_movieOutput;
+  AVCaptureDeviceInput *_audioInput;
+  BOOL _recording;
+  LynxUIMethodCallbackBlock _pendingStopCallback;
 }
 
 LYNX_LAZY_REGISTER_UI("camera-view")
@@ -341,6 +351,97 @@ LYNX_UI_METHOD(focusAtPoint) {
   });
 }
 
+LYNX_UI_METHOD(startRecording) {
+  BOOL enableAudio = [params[@"enableAudio"] boolValue];
+  dispatch_async(_sessionQueue, ^{
+    if (!self->_session.isRunning || !self->_input) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/not-active",
+        @"message" : @"camera-view is not active; set active={true} and wait for the ready event."
+      });
+      return;
+    }
+    if (self->_recording) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"recording/in-progress",
+        @"message" : @"A recording is already in progress."
+      });
+      return;
+    }
+    if (enableAudio &&
+        [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] != AVAuthorizationStatusAuthorized) {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/permission-denied",
+        @"message" : @"Microphone permission is required for audio recording; request it via CameraModule."
+      });
+      return;
+    }
+
+    // NOTE: movie output needs a preset the Photo preset does not provide, so the
+    // session switches to High here and is NOT restored afterwards — a fuller
+    // impl would restore the Photo preset or use AVAssetWriter for true
+    // simultaneous photo+video.
+    [self->_session beginConfiguration];
+    if (![self->_session.sessionPreset isEqualToString:AVCaptureSessionPresetHigh] &&
+        [self->_session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
+      self->_session.sessionPreset = AVCaptureSessionPresetHigh;
+    }
+    if (!self->_movieOutput) {
+      AVCaptureMovieFileOutput *movieOutput = [[AVCaptureMovieFileOutput alloc] init];
+      if ([self->_session canAddOutput:movieOutput]) {
+        [self->_session addOutput:movieOutput];
+        self->_movieOutput = movieOutput;
+      }
+    }
+    if (enableAudio && !self->_audioInput) {
+      AVCaptureDevice *mic = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+      NSError *audioError;
+      AVCaptureDeviceInput *audioInput =
+          mic ? [AVCaptureDeviceInput deviceInputWithDevice:mic error:&audioError] : nil;
+      if (audioInput && [self->_session canAddInput:audioInput]) {
+        [self->_session addInput:audioInput];
+        self->_audioInput = audioInput;
+      }
+    }
+    [self->_session commitConfiguration];
+
+    if (!self->_movieOutput) {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"recording/failed",
+        @"message" : @"Could not configure the movie output."
+      });
+      return;
+    }
+
+    AVCaptureConnection *connection = [self->_movieOutput connectionWithMediaType:AVMediaTypeVideo];
+    if (connection.isVideoOrientationSupported) {
+      connection.videoOrientation = AVCaptureVideoOrientationPortrait;
+    }
+
+    NSString *path = [NSTemporaryDirectory()
+        stringByAppendingPathComponent:[NSString stringWithFormat:@"chimera-camera-%@.mov",
+                                                                  NSUUID.UUID.UUIDString]];
+    self->_recording = YES;
+    [self->_movieOutput startRecordingToOutputFileURL:[NSURL fileURLWithPath:path] recordingDelegate:self];
+    // Resolve now; recordingStarted fires from the delegate once the file opens.
+    callback(kUIMethodSuccess, @{});
+  });
+}
+
+LYNX_UI_METHOD(stopRecording) {
+  dispatch_async(_sessionQueue, ^{
+    if (!self->_recording || !self->_movieOutput.isRecording) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"recording/not-active",
+        @"message" : @"No recording is in progress."
+      });
+      return;
+    }
+    self->_pendingStopCallback = [callback copy];
+    [self->_movieOutput stopRecording];
+  });
+}
+
 #pragma mark - Session
 
 - (void)syncSession {
@@ -447,6 +548,53 @@ LYNX_UI_METHOD(focusAtPoint) {
                                                         targetSign:[self sign]
                                                             detail:detail];
     [self.context.eventEmitter dispatchCustomEvent:event];
+  });
+}
+
+#pragma mark - AVCaptureFileOutputRecordingDelegate (0.3, UNVERIFIED)
+
+- (void)captureOutput:(AVCaptureFileOutput *)output
+    didStartRecordingToOutputFileAtURL:(NSURL *)fileURL
+                       fromConnections:(NSArray<AVCaptureConnection *> *)connections {
+  [self emitEvent:@"recordingStarted" detail:@{@"path" : fileURL.path}];
+}
+
+- (void)captureOutput:(AVCaptureFileOutput *)output
+    didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
+                        fromConnections:(NSArray<AVCaptureConnection *> *)connections
+                                  error:(NSError *)error {
+  dispatch_async(_sessionQueue, ^{
+    self->_recording = NO;
+    LynxUIMethodCallbackBlock stop = self->_pendingStopCallback;
+    self->_pendingStopCallback = nil;
+
+    // AVFoundation reports a normal stop as an "error" whose userInfo still flags
+    // the file as finished successfully.
+    BOOL success = (error == nil) || [error.userInfo[AVErrorRecordingSuccessfullyFinishedKey] boolValue];
+    if (!success) {
+      if (stop) {
+        stop(kUIMethodOperationError, @{
+          @"code" : @"recording/failed",
+          @"message" : error.localizedDescription ?: @"Recording failed."
+        });
+      }
+      return;
+    }
+
+    unsigned long long sizeBytes =
+        [[NSFileManager.defaultManager attributesOfItemAtPath:outputFileURL.path error:nil] fileSize];
+    Float64 seconds = CMTimeGetSeconds([[AVURLAsset assetWithURL:outputFileURL] duration]);
+    NSInteger durationMs = (isnan(seconds) || seconds < 0) ? 0 : (NSInteger)(seconds * 1000.0);
+
+    NSDictionary *file = @{
+      @"path" : outputFileURL.path,
+      @"durationMs" : @(durationMs),
+      @"sizeBytes" : @(sizeBytes),
+    };
+    if (stop) {
+      stop(kUIMethodSuccess, file);
+    }
+    [self emitEvent:@"recordingFinished" detail:@{@"file" : file}];
   });
 }
 
