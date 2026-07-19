@@ -28,10 +28,13 @@ the output-transport story ([output-transport.md](docs/output-transport.md)), th
 plain-TypeScript `camera-view`/SelectorQuery contract
 ([framework-integration.md](docs/framework-integration.md)), the recording and
 controls native contract ([native-contract.md](docs/native-contract.md)), and the
-ReactLynx + Vue demo scaffolds (`example/`). What remains for 0.3 is device-bound
-(native recording, zoom, torch, focus, output orientation) or toolchain-bound
-(building the Sparkling React/Vue bundles, adding a Svelte page). Autolinking
-stays deferred; native recording and controls have not started.
+ReactLynx + Vue demo scaffolds (`example/`). The 0.3 native session controls and
+recording (zoom, torch, focus, `startRecording`/`stopRecording` with audio and
+events) are now written for iOS (AVFoundation) and Android (CameraX) but are
+**UNVERIFIED** — not compiled or run. What remains for 0.3 is device verification
+of that native code, output orientation for non-portrait hosts, and toolchain-bound
+work (building the Sparkling React/Vue bundles, adding a Svelte page). Autolinking
+stays deferred.
 
 ### Implemented and verified in the repository
 
