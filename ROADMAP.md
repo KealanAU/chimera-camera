@@ -202,13 +202,16 @@ imperative TypeScript API.
 
 ### Recording and controls
 
-- [ ] Implement `startRecording()` / `stopRecording()` with real `VideoFile`
-      results on iOS and Android.
-- [ ] Honor `enableAudio` and check microphone permission before recording.
-- [ ] Emit normalized recording-started and recording-finished events.
-- [ ] Implement clamped zoom, torch with unsupported-device errors, and
-      focus-at-point where supported.
+- [~] Implement `startRecording()` / `stopRecording()` with real `VideoFile`
+      results on iOS and Android. *(AVFoundation + CameraX, written but unverified)*
+- [~] Honor `enableAudio` and check microphone permission before recording.
+      *(written, unverified)*
+- [~] Emit normalized recording-started and recording-finished events.
+      *(written, unverified)*
+- [~] Implement clamped zoom, torch with unsupported-device errors, and
+      focus-at-point where supported. *(written, unverified)*
 - [ ] Revisit output orientation when a non-portrait host consumes the view.
+      *(still portrait-locked in the recording/capture connections)*
 
 ### Framework-neutral acceptance
 

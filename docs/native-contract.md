@@ -54,13 +54,16 @@ uploads, and cleans up these files, and when base64 is the right fallback.
 | ------------------- | ----------------------------- | ------------- |
 | `ready`             | `{ deviceId: string }`        | implemented   |
 | `error`             | `{ code: string, message }`   | implemented   |
-| `recordingStarted`  | `{ path?: string }`           | 0.3           |
-| `recordingFinished` | `{ file: VideoFile }`         | 0.3           |
+| `recordingStarted`  | `{ path?: string }`           | 0.3, unverified |
+| `recordingFinished` | `{ file: VideoFile }`         | 0.3, unverified |
 
 ## View-session controls and recording (0.3)
 
-These `camera-view` methods require an active session (`active={true}` and a
-`ready` event). Called before then they reject with `capture/not-active`.
+**Implemented on both platforms, UNVERIFIED** (iOS `ChimeraCameraView.m`, Android
+`ChimeraCameraView.kt`) — written to this contract but not compiled or run; see
+[ROADMAP.md](../ROADMAP.md). These `camera-view` methods require an active session
+(`active={true}` and a `ready` event). Called before then they reject with
+`capture/not-active`.
 
 ### Controls
 

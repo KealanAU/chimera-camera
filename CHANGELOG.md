@@ -5,6 +5,16 @@ stable, prerelease entries may include breaking changes.
 
 ## 0.2.0-alpha.0 — Unreleased
 
+- Begin the 0.3 session controls: add **experimental, unverified** `camera-view`
+  recording and controls on both platforms — `startRecording`/`stopRecording`
+  (AVFoundation movie output / CameraX `VideoCapture`, `enableAudio` gated on
+  microphone permission, `recordingStarted`/`recordingFinished` events), clamped
+  `setZoom`, `setTorch` (`camera/unsupported` when absent), and `focusAtPoint`.
+  Written to `docs/native-contract.md`; not compiled or run — see the platform
+  support matrix.
+- Settle and document output transport (`docs/output-transport.md`), the
+  `camera-view`/SelectorQuery contract (`docs/framework-integration.md`), and add
+  a Vue Lynx demo scaffold alongside the ReactLynx one.
 - Add a first, **experimental and not-device-audited** Android implementation:
   Kotlin `CameraModule` (version, permissions, device discovery, system
   capture/pick) and a CameraX `camera-view` (preview, `ping`, `capturePhoto`,
