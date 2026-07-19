@@ -99,7 +99,10 @@ The core has two surfaces, and each operation belongs to exactly one:
 
 The V0 combined `CameraAdapter` merged both and is deprecated (removed in 1.0).
 The normalized cross-platform contract lives in
-[docs/native-contract.md](docs/native-contract.md).
+[docs/native-contract.md](docs/native-contract.md). How any framework (React,
+Vue, Svelte, or plain TypeScript) drives the `<camera-view>` element and its
+imperative methods is documented in
+[docs/framework-integration.md](docs/framework-integration.md).
 
 ### Capture output
 

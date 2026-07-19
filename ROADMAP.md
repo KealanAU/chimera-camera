@@ -208,8 +208,9 @@ imperative TypeScript API.
 - [ ] ReactLynx page exercises the complete native view surface.
 - [ ] Vue Lynx page performs the same flow without a React dependency.
 - [ ] Add a Svelte page only when a maintained Svelte-on-Lynx toolchain exists.
-- [ ] Plain TypeScript documentation explains the underlying custom element,
-      events, and SelectorQuery contract.
+- [x] Plain TypeScript documentation explains the underlying custom element,
+      events, and SelectorQuery contract. See
+      [docs/framework-integration.md](docs/framework-integration.md).
 - [ ] Keep framework helpers thin and optional; add them only where lifecycle
       differences require them.
 - [ ] Add contract tests asserting equivalent normalized behavior through each
