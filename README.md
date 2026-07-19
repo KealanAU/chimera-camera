@@ -20,12 +20,14 @@ Svelte, or any other JS integration layer.
 | Platform | Status | Verified                                                        |
 | -------- | ------ | --------------------------------------------------------------- |
 | iOS      | Alpha  | Device-proven on a physical iPhone (preview, capture, switch).  |
-| Android  | Experimental | Native code written to the contract; **not device-audited** — emulator-testable only (see [docs/android-testing.md](docs/android-testing.md)). |
+| Android  | Experimental | Written to the same contract as device-proven iOS and **believed to work — but not yet compiled or run on any device or emulator** (see [docs/android-testing.md](docs/android-testing.md)). |
 | Mock     | Stable | Framework-neutral JS double for all hosts.                      |
 
-Android ships as experimental on purpose: the Kotlin/CameraX surface matches
-`docs/native-contract.md` and the iOS behavior, but has not been run on a real
-device. Do not treat Android as supported until it has passed device acceptance.
+Android ships as experimental on purpose: the Kotlin/CameraX surface mirrors
+`docs/native-contract.md` and the device-proven iOS behavior, so we expect it to
+work — but it has not been compiled or run on a real device or emulator, so that
+expectation is unverified. Do not treat Android as supported until it has passed
+device acceptance.
 
 ## Why This Exists
 
@@ -318,8 +320,11 @@ Working today:
   layered over the preview in Lynx. Preview, capture, front/back switching,
   and close/reopen were exercised successfully on a physical iPhone on
   2026-07-10; focused bridge, lifecycle, and error-case acceptance remains.
+- Android `CameraModule` and `camera-view`: a full Kotlin/CameraX surface
+  written to the same contract as iOS. Believed to work but **not yet compiled
+  or run** — experimental until it passes device acceptance (see the platform
+  support matrix and [docs/android-testing.md](docs/android-testing.md)).
 
 Not started yet:
 
-- Android native source.
 - Video recording, zoom, torch, and tap-to-focus.

@@ -10,16 +10,19 @@ The normalized native contract lives in
 `docs/archive/`. [README.md](README.md) explains the project and architecture
 without duplicating the working checklist here.
 
-Last reconciled: 2026-07-18.
+Last reconciled: 2026-07-19.
 
 ## Current checkpoint
 
-Chimera Camera is at the end of the iOS `0.1` implementation and partway
-through physical-device acceptance. It is no longer just a bridge placeholder:
-the repository contains a real AVFoundation preview and view-session photo
-capture. Android has a first, unverified Kotlin/CameraX implementation (written
-2026-07-18) that has not been compiled or run. Autolinking (deferred), recording,
-and native camera controls have not started.
+Chimera Camera has completed the `0.2` implementation and is now kicking off
+`0.3` (session controls and framework portability). iOS is device-proven
+(preview, capture, front/back switch, and close/reopen on a physical iPhone).
+Android has a full Kotlin/CameraX implementation written to the same contract as
+iOS; it is **believed correct but has not been compiled or run**, so it stays
+experimental. By project decision (2026-07-19) the Android device audit is
+carried forward as a follow-up acceptance task rather than a 0.2 blocker — see
+Known debt. Autolinking (deferred), recording, and native camera controls have
+not started.
 
 ### Implemented and verified in the repository
 
@@ -48,7 +51,7 @@ This proves the central iOS architecture. It does not by itself prove explicit
 `ping()`/`bindready` observation, system-camera capture, app
 background/foreground recovery, or error cases; those remain listed below.
 
-## 0.1 — Device-proven iOS alpha (current)
+## 0.1 — Device-proven iOS alpha
 
 **Goal:** finish the focused iPhone acceptance and produce an explicitly
 iOS-only alpha candidate. Publishing is a separate distribution follow-up and
@@ -177,7 +180,12 @@ A manually integrated iOS or Android Lynx host renders a preview and captures a
 photo through the same framework-independent contract. Autolinked, zero-setup
 installation is explicitly out of scope for 0.2.
 
-## 0.3 — Complete view sessions and prove framework portability
+**Closed 2026-07-19.** iOS met this on a physical device. Android's surface is
+implemented to the contract and believed correct, but its device/emulator audit
+is deliberately deferred and carried forward as a device-acceptance task (Known
+debt) rather than gating 0.3. Android stays experimental until that audit runs.
+
+## 0.3 — Complete view sessions and prove framework portability (current)
 
 **Goal:** complete the useful session controls on both platforms and prove
 that React, Vue, and Svelte Lynx consumers drive the same native element and
@@ -275,3 +283,8 @@ the cross-platform Lynx surface is stable.
   requires manual host integration. Deferred by decision (2026-07-18): manual
   integration is the supported path until an external consumer needs zero-setup
   installs. Revisit as a 1.0 distribution task.
+- The Android Kotlin/CameraX surface is written to the contract and believed
+  correct, but has never been compiled or run. Its device/emulator audit was
+  deferred at the 0.2→0.3 transition (decision 2026-07-19). Android must not be
+  called supported until that audit passes; see
+  [docs/android-testing.md](docs/android-testing.md).
