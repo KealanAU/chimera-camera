@@ -1,6 +1,8 @@
 package com.kealanau.chimeracamera
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
@@ -8,6 +10,11 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FileOutputOptions
+import androidx.camera.video.Recorder
+import androidx.camera.video.Recording
+import androidx.camera.video.VideoCapture
+import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -43,6 +50,9 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
     private var facing = "back"
     private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
+    private var videoCapture: VideoCapture<Recorder>? = null
+    private var activeRecording: Recording? = null
+    private var stopCallback: Callback? = null
     private var readyDeviceId: String? = null
     private var captureInProgress = false
 
@@ -171,11 +181,86 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         callback.invoke(0, JavaOnlyMap())
     }
 
+    @LynxUIMethod
+    fun startRecording(params: ReadableMap, callback: Callback) {
+        val recorderCapture = videoCapture
+        if (!active || recorderCapture == null) {
+            callback.invoke(1, notActive())
+            return
+        }
+        if (activeRecording != null) {
+            callback.invoke(1, failDetail("recording/in-progress", "A recording is already in progress."))
+            return
+        }
+        val enableAudio = params.hasKey("enableAudio") && params.getBoolean("enableAudio")
+        if (enableAudio &&
+            ContextCompat.checkSelfPermission(view.context, Manifest.permission.RECORD_AUDIO) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            callback.invoke(
+                1,
+                failDetail(
+                    "camera/permission-denied",
+                    "Microphone permission is required for audio recording; request it via CameraModule.",
+                ),
+            )
+            return
+        }
+
+        val file = File(view.context.cacheDir, "chimera-camera-${UUID.randomUUID()}.mp4")
+        val builder = FileOutputOptions.Builder(file)
+        if (params.hasKey("maxFileSizeBytes")) builder.setFileSizeLimit(params.getDouble("maxFileSizeBytes").toLong())
+        if (params.hasKey("maxDurationMs")) builder.setDurationLimitMillis(params.getDouble("maxDurationMs").toLong())
+
+        var pending = recorderCapture.output.prepareRecording(view.context, builder.build())
+        if (enableAudio) pending = pending.withAudioEnabled()
+
+        activeRecording = pending.start(ContextCompat.getMainExecutor(view.context)) { event ->
+            when (event) {
+                is VideoRecordEvent.Start -> emitRecordingStarted(file.absolutePath)
+                is VideoRecordEvent.Finalize -> {
+                    activeRecording = null
+                    val cb = stopCallback
+                    stopCallback = null
+                    // A reached size/duration limit is a normal stop with a usable file.
+                    val ok = !event.hasError() ||
+                        event.error == VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED ||
+                        event.error == VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED
+                    if (!ok) {
+                        cb?.invoke(1, failDetail("recording/failed", event.cause?.message ?: "Recording failed."))
+                    } else {
+                        val videoFile = videoFileMap(
+                            file.absolutePath,
+                            event.recordingStats.recordedDurationNanos / 1_000_000,
+                            file.length(),
+                        )
+                        cb?.invoke(0, videoFile)
+                        emitRecordingFinished(videoFile)
+                    }
+                }
+            }
+        }
+        callback.invoke(0, JavaOnlyMap())
+    }
+
+    @LynxUIMethod
+    fun stopRecording(params: ReadableMap, callback: Callback) {
+        val recording = activeRecording
+        if (recording == null) {
+            callback.invoke(1, failDetail("recording/not-active", "No recording is in progress."))
+            return
+        }
+        // Finalize resolves this callback and emits recordingFinished.
+        stopCallback = callback
+        recording.stop()
+    }
+
     private fun syncSession() {
         if (!active) {
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
             readyDeviceId = null
             camera = null
+            videoCapture = null
             return
         }
         val providerFuture = ProcessCameraProvider.getInstance(view.context)
@@ -195,14 +280,27 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         val capture = ImageCapture.Builder().build()
 
         provider.unbindAll()
+        val recorder = Recorder.Builder().build()
+        val videoCap = VideoCapture.withOutput(recorder)
+        var boundVideo = true
         val camera = try {
-            provider.bindToLifecycle(this, selector, preview, capture)
-        } catch (error: Throwable) {
-            emitEvent("error", "camera/unavailable", error.message ?: "No $facing camera on this device.")
-            return
+            // Preview + ImageCapture + VideoCapture is supported on most modern
+            // devices; where it is not, fall back to photo-only so capture still
+            // works (recording then reports capture/not-active until a supported
+            // device is used).
+            provider.bindToLifecycle(this, selector, preview, capture, videoCap)
+        } catch (videoError: Throwable) {
+            boundVideo = false
+            try {
+                provider.bindToLifecycle(this, selector, preview, capture)
+            } catch (error: Throwable) {
+                emitEvent("error", "camera/unavailable", error.message ?: "No $facing camera on this device.")
+                return
+            }
         }
         imageCapture = capture
         this.camera = camera
+        videoCapture = if (boundVideo) videoCap else null
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
         // CameraX has no stable per-device id here; use the facing as the id so
@@ -225,6 +323,26 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         event.addDetail("code", code)
         event.addDetail("message", message)
         lynxContext.eventEmitter.sendCustomEvent(event)
+    }
+
+    private fun emitRecordingStarted(path: String) {
+        val event = LynxDetailEvent(sign, "recordingStarted")
+        event.addDetail("path", path)
+        lynxContext.eventEmitter.sendCustomEvent(event)
+    }
+
+    private fun emitRecordingFinished(file: JavaOnlyMap) {
+        val event = LynxDetailEvent(sign, "recordingFinished")
+        event.addDetail("file", file)
+        lynxContext.eventEmitter.sendCustomEvent(event)
+    }
+
+    private fun videoFileMap(path: String, durationMs: Long, sizeBytes: Long): JavaOnlyMap {
+        val map = JavaOnlyMap()
+        map.putString("path", path)
+        map.putDouble("durationMs", durationMs.toDouble())
+        map.putDouble("sizeBytes", sizeBytes.toDouble())
+        return map
     }
 
     private fun failDetail(code: String, message: String): JavaOnlyMap {
