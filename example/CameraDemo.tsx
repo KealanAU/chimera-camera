@@ -1,3 +1,17 @@
+/*
+ * ReactLynx camera demo — the device-proven reference for driving Chimera
+ * Camera from React. It renders the native `camera-view` preview and calls the
+ * module + `createCameraViewHandle` surface, falling back to the mock adapter
+ * when no native camera is installed.
+ *
+ * Use it: in a `create-rspeedy` (ReactLynx) project, copy this file to
+ * `src/App.tsx` — rspeedy renders the default export, so no custom entry is
+ * needed. Full quickstart in `docs/lynx-explorer.md`. `example/CameraDemo.vue`
+ * is the Vue Lynx port of this same flow and native contract.
+ *
+ * Pass an `uploadPhoto(photo)` prop to wire a real uploader; without it the demo
+ * still runs capture/preview and shows the upload step as inert.
+ */
 import { useEffect, useState } from '@lynx-js/react'
 
 import {
@@ -99,6 +113,8 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
   const capturedPhotoLabel = capturedPhoto
     ? `${capturedPhoto.width ?? 0} x ${capturedPhoto.height ?? 0} ${capturedPhoto.mime ?? 'image'}`
     : 'No photo yet'
+  // Mock/web previews display base64 (no real file behind the path); native
+  // captures could display `file://${path}` instead. See docs/output-transport.md.
   const capturedPhotoPreviewSource = capturedPhoto?.base64
     ? `data:${capturedPhoto.mime ?? 'image/jpeg'};base64,${capturedPhoto.base64}`
     : null
