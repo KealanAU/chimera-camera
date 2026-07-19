@@ -6,20 +6,39 @@ mutation.
 
 Files:
 
-- `CameraDemo.tsx` — ReactLynx demo for a standard `create-rspeedy` project.
-  Copy it in as `src/App.tsx`. This is the one to use with Lynx Go /
-  LynxExplorer (see `docs/lynx-explorer.md` for the full quickstart).
-- `MockCameraDemo.vue` — Vue SFC targeting the pre-alpha Vue Lynx project
-  created with `npm create vue-lynx@latest`. It is not part of the verified
-  ReactLynx acceptance path.
+- `CameraDemo.tsx` — ReactLynx page driving the native `camera-view` surface
+  (preview, `ready`/`error`, `ping()`, `capturePhoto()`, front/back switch,
+  close/reopen). Copy it in as `src/App.tsx` for a standard `create-rspeedy`
+  project; this is the one to use with Lynx Go / LynxExplorer (see
+  `docs/lynx-explorer.md`). iOS device-proven.
+- `CameraDemo.vue` — Vue Lynx port of the same page, driving the **same**
+  `camera-view` element and `createCameraViewHandle` contract with no React
+  dependency — the 0.3 framework-portability proof. **Unverified**: written
+  against `npm create vue-lynx@latest`, not yet built or run.
+- `MockCameraDemo.vue` — module-only Vue demo (mock/system `capturePhoto`, no
+  rendered `camera-view`). The minimal Vue + mock walkthrough.
 - `mock-camera-demo.ts` — minimal console-only mock walkthrough.
 
-There is no Svelte-on-Lynx example. Framework validation beyond ReactLynx is
-tracked for `0.3`.
+There is no Svelte-on-Lynx page; it is gated on a maintained Svelte-on-Lynx
+toolchain (see `ROADMAP.md`).
 
-The planned `0.3` harness is one Sparkling app containing separate ReactLynx
-and Vue Lynx page bundles. Sparkling owns the native shell and routing; each
-framework keeps its own build entry and consumes the same camera package.
+## The 0.3 Sparkling shell
+
+The framework-portability harness is one Sparkling app hosting both page bundles
+so they share a single native camera registration:
+
+```
+sparkling-app/
+  react/    -> entry mounts CameraDemo.tsx   (ReactLynx build)
+  vue/      -> entry mounts CameraDemo.vue    (Vue Lynx build)
+  native/   -> registers CameraModule + camera-view once, shared by both
+```
+
+Sparkling owns the native shell and routing; each framework keeps its own build
+entry and consumes the same `@kealanau/chimera-camera` package and the same
+registered native surface. Both page bundles are scaffolded here; standing up the
+Sparkling host and running the two bundles needs the Lynx toolchain and is the
+remaining 0.3 acceptance step.
 
 `CameraDemo` accepts an `uploadPhoto(photo)` prop so the consuming app can wire
 its own uploader without coupling this package to a networking library. Its

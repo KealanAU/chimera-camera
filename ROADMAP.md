@@ -203,16 +203,22 @@ imperative TypeScript API.
 
 ### Framework-neutral acceptance
 
-- [ ] Add one Sparkling demo shell with separate ReactLynx and Vue Lynx page
-      bundles sharing the same native camera registration.
-- [ ] ReactLynx page exercises the complete native view surface.
-- [ ] Vue Lynx page performs the same flow without a React dependency.
+- [~] Add one Sparkling demo shell with separate ReactLynx and Vue Lynx page
+      bundles sharing the same native camera registration. *(both page bundles
+      scaffolded in `example/`; the Sparkling host and running them need the Lynx
+      toolchain — layout in `example/README.md`)*
+- [~] ReactLynx page exercises the complete native view surface.
+      *(`example/CameraDemo.tsx` exercises the implemented surface — preview,
+      ping, capture, switch, close/reopen; recording/controls await native work)*
+- [~] Vue Lynx page performs the same flow without a React dependency.
+      *(`example/CameraDemo.vue`, written but not built or run — unverified)*
 - [ ] Add a Svelte page only when a maintained Svelte-on-Lynx toolchain exists.
 - [x] Plain TypeScript documentation explains the underlying custom element,
       events, and SelectorQuery contract. See
       [docs/framework-integration.md](docs/framework-integration.md).
-- [ ] Keep framework helpers thin and optional; add them only where lifecycle
-      differences require them.
+- [x] Keep framework helpers thin and optional; add them only where lifecycle
+      differences require them. Both demos drive the core directly through the
+      package and `createCameraViewHandle`; no framework wrapper is needed.
 - [ ] Add contract tests asserting equivalent normalized behavior through each
       binding.
 
