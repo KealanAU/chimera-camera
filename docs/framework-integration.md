@@ -117,7 +117,8 @@ import { createCameraViewHandle } from '@kealanau/chimera-camera'
 const photo = await createCameraViewHandle('#camera').capturePhoto()
 ```
 
-See `example/CameraDemo.tsx` for a complete ReactLynx flow.
+See `example/react/src/App.tsx` for a complete ReactLynx flow (run it with
+`pnpm --filter @chimera-camera/react run dev`).
 
 ### Vue, Svelte, and plain TypeScript
 

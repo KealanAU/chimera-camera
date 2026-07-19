@@ -219,11 +219,13 @@ imperative TypeScript API.
 ### Framework-neutral acceptance
 
 - [~] Add one Sparkling demo shell with separate ReactLynx and Vue Lynx page
-      bundles sharing the same native camera registration. *(both page bundles
-      scaffolded in `example/`; the Sparkling host and running them need the Lynx
-      toolchain — layout in `example/README.md`)*
+      bundles sharing the same native camera registration. *(`example/react` is a
+      runnable rspeedy ReactLynx app — `pnpm --filter @chimera-camera/react run dev`
+      boots the dev server and compiles the bundle; the Vue bundle and folding
+      both under one shared Sparkling native registration still need the toolchain
+      — layout in `example/README.md`)*
 - [~] ReactLynx page exercises the complete native view surface.
-      *(`example/CameraDemo.tsx` exercises the implemented surface — preview,
+      *(`example/react/src/App.tsx` exercises the implemented surface — preview,
       ping, capture, switch, close/reopen; recording/controls await native work)*
 - [~] Vue Lynx page performs the same flow without a React dependency.
       *(`example/CameraDemo.vue`, written but not built or run — unverified)*

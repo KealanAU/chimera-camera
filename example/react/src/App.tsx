@@ -4,10 +4,10 @@
  * module + `createCameraViewHandle` surface, falling back to the mock adapter
  * when no native camera is installed.
  *
- * Use it: in a `create-rspeedy` (ReactLynx) project, copy this file to
- * `src/App.tsx` — rspeedy renders the default export, so no custom entry is
- * needed. Full quickstart in `docs/lynx-explorer.md`. `example/CameraDemo.vue`
- * is the Vue Lynx port of this same flow and native contract.
+ * This is the runnable ReactLynx app's `src/App.tsx`; `src/index.tsx` renders it.
+ * Run it with `pnpm --filter @chimera-camera/react run dev`. Full quickstart in
+ * `docs/lynx-explorer.md`. `example/CameraDemo.vue` is the Vue Lynx port of this
+ * same flow and native contract.
  *
  * Pass an `uploadPhoto(photo)` prop to wire a real uploader; without it the demo
  * still runs capture/preview and shows the upload step as inert.

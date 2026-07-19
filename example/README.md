@@ -6,11 +6,12 @@ mutation.
 
 Files:
 
-- `CameraDemo.tsx` — ReactLynx page driving the native `camera-view` surface
-  (preview, `ready`/`error`, `ping()`, `capturePhoto()`, front/back switch,
-  close/reopen). Copy it in as `src/App.tsx` for a standard `create-rspeedy`
-  project; this is the one to use with Lynx Go / LynxExplorer (see
-  `docs/lynx-explorer.md`). iOS device-proven.
+- `react/` — a runnable ReactLynx app (rspeedy). Its `src/App.tsx` drives the
+  native `camera-view` surface (preview, `ready`/`error`, `ping()`,
+  `capturePhoto()`, front/back switch, close/reopen), falling back to the mock
+  adapter in hosts without native camera. Run it with
+  `pnpm --filter @chimera-camera/react run dev` and scan the QR code with Lynx
+  Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
 - `CameraDemo.vue` — Vue Lynx port of the same page, driving the **same**
   `camera-view` element and `createCameraViewHandle` contract with no React
   dependency — the 0.3 framework-portability proof. **Unverified**: written
@@ -29,16 +30,17 @@ so they share a single native camera registration:
 
 ```
 sparkling-app/
-  react/    -> entry mounts CameraDemo.tsx   (ReactLynx build)
-  vue/      -> entry mounts CameraDemo.vue    (Vue Lynx build)
+  react/    -> mounts react/src/App.tsx    (ReactLynx build — runnable today)
+  vue/      -> mounts CameraDemo.vue        (Vue Lynx build)
   native/   -> registers CameraModule + camera-view once, shared by both
 ```
 
 Sparkling owns the native shell and routing; each framework keeps its own build
 entry and consumes the same `@kealanau/chimera-camera` package and the same
-registered native surface. Both page bundles are scaffolded here; standing up the
-Sparkling host and running the two bundles needs the Lynx toolchain and is the
-remaining 0.3 acceptance step.
+registered native surface. The ReactLynx bundle is a runnable rspeedy app today
+(`pnpm --filter @chimera-camera/react run dev`); folding it plus the Vue bundle
+under a single shared native registration still needs the Sparkling host and is
+the remaining 0.3 acceptance step.
 
 `CameraDemo` accepts an `uploadPhoto(photo)` prop so the consuming app can wire
 its own uploader without coupling this package to a networking library. Its

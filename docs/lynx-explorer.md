@@ -13,7 +13,18 @@ When debugging on device, render `getCameraInstallStatus().code` into your UI
 ## Run The Demo In Lynx Go
 
 Lynx Go does not load source files directly — it loads a compiled bundle from
-a dev server. The path that works end to end:
+a dev server.
+
+**From this repo** (contributors): the runnable ReactLynx app already lives at
+`example/react`. Build the package once, then start its dev server:
+
+```sh
+pnpm install
+pnpm --filter @kealanau/chimera-camera run build
+pnpm --filter @chimera-camera/react run dev   # scan the QR code with Lynx Go
+```
+
+**From your own project** (consuming the published package):
 
 ```sh
 # 1. Create a standard ReactLynx project (if you don't have one)
@@ -24,7 +35,7 @@ cd camera-demo
 pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.2.0-alpha.0.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
-cp node_modules/@kealanau/chimera-camera/example/CameraDemo.tsx src/App.tsx
+cp node_modules/@kealanau/chimera-camera/example/react/src/App.tsx src/App.tsx
 
 # 4. Start the dev server and scan its QR code with Lynx Go
 pnpm dev
@@ -42,7 +53,8 @@ app that compiles this package's `ios/` sources.
 
 `example/MockCameraDemo.vue` targets the separate, pre-alpha Vue Lynx scaffold
 created with `npm create vue-lynx@latest`. It is not verified by this package.
-A standard `create-rspeedy` project is ReactLynx and uses `CameraDemo.tsx`.
+A standard `create-rspeedy` project is ReactLynx and uses the demo at
+`example/react/src/App.tsx`.
 
 ## Mock Adapter Basics
 
@@ -74,7 +86,7 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@kealanau/chimera-camera/example/CameraDemo.tsx      (ReactLynx — standard)
+node_modules/@kealanau/chimera-camera/example/react/src/App.tsx   (ReactLynx — standard)
 node_modules/@kealanau/chimera-camera/example/MockCameraDemo.vue  (pre-alpha Vue Lynx target)
 ```
 
