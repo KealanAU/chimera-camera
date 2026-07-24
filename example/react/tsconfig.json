@@ -9,7 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["@lynx-js/rspeedy/client"]
+    "types": ["@lynx-js/rspeedy/client", "@lynx-js/types"]
   },
   "include": ["src", "lynx.config.ts"]
 }

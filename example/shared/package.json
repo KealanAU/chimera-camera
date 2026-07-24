@@ -1,0 +1,10 @@
+{
+  "name": "@chimera-camera/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@kealanau/chimera-camera": "workspace:*",
+    "@lynx-js/types": "^4.1.0"
+  }
+}

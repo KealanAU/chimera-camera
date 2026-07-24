@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "rspeedy dev",
     "build": "rspeedy build",
-    "preview": "rspeedy preview"
+    "preview": "rspeedy preview",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@kealanau/chimera-camera": "workspace:*",
@@ -16,7 +17,9 @@
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.4.0",
     "@lynx-js/rspeedy": "^0.14.0",
+    "@lynx-js/types": "^4.1.0",
     "@rsbuild/plugin-vue": "^1.2.9",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.8"
   }
 }

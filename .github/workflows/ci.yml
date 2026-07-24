@@ -10,6 +10,31 @@ permissions:
   contents: read
 
 jobs:
+  examples:
+    name: Typecheck example apps
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The example apps need the whole workspace (rspeedy, ReactLynx, vue-lynx).
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # tsc for ReactLynx, vue-tsc for the Vue SFC — both against @lynx-js/types.
+      - name: Typecheck
+        run: pnpm run typecheck:examples
+
   build:
     name: Build package
     runs-on: macos-latest
@@ -40,5 +65,18 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # Guards the regression that shipped an 11.7MB / 103-file tarball:
+      # stale example build output and node_modules symlinks. Healthy: 76 files / 0.43MB.
+      # images/ ships (the README renders on npmjs.com, which cannot resolve
+      # relative paths back to a private repo) but images/src/ must not.
       - name: Validate package contents
-        run: pnpm pack --dry-run
+        run: |
+          npm pack --dry-run --json | node -e "
+            const p = JSON.parse(require('fs').readFileSync(0, 'utf8'))[0];
+            const fail = (m) => { console.error('pack regression: ' + m); process.exit(1); };
+            const leaked = p.files.map((f) => f.path).filter((f) => /node_modules|^example\/.*dist\/|^docs\/archive\/|^images\/src\//.test(f));
+            if (leaked.length) fail('leaked paths: ' + leaked.join(', '));
+            if (p.entryCount > 90) fail(p.entryCount + ' files, max 90');
+            if (p.unpackedSize > 600000) fail(p.unpackedSize + ' bytes unpacked, max 600000');
+            console.log('ok: ' + p.entryCount + ' files, ' + p.unpackedSize + ' unpacked, ' + p.size + ' packed');
+          "

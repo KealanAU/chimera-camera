@@ -4,8 +4,20 @@ This example app validates the complete `0.1` application flow: explicit
 native/mock detection, capture, JavaScript preview, and a host-provided upload
 mutation.
 
+> Reading this from the npm tarball instead of the repo? Each app's
+> `package.json` depends on `"@kealanau/chimera-camera": "workspace:*"`, which
+> only resolves inside this repo's pnpm workspace. Swap it for the published
+> version you installed (e.g. `"^0.0.1"`) before running an install.
+> The `pnpm --filter` commands below are likewise repo-local.
+
 Files:
 
+- `shared/` — the framework-free half of the demo, imported verbatim by both
+  apps so their `App` files are only state, handlers, and markup:
+  `camera-core.ts` (module/mock wiring, screen probe, zoom-arc geometry,
+  exposure math), `camera-styles.ts` (the glass UI's style objects) and
+  `camera-element.ts` (the `<camera-view>` element's props, declared once for
+  both ReactLynx JSX and Vue templates).
 - `react/` — a runnable ReactLynx app (rspeedy). Its `src/App.tsx` drives the
   full `camera-view` surface (preview, `ready`/`error`, `ping()`,
   `capturePhoto()`, front/back switch, close/reopen, plus recording, zoom, torch,
@@ -13,17 +25,24 @@ Files:
   so the session controls are exercisable end-to-end against the mock in Lynx Go.
   Run it with `pnpm --filter @chimera-camera/react run dev` and scan the QR code
   with Lynx Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
-- `vue/` — a runnable Vue Lynx app (`vue-lynx` + rspeedy). Its `src/App.vue`
-  drives the **same** `camera-view` element and `createCameraViewHandle` contract
-  as the React app with no React dependency — the 0.3 framework-portability proof.
-  Run it with `pnpm --filter @chimera-camera/vue run dev`. Boots and compiles in
-  mock mode; the native-backed flow needs a host, same as React.
-- `MockCameraDemo.vue` — module-only Vue demo (mock/system `capturePhoto`, no
-  rendered `camera-view`). The minimal Vue + mock walkthrough.
-- `mock-camera-demo.ts` — minimal console-only mock walkthrough.
+- `vue/` — a runnable Vue Lynx app (`vue-lynx` + rspeedy). Its `src/App.vue` is a
+  line-for-line port of `react/src/App.tsx` — same glass camera UI, driving the
+  **same** `camera-view` element and `createCameraViewHandle` contract with no
+  React dependency — the 0.3 framework-portability proof. Run it with
+  `pnpm --filter @chimera-camera/vue run dev`. Boots and compiles in mock mode;
+  the native-backed flow needs a host, same as React.
+- `host-ios/` — the native iOS Lynx host that compiles the package's `ios/`
+  sources and loads either bundle above from its dev server, so `camera-view` and
+  `CameraModule` run for real on a device. `cd host-ios && ./setup.sh`, then open
+  the workspace in Xcode. See `host-ios/README.md`.
 
 There is no Svelte-on-Lynx page; it is gated on a maintained Svelte-on-Lynx
 toolchain (see `ROADMAP.md`).
+
+Both apps typecheck against the real Lynx element types (`@lynx-js/types`):
+`pnpm run typecheck:examples` from the repo root, or
+`pnpm --filter @chimera-camera/{react,vue} run typecheck` for one of them (Vue
+runs `vue-tsc`, so templates are checked too).
 
 ## The 0.3 Sparkling shell
 
