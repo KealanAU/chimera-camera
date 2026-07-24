@@ -15,22 +15,13 @@ the registry would receive without sending anything.
 
 Publishing uploads a tarball of the package to the npm registry under the
 `@vyui` scope — the same org as `@vyui/core` and `@vyui/kit` — so the full
-name is `@vyui/chimera-camera`. One thing
-worth being clear-eyed about: the privacy of the GitHub repo has no bearing on
-the privacy of the npm package. They are separate systems. The repo can stay
-private forever, but the moment you publish with `--access public` (which is
-what the release workflow does, and what `publishConfig` in package.json is
-set to), everything in the tarball becomes publicly downloadable — the
-compiled JS, the Swift sources under `ios/`, the docs, all of it. Anyone can
-read that code even though they can't see the repo.
+name is `@vyui/chimera-camera`.
 
-The alternative is a private npm package, which keeps the tarball behind your
-account, but scoped private packages require a paid npm plan. So the real
-choice is: publish publicly for free and accept that the code is out there, or
-pay npm to keep it private, or keep using the sibling checkout and publish
-nothing. Since the package is MIT licensed and built on MIT-licensed
-VisionCamera ideas anyway, public is probably fine — but it should be a
-decision, not a surprise.
+The repository is public and the package is MIT licensed, so everything in the
+tarball is readable either way: the compiled JS, the Swift and Kotlin sources,
+the docs. Worth remembering that a publish is still a one-way door in a way a
+git push is not — npm only allows unpublishing within 72 hours of a release, and
+anything downloaded in that window is already gone.
 
 ## How to publish
 

@@ -67,8 +67,8 @@ jobs:
 
       # Guards the regression that shipped an 11.7MB / 103-file tarball:
       # stale example build output and node_modules symlinks. Healthy: 76 files / 0.43MB.
-      # images/ ships (the README renders on npmjs.com, which cannot resolve
-      # relative paths back to a private repo) but images/src/ must not.
+      # images/ ships so the npm page renders standalone rather than relying on
+      # npm rewriting relative paths to GitHub; images/src/ must not.
       - name: Validate package contents
         run: |
           npm pack --dry-run --json | node -e "
