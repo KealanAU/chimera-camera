@@ -49,6 +49,7 @@
     "README.md",
     "CHANGELOG.md",
     "LICENSE",
+    "LICENSES",
     "THIRD_PARTY_NOTICES.md",
     "!docs/archive",
     "!images/src",

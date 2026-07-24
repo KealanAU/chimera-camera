@@ -248,7 +248,9 @@ and WebP.
 
 Chimera Camera's own code is MIT licensed, and [LICENSE](LICENSE) has the text.
 The package declares `MIT AND Apache-2.0` because the shipped artwork derives
-from Apache-licensed material, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
-carries the full notices for both.
+from Apache-licensed material.
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) reproduces VisionCamera's MIT
+license in full alongside the Material Symbols notice, and the Apache text sits
+in [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt).
 
 This is not the official VisionCamera package and has no affiliation with it.
