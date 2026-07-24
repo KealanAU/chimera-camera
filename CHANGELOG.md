@@ -7,7 +7,7 @@ stable, prerelease entries may include breaking changes.
 
 Renumbered from the unpublished `0.2.0-alpha.0`. Nothing had ever been published
 to npm, so this restarts at `0.0.1` under the default `latest` dist-tag: a plain
-`pnpm add @kealanau/chimera-camera` resolves to it, with no `@alpha` suffix to
+`pnpm add @vyui/chimera-camera` resolves to it, with no `@alpha` suffix to
 remember. The `0.0.x` line is the pre-alpha and `1.0.0` will be the launch, so
 every release in between is a patch — `pnpm run bump` is the only bump path, and
 a test fails CI if the version leaves the `0.0.x` track. The README carries the
@@ -20,7 +20,7 @@ pre-alpha warning where people actually read it.
 
 - Make native installation two build-config lines instead of a manual file
   copy. iOS ships `ChimeraCamera.podspec`, so a host adds one
-  `pod 'ChimeraCamera', :path => '.../node_modules/@kealanau/chimera-camera'`
+  `pod 'ChimeraCamera', :path => '.../node_modules/@vyui/chimera-camera'`
   line; the spec leaves `Lynx` unpinned to resolve against the host's pin and
   adds `-ObjC` so `LYNX_LAZY_REGISTER_UI` survives a static-library link.
   Android's `android/` is a consumable `com.android.library` module, so a

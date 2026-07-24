@@ -1,6 +1,6 @@
 # Mock Testing
 
-`@kealanau/chimera-camera/mock` provides a dev-only camera adapter for Lynx
+`@vyui/chimera-camera/mock` provides a dev-only camera adapter for Lynx
 Explorer, web preview, tests, and apps that have not wired native iOS/Android
 camera code yet.
 
@@ -15,7 +15,7 @@ During early development, link the package from the local workspace:
 ```json
 {
   "dependencies": {
-    "@kealanau/chimera-camera": "file:../../chimera-camera"
+    "@vyui/chimera-camera": "file:../../chimera-camera"
   }
 }
 ```
@@ -23,15 +23,15 @@ During early development, link the package from the local workspace:
 After publishing:
 
 ```sh
-pnpm add @kealanau/chimera-camera
+pnpm add @vyui/chimera-camera
 ```
 
 ## Basic Usage
 
 ```ts
-import { createCameraModule } from '@kealanau/chimera-camera'
-import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
-import type { CameraModuleClient } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@vyui/chimera-camera'
+import { createMockCameraModule } from '@vyui/chimera-camera/mock'
+import type { CameraModuleClient } from '@vyui/chimera-camera'
 
 const camera: CameraModuleClient =
   createCameraModule({ optional: true }) ?? createMockCameraModule()
@@ -43,7 +43,7 @@ const photo = await camera.capturePhoto()
 Or force the mock explicitly:
 
 ```ts
-import { createCameraModule } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@vyui/chimera-camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -59,7 +59,7 @@ The default mock returns:
 ## Custom Fixtures
 
 ```ts
-import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
+import { createMockCameraModule } from '@vyui/chimera-camera/mock'
 
 export const camera = createMockCameraModule({
   permissions: {
@@ -67,7 +67,7 @@ export const camera = createMockCameraModule({
     microphone: 'denied',
   },
   photo: {
-    path: 'mock://consumer-app/test-photo.jpg',
+    path: 'mock://test/photo.jpg',
     width: 320,
     height: 280,
     mime: 'image/jpeg',
@@ -76,16 +76,15 @@ export const camera = createMockCameraModule({
 })
 ```
 
-## the consuming app Integration Shape
+## Integration Shape
 
-the consuming app already has a boundary at `app/src/native/camera.ts`. During migration,
-that boundary can resolve a real native module first and fall back to the mock in
-development:
+If your app already has a single native-camera boundary module, that boundary can
+resolve a real native module first and fall back to the mock in development:
 
 ```ts
-import { createCameraModule } from '@kealanau/chimera-camera'
-import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
-import type { CameraModuleClient } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@vyui/chimera-camera'
+import { createMockCameraModule } from '@vyui/chimera-camera/mock'
+import type { CameraModuleClient } from '@vyui/chimera-camera'
 
 const camera: CameraModuleClient | null =
   createCameraModule({ optional: true }) ??

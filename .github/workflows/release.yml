@@ -37,7 +37,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @kealanau/chimera-camera
+        run: pnpm install --frozen-lockfile --filter @vyui/chimera-camera
 
       - name: Build
         run: pnpm run build

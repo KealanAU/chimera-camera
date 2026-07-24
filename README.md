@@ -40,7 +40,7 @@ layer, so the public API is plain TypeScript that any JS framework can drive.
 ### 1. Install the package
 
 ```sh
-pnpm add @kealanau/chimera-camera
+pnpm add @vyui/chimera-camera
 ```
 
 That is all JavaScript needs. Types, the mock adapter, and the install
@@ -48,7 +48,7 @@ diagnostics work immediately, so you can build your whole capture flow before
 touching a native host:
 
 ```ts
-import { createCameraModule } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@vyui/chimera-camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -66,7 +66,7 @@ target 'YourApp' do
   use_modular_headers!
 
   pod 'Lynx', '3.9.0', :subspecs => ['Framework']   # your own Lynx pin
-  pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'
+  pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
 end
 ```
 
@@ -98,7 +98,7 @@ config.register(ChimeraCameraModule.self)
 needed for the element itself.
 
 Not using CocoaPods? Add the three files in
-`node_modules/@kealanau/chimera-camera/ios` to your app target directly. That is
+`node_modules/@vyui/chimera-camera/ios` to your app target directly. That is
 all the pod does.
 
 ### 3. Android
@@ -109,7 +109,7 @@ In `settings.gradle`:
 ```gradle
 include ':chimera-camera'
 project(':chimera-camera').projectDir =
-    new File(rootProject.projectDir, '../node_modules/@kealanau/chimera-camera/android')
+    new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
 ```
 
 In your app module's `build.gradle`:
@@ -139,7 +139,7 @@ Lynx has no autolinking, so those registration calls in steps 2 and 3 are the
 one thing that cannot be automated away. Confirm they took:
 
 ```ts
-import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@kealanau/chimera-camera'
+import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
 
 console.log(await getCameraInstallStatusAsync())
 await assertCameraInstalledAsync()
@@ -164,7 +164,7 @@ involved — this is plain TypeScript against the DOM-ish Lynx element:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@kealanau/chimera-camera'
+import { createCameraViewHandle } from '@vyui/chimera-camera'
 
 const camera = createCameraViewHandle('#camera')
 

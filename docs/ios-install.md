@@ -9,7 +9,7 @@ line registers the module.
 1. Install the package:
 
    ```sh
-   pnpm add @kealanau/chimera-camera
+   pnpm add @vyui/chimera-camera
    ```
 
 2. Add the pod to the host `Podfile`:
@@ -20,7 +20,7 @@ line registers the module.
      use_modular_headers!
 
      pod 'Lynx', '3.9.0', :subspecs => ['Framework']   # your Lynx pin
-     pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'
+     pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
    end
    ```
 
@@ -36,7 +36,7 @@ line registers the module.
      It self-registers via `LYNX_LAZY_REGISTER_UI`; no bootstrap call needed.
 
    Not using CocoaPods? Add those three files from
-   `node_modules/@kealanau/chimera-camera/ios` to your app target directly —
+   `node_modules/@vyui/chimera-camera/ios` to your app target directly —
    that is all the pod does.
 
 3. Add camera permissions to `Info.plist`:
@@ -73,7 +73,7 @@ From JavaScript:
 import {
   assertCameraInstalledAsync,
   getCameraInstallStatusAsync,
-} from '@kealanau/chimera-camera'
+} from '@vyui/chimera-camera'
 
 const status = await getCameraInstallStatusAsync()
 console.log(status)
@@ -91,7 +91,7 @@ To verify the `camera-view` bridge spike, render the element and ping it:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@kealanau/chimera-camera'
+import { createCameraViewHandle } from '@vyui/chimera-camera'
 
 const camera = createCameraViewHandle('#camera')
 console.log(await camera.ping()) // { ok: true }

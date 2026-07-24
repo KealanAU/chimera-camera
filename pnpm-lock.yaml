@@ -14,12 +14,12 @@ importers:
 
   example/react:
     dependencies:
-      '@kealanau/chimera-camera':
-        specifier: workspace:*
-        version: link:../..
       '@lynx-js/react':
         specifier: ^0.123.0
         version: 0.123.0(@lynx-js/types@4.1.0)(@types/react@18.3.31)
+      '@vyui/chimera-camera':
+        specifier: workspace:*
+        version: link:../..
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.6.0
@@ -39,16 +39,16 @@ importers:
 
   example/shared:
     dependencies:
-      '@kealanau/chimera-camera':
-        specifier: workspace:*
-        version: link:../..
       '@lynx-js/types':
         specifier: ^4.1.0
         version: 4.1.0
+      '@vyui/chimera-camera':
+        specifier: workspace:*
+        version: link:../..
 
   example/vue:
     dependencies:
-      '@kealanau/chimera-camera':
+      '@vyui/chimera-camera':
         specifier: workspace:*
         version: link:../..
       vue:

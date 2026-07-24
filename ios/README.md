@@ -3,17 +3,17 @@
 These files are shipped in the npm package so a Lynx host app can compile them
 into its iOS target.
 
-Installing `@kealanau/chimera-camera` puts this folder in:
+Installing `@vyui/chimera-camera` puts this folder in:
 
 ```text
-node_modules/@kealanau/chimera-camera/ios
+node_modules/@vyui/chimera-camera/ios
 ```
 
 The package ships `ChimeraCamera.podspec` at its root, so the normal way to get
 these into a host is one Podfile line:
 
 ```ruby
-pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'
+pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
 ```
 
 Adding the files to an Xcode target by hand works too — the pod does nothing
@@ -36,5 +36,5 @@ podspec cannot set that for you. Embedded
 preview, capture, front/back switching, and close/reopen were exercised on a
 physical iPhone on 2026-07-10; remaining acceptance is tracked in `ROADMAP.md`.
 
-For LynxExplorer, use `@kealanau/chimera-camera/mock`. Explorer cannot compile and
+For LynxExplorer, use `@vyui/chimera-camera/mock`. Explorer cannot compile and
 register native Swift from an installed npm package at runtime.

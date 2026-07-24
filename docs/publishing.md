@@ -3,7 +3,7 @@
 The package is scoped as:
 
 ```text
-@kealanau/chimera-camera
+@vyui/chimera-camera
 ```
 
 ## Local Validation
@@ -26,8 +26,8 @@ Releases are published from GitHub Actions through `.github/workflows/release.ym
 
 One-time repository setup:
 
-1. Own the `@kealanau` npm scope (`npm org ls kealanau`, or just publish once —
-   the scope is created on first publish of a package you own).
+1. The `@vyui` org already exists and publishes `@vyui/core`, `@vyui/kit`, and
+   `@vyui/cli`, so the scope needs no setup.
 2. Create an npm **automation** token (granular tokens work; classic
    "Automation" is simplest, and it must bypass 2FA for CI).
 3. Add it to the GitHub repository as the `NPM_TOKEN` secret.
@@ -37,7 +37,7 @@ Then, per release:
 1. `pnpm run bump` — patch only, and it rewrites all four version sites at once.
 2. Update `CHANGELOG.md` and commit.
 3. Run the `Release` workflow manually. The dist-tag defaults to `latest`, which
-   is what a plain `pnpm add @kealanau/chimera-camera` resolves to. Pick
+   is what a plain `pnpm add @vyui/chimera-camera` resolves to. Pick
    `alpha`/`beta` only for a release you do *not* want as the default.
 
 ### Every release before 1.0.0 is a patch
@@ -66,7 +66,7 @@ unpublishing within 72 hours.
 ## Installing In A Lynx App
 
 ```sh
-pnpm add @kealanau/chimera-camera
+pnpm add @vyui/chimera-camera
 ```
 
 The npm package includes JavaScript, TypeScript declarations, docs, a CocoaPods

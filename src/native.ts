@@ -104,7 +104,7 @@ export function getCameraInstallStatus(options: CreateCameraModuleOptions = {}):
       jsVersion: CHIMERA_CAMERA_JS_VERSION,
       nativeVersion: 'mock',
       missingMethods: [],
-      message: '@kealanau/chimera-camera is running with the mock adapter.',
+      message: '@vyui/chimera-camera is running with the mock adapter.',
     }
   }
 
@@ -155,7 +155,7 @@ export function getCameraInstallStatus(options: CreateCameraModuleOptions = {}):
     nativeModuleName,
     jsVersion: CHIMERA_CAMERA_JS_VERSION,
     missingMethods: [],
-    message: '@kealanau/chimera-camera native module is registered.',
+    message: '@vyui/chimera-camera native module is registered.',
   }
 }
 
@@ -273,7 +273,7 @@ function createMissingStatus(
 
 function createInstallErrorMessage(nativeModuleName: string, reason: string): string {
   return [
-    `@kealanau/chimera-camera native module (NativeModules.${nativeModuleName}) is not installed correctly.`,
+    `@vyui/chimera-camera native module (NativeModules.${nativeModuleName}) is not installed correctly.`,
     reason,
     'For JS-only hosts like LynxExplorer / Lynx Go, use createCameraModule({ mock: true }).',
     'Native setup: see docs/ios-install.md, docs/android-install.md, docs/lynx-explorer.md.',

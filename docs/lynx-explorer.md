@@ -20,7 +20,7 @@ a dev server.
 
 ```sh
 pnpm install
-pnpm --filter @kealanau/chimera-camera run build
+pnpm --filter @vyui/chimera-camera run build
 pnpm --filter @chimera-camera/react run dev   # scan the QR code with Lynx Go
 ```
 
@@ -35,7 +35,7 @@ cd camera-demo
 pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.0.1.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
-cp node_modules/@kealanau/chimera-camera/example/react/src/App.tsx src/App.tsx
+cp node_modules/@vyui/chimera-camera/example/react/src/App.tsx src/App.tsx
 
 # 4. Start the dev server and scan its QR code with Lynx Go
 pnpm dev
@@ -61,7 +61,7 @@ contract through the same `example/shared/camera-core.ts`.
 Use these hosts with the mock adapter first:
 
 ```ts
-import { createCameraModule } from '@kealanau/chimera-camera'
+import { createCameraModule } from '@vyui/chimera-camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -69,7 +69,7 @@ const camera = createCameraModule({ mock: true })
 The install checker also reports mock mode:
 
 ```ts
-import { getCameraInstallStatus } from '@kealanau/chimera-camera'
+import { getCameraInstallStatus } from '@vyui/chimera-camera'
 
 console.log(getCameraInstallStatus({ mock: true }))
 ```
@@ -86,9 +86,9 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@kealanau/chimera-camera/example/react/src/App.tsx      (ReactLynx — standard)
-node_modules/@kealanau/chimera-camera/example/vue/src/App.vue        (Vue Lynx)
-node_modules/@kealanau/chimera-camera/example/shared/camera-core.ts  (shared by both)
+node_modules/@vyui/chimera-camera/example/react/src/App.tsx      (ReactLynx — standard)
+node_modules/@vyui/chimera-camera/example/vue/src/App.vue        (Vue Lynx)
+node_modules/@vyui/chimera-camera/example/shared/camera-core.ts  (shared by both)
 ```
 
 Both show the host-detection pattern, but only the ReactLynx example is the
@@ -101,7 +101,7 @@ permission keys in `Info.plist`.
 ## Recommended Test Order
 
 1. LynxExplorer + mock adapter.
-2. the consuming app app flow with mock capture.
+2. Consuming-app flow with mock capture.
 3. Custom iOS host with `ios/ChimeraCameraModule.swift` registered.
 4. Real iPhone system-camera capture through `CameraModule.capturePhoto`.
 5. Native `camera-view` live preview, front/back switching, close/reopen, and

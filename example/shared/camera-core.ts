@@ -11,8 +11,8 @@ import {
   type CameraSessionMethods,
   type PhotoFile,
   type VideoFile,
-} from '@kealanau/chimera-camera'
-import { createMockCameraModule } from '@kealanau/chimera-camera/mock'
+} from '@vyui/chimera-camera'
+import { createMockCameraModule } from '@vyui/chimera-camera/mock'
 
 const mock = createMockCameraModule()
 

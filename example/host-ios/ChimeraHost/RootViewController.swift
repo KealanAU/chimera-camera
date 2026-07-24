@@ -4,7 +4,7 @@ import UIKit
 /// Loads a Lynx bundle from the rspeedy dev server into a LynxView, with the
 /// package's native CameraModule registered and <camera-view> compiled in.
 ///
-/// Auto-discovers the dev server (like consumer-app's host): a post-build phase
+/// Auto-discovers the dev server: a post-build phase
 /// (project.yml "Write dev server host") bakes the Mac's LAN IP into the app as
 /// DevServerHost.txt, and on launch we scan the rspeedy port range for the first
 /// server that answers — so you never type a URL and never get trapped on

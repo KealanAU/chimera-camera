@@ -86,14 +86,16 @@ does not block implementation completion.
 
 - [x] Package example exposes explicit native/mock install status and covers
       capture → bounded base64 preview → host-provided upload mutation.
-- [ ] Build the the consuming app capture → preview → upload flow against
+- [ ] Build a real consuming app's capture → preview → upload flow against
       `createCameraModule({ mock: true })`.
-- [ ] Expose `getCameraInstallStatus()` in the app so native versus mock use is
-      explicit rather than an invisible fallback.
+- [ ] Have that app surface `getCameraInstallStatus()` so native versus mock use
+      is explicit rather than an invisible fallback.
 
 ### Distribution follow-up (not an implementation gate)
 
-- [ ] Verify ownership of the `@kealanau` npm scope.
+- [x] Publish under the established `@vyui` scope (alongside `@vyui/core`,
+      `@vyui/kit`, `@vyui/cli`) rather than a personal one — same Lynx audience,
+      one brand. Docs land at `chimeracamera.vyui.dev`.
 - [ ] Create an npm Automation token and add it as the `NPM_TOKEN` repository
       secret. **This is the only thing still blocking the first publish.**
 - [x] Add `npm test` to `.github/workflows/release.yml` before publishing.
@@ -101,7 +103,7 @@ does not block implementation completion.
       publish without it, and the release workflow sets
       `NPM_CONFIG_PROVENANCE=true`.
 - [x] Renumber to `0.0.1` and default the release workflow to the `latest`
-      dist-tag, so a plain `pnpm add @kealanau/chimera-camera` resolves.
+      dist-tag, so a plain `pnpm add @vyui/chimera-camera` resolves.
 - [x] Fix the release cadence: `0.0.x` is the whole pre-alpha and `1.0.0` is the
       launch, so every release between them is a patch. `pnpm run bump` is the
       only bump path, and `tests/version-sync.test.js` fails if the version
@@ -131,7 +133,7 @@ way on both platforms. Autolinked distribution is deferred (see below).
 Autolinking is a distribution convenience, not an architecture gate: it removes
 the per-host manual native wiring, nothing more. npm install already delivers
 the JS plus `ios/`/`android/` sources; manual integration works today (iOS is
-device-proven). With a single in-house consumer (the consuming app), full autolinking buys
+device-proven). With a single in-house consumer today, full autolinking buys
 little, so it stays deferred until an external consumer needs zero-setup
 installs — realistically a 1.0 distribution task.
 

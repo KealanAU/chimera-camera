@@ -10,7 +10,7 @@ surfaces.
 1. Install the package:
 
    ```sh
-   pnpm add @kealanau/chimera-camera
+   pnpm add @vyui/chimera-camera
    ```
 
 2. Include the shipped Gradle module. In `settings.gradle`:
@@ -18,7 +18,7 @@ surfaces.
    ```gradle
    include ':chimera-camera'
    project(':chimera-camera').projectDir =
-       new File(rootProject.projectDir, '../node_modules/@kealanau/chimera-camera/android')
+       new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
    ```
 
    In the app module's `build.gradle`:

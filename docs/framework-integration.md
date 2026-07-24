@@ -55,7 +55,7 @@ returns a typed `CameraViewMethods` object whose methods each round-trip to the
 native element through Lynx's SelectorQuery:
 
 ```ts
-import { createCameraViewHandle } from '@kealanau/chimera-camera'
+import { createCameraViewHandle } from '@vyui/chimera-camera'
 
 const camera = createCameraViewHandle('#camera')
 await camera.ping()                 // { ok: true } once the bridge is live
@@ -101,7 +101,7 @@ requires one.
 ### ReactLynx
 
 ```tsx
-import { createCameraViewHandle } from '@kealanau/chimera-camera'
+import { createCameraViewHandle } from '@vyui/chimera-camera'
 
 <camera-view
   id="camera"

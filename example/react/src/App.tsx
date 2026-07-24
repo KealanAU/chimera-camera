@@ -13,7 +13,7 @@
  */
 import { useEffect, useRef, useState } from '@lynx-js/react'
 
-import type { FlashMode, PhotoFile, TargetCameraPosition } from '@kealanau/chimera-camera'
+import type { FlashMode, PhotoFile, TargetCameraPosition } from '@vyui/chimera-camera'
 
 import {
   cameraModule,

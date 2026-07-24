@@ -16,7 +16,7 @@ import type {
   RecordingFinishedEvent,
   RecordingStartedEvent,
   TargetCameraPosition,
-} from '@kealanau/chimera-camera'
+} from '@vyui/chimera-camera'
 
 /** Lynx delivers every native event payload wrapped in `{ detail }`. */
 export type LynxEvent<T> = { detail?: T }

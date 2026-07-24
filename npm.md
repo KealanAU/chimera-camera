@@ -1,23 +1,21 @@
 # The npm side of chimera-camera
 
-This is a plain-language tour of where this package sits with npm today, what
-publishing would actually do, and how the consuming app would consume the published
-version. The command-level detail lives in [docs/publishing.md](docs/publishing.md);
-this file is the why and the when.
+This is a plain-language tour of where this package sits with npm today and what
+publishing actually does. The command-level detail lives in
+[docs/publishing.md](docs/publishing.md); this file is the why and the when.
 
 ## Where things stand today
 
-The package lives in a private GitHub repo and has never been published to
-npm. Nobody can `npm install` it yet. the consuming app consumes it as a sibling
-checkout: the app's iOS host project points straight at `../chimera-camera/ios`
-on disk, and there is also a local `.tgz` tarball from a previous `npm pack`
-run, which is just a dry-run of what npm would receive. Nothing has left your
-machine.
+The package has never been published to npm, so nobody can `npm install` it yet.
+The only consumer today is `example/host-ios`, which compiles the `ios/` sources
+straight off disk. `npm pack --dry-run` is the cheapest way to see exactly what
+the registry would receive without sending anything.
 
 ## What publishing actually means
 
 Publishing uploads a tarball of the package to the npm registry under the
-`@kealanau` scope, so the full name is `@kealanau/chimera-camera`. One thing
+`@vyui` scope — the same org as `@vyui/core` and `@vyui/kit` — so the full
+name is `@vyui/chimera-camera`. One thing
 worth being clear-eyed about: the privacy of the GitHub repo has no bearing on
 the privacy of the npm package. They are separate systems. The repo can stay
 private forever, but the moment you publish with `--access public` (which is
@@ -41,7 +39,7 @@ The flow is already wired up; the steps are in
 token, add it to the GitHub repo as the `NPM_TOKEN` secret, then run the
 `Release` workflow manually from GitHub Actions. It defaults to the `latest`
 dist-tag, so the published version is what a plain
-`pnpm add @kealanau/chimera-camera` resolves to.
+`pnpm add @vyui/chimera-camera` resolves to.
 
 Before triggering it, the local sanity check is:
 
@@ -72,7 +70,7 @@ things would have to happen for a camera to appear with zero setup:
 
 1. **Get the native code into the app's build.** This part is now one line per
    platform. iOS ships a CocoaPods podspec, so the host adds
-   `pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'`
+   `pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'`
    and `pod install` compiles the Swift and Objective-C into the app. Android
    ships `android/` as a real `com.android.library` Gradle module, so the host
    includes it in `settings.gradle` — and the Android manifest merger folds in
@@ -95,23 +93,10 @@ The native code also ships as plain source rather than a prebuilt
 version the host pins, and a prebuilt binary would freeze one Lynx version into
 the package.
 
-## Switching the consuming app over
-
-Once the package is on npm, the consuming app drops the sibling-checkout dependency:
-
-```sh
-pnpm add @kealanau/chimera-camera
-```
-
-Then remove the three `../../../../chimera-camera/ios/*` source entries from
-`consumer-app/app/native/ios-host/project.yml` and add the pod line to that host's
-`Podfile` instead. There is already a comment in `project.yml` marking the
-swap.
-
 ## Versioning
 
 The first published version is `0.0.1`, under the default `latest` dist-tag —
-so a plain `pnpm add @kealanau/chimera-camera` picks it up with no `@alpha`
+so a plain `pnpm add @vyui/chimera-camera` picks it up with no `@alpha`
 suffix. The `0.0.x` line *is* the alpha; there is no separate dist-tag to
 remember, and the README carries the pre-alpha warning where people actually
 read it.

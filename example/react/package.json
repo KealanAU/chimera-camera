@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kealanau/chimera-camera": "workspace:*",
+    "@vyui/chimera-camera": "workspace:*",
     "@lynx-js/react": "^0.123.0"
   },
   "devDependencies": {
