@@ -39,14 +39,12 @@ API is plain TypeScript that any JS framework can drive.
 
 ## Installation
 
-### 1. Install the package
-
 ```sh
 pnpm add @vyui/chimera-camera
 ```
 
-JavaScript needs nothing further. The types, the mock adapter, and the install
-diagnostics all work immediately, so you can build a complete capture flow
+That is everything JavaScript needs. The types, the mock adapter, and the
+install diagnostics work immediately, so you can build a complete capture flow
 before touching a native host:
 
 ```ts
@@ -55,107 +53,14 @@ import { createCameraModule } from '@vyui/chimera-camera'
 const camera = createCameraModule({ mock: true })
 ```
 
-Getting a real camera means your Lynx host app also compiles the shipped native
-sources and registers them, which is what steps 2 through 4 cover.
+A real camera also needs your Lynx host app to compile the shipped native
+sources and register them, which is two build-config lines and one registration
+call per platform. [INSTALLATION.md](INSTALLATION.md) walks through all of it,
+including the iOS podspec, the Android Gradle module, and troubleshooting.
 
-### 2. iOS
-
-Add the pod to your `Podfile` and run `pod install`:
-
-```ruby
-target 'YourApp' do
-  # Required so ChimeraCameraModule.swift can `import Lynx`.
-  use_modular_headers!
-
-  pod 'Lynx', '3.9.0', :subspecs => ['Framework']   # your own Lynx pin
-  pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
-end
-```
-
-The path resolves relative to your `Podfile`, so adjust it for your own layout.
-The podspec leaves its `Lynx` dependency unpinned so that it resolves to whatever
-version you pin above, and it adds `-ObjC` to your linker flags so that
-`<camera-view>` survives a static-library build.
-
-Add the usage strings to `Info.plist`:
-
-```xml
-<key>NSCameraUsageDescription</key>
-<string>This app needs camera access to capture photos.</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>This app needs microphone access to record videos.</string>
-<!-- Only if you call saveToLibrary(). -->
-<key>NSPhotoLibraryAddUsageDescription</key>
-<string>This app saves photos and videos you capture to your library.</string>
-```
-
-Then register the module in your Lynx bootstrap:
-
-```swift
-let config = LynxConfig(provider: templateProvider)
-config.register(ChimeraCameraModule.self)
-```
-
-The element registers itself through `LYNX_LAZY_REGISTER_UI`, so `<camera-view>`
-needs no bootstrap call of its own.
-
-If you do not use CocoaPods, add the three files in
-`node_modules/@vyui/chimera-camera/ios` to your app target directly, which is
-all the pod does anyway.
-
-### 3. Android
-
-The shipped `android/` folder is a complete `com.android.library` module. In
-`settings.gradle`:
-
-```gradle
-include ':chimera-camera'
-project(':chimera-camera').projectDir =
-    new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
-```
-
-In your app module's `build.gradle`:
-
-```gradle
-dependencies {
-    implementation project(':chimera-camera')
-}
-```
-
-Your `AndroidManifest.xml` needs nothing added, because the manifest merger
-folds in the `CAMERA` and `RECORD_AUDIO` permissions, the proxy activity, and
-the FileProvider on its own. The module declares `lynx` as `compileOnly`, so it
-links against whatever version your host already ships.
-
-Then register both surfaces in your Lynx host:
-
-```kotlin
-LynxEnv.inst().registerModule("CameraModule", ChimeraCameraModule::class.java)
-
-val builder = LynxViewBuilder()
-ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
-```
-
-### 4. Verify
-
-Lynx has no autolinking, which makes those registration calls in steps 2 and 3
-the one part nobody can automate away for you. Confirm they took:
-
-```ts
-import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
-
-console.log(await getCameraInstallStatusAsync())
-await assertCameraInstalledAsync()
-```
-
-When native setup is incomplete, the thrown error names the missing piece,
-whether that turns out to be `NativeModules`, `CameraModule`, a required native
-method, or a native/JS version mismatch.
-
-Full details and troubleshooting live in
-[docs/ios-install.md](docs/ios-install.md) and
-[docs/android-install.md](docs/android-install.md), and `example/host-ios` is a
-working Lynx iOS host you can copy from.
+Note that LynxExplorer and Lynx Go can only run the mock. Neither compiles
+native source from an installed npm package at runtime, so the native path
+needs a host app you build yourself.
 
 ## Example
 
@@ -220,7 +125,8 @@ want for mock previews, web previews, and JSON transports.
 
 ## Links
 
-- [Install: iOS](docs/ios-install.md) · [Android](docs/android-install.md)
+- [Installation](INSTALLATION.md) is the full four-step setup and troubleshooting guide
+- Platform reference: [iOS](docs/ios-install.md) · [Android](docs/android-install.md)
 - [Native contract](docs/native-contract.md) covers props, methods, events, and error codes
 - [Framework integration](docs/framework-integration.md) covers the element and SelectorQuery contract
 - [Output transport](docs/output-transport.md) covers file paths, lifetime, and cleanup ownership

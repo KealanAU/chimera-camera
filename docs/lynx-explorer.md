@@ -32,7 +32,7 @@ pnpm create rspeedy@latest camera-demo
 cd camera-demo
 
 # 2. Install this package. It is NOT on npm yet — use the local tarball:
-pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.0.1.tgz
+pnpm add /path/to/chimera-camera/vyui-chimera-camera-0.0.1.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
 cp node_modules/@vyui/chimera-camera/example/react/src/App.tsx src/App.tsx
