@@ -12,28 +12,30 @@
 </div>
 
 > [!WARNING]
-> **Pre-alpha.** Published as `0.0.x` while the surface settles. iOS photo
-> capture is proven on a physical iPhone; Android is written but has never been
-> compiled or run; the 0.3 recording and session controls are written but
-> unverified on both platforms. Expect breaking changes on any release, and read
-> the [platform support](#platform-support) table before depending on this.
-> `1.0.0` will be the first real launch.
+> **Pre-alpha.** The package publishes as `0.0.x` while the surface settles. iOS
+> photo capture is proven on a physical iPhone, Android is written but has never
+> been compiled or run, and the recording and session controls are written but
+> unverified on both platforms. Any release can break you, so read the
+> [platform support](#platform-support) table before depending on this. The first
+> real launch will be `1.0.0`.
 
-Chimera Camera is a native camera library for [Lynx](https://lynxjs.org),
-inspired by [`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera).
-It is built for Lynx from day one rather than as a React Native compatibility
-layer, so the public API is plain TypeScript that any JS framework can drive.
+Chimera Camera is a native camera library for [Lynx](https://lynxjs.org), built
+off the amazing work in [`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera).
+Its architecture, its native camera handling, and a good deal of its
+implementation come from that project, rebuilt against Lynx's native APIs. It
+targets Lynx directly instead of wrapping React Native, which is why the public
+API is plain TypeScript that any JS framework can drive.
 
-- 📸 Photo capture — embedded preview or the system camera
+- 📸 Photo capture, through an embedded preview or the system camera
 - 🎥 Video recording with optional audio *(written, unverified)*
 - 🔦 Zoom, torch, and tap-to-focus *(written, unverified)*
 - 🔄 Front/back switching, `resizeMode`, and live `active` toggling
 - 🖼️ Photo-library picking
 - 🔐 Camera and microphone permission checks and requests
-- ⚛️ Framework-neutral — React, Vue, Svelte, or plain TypeScript, no wrapper
+- ⚛️ Framework-neutral, so React, Vue, Svelte, or plain TypeScript all work unwrapped
 - 🧪 A mock adapter, so app flows can be built before any native wiring exists
-- 🩺 Install diagnostics that say exactly which native step is missing
-- 📁 File paths, not multi-megabyte base64 payloads, across the bridge
+- 🩺 Install diagnostics that name the native step you are missing
+- 📁 File paths across the bridge rather than multi-megabyte base64 payloads
 
 ## Installation
 
@@ -43,9 +45,9 @@ layer, so the public API is plain TypeScript that any JS framework can drive.
 pnpm add @vyui/chimera-camera
 ```
 
-That is all JavaScript needs. Types, the mock adapter, and the install
-diagnostics work immediately, so you can build your whole capture flow before
-touching a native host:
+JavaScript needs nothing further. The types, the mock adapter, and the install
+diagnostics all work immediately, so you can build a complete capture flow
+before touching a native host:
 
 ```ts
 import { createCameraModule } from '@vyui/chimera-camera'
@@ -53,12 +55,12 @@ import { createCameraModule } from '@vyui/chimera-camera'
 const camera = createCameraModule({ mock: true })
 ```
 
-For a real camera, your Lynx host app also has to compile the shipped native
-sources and register them. That is steps 2–4.
+Getting a real camera means your Lynx host app also compiles the shipped native
+sources and registers them, which is what steps 2 through 4 cover.
 
 ### 2. iOS
 
-Add the pod to your `Podfile`, then run `pod install`:
+Add the pod to your `Podfile` and run `pod install`:
 
 ```ruby
 target 'YourApp' do
@@ -70,10 +72,10 @@ target 'YourApp' do
 end
 ```
 
-The path is relative to your `Podfile` — adjust it for your layout. The podspec
-leaves its `Lynx` dependency unpinned so it resolves to whatever you pin above,
-and it adds `-ObjC` to your linker flags so `<camera-view>` survives a
-static-library build.
+The path resolves relative to your `Podfile`, so adjust it for your own layout.
+The podspec leaves its `Lynx` dependency unpinned so that it resolves to whatever
+version you pin above, and it adds `-ObjC` to your linker flags so that
+`<camera-view>` survives a static-library build.
 
 Add the usage strings to `Info.plist`:
 
@@ -94,17 +96,17 @@ let config = LynxConfig(provider: templateProvider)
 config.register(ChimeraCameraModule.self)
 ```
 
-`<camera-view>` self-registers via `LYNX_LAZY_REGISTER_UI` — no bootstrap call
-needed for the element itself.
+The element registers itself through `LYNX_LAZY_REGISTER_UI`, so `<camera-view>`
+needs no bootstrap call of its own.
 
-Not using CocoaPods? Add the three files in
-`node_modules/@vyui/chimera-camera/ios` to your app target directly. That is
-all the pod does.
+If you do not use CocoaPods, add the three files in
+`node_modules/@vyui/chimera-camera/ios` to your app target directly, which is
+all the pod does anyway.
 
 ### 3. Android
 
-The shipped `android/` folder is a complete `com.android.library` module.
-In `settings.gradle`:
+The shipped `android/` folder is a complete `com.android.library` module. In
+`settings.gradle`:
 
 ```gradle
 include ':chimera-camera'
@@ -120,9 +122,10 @@ dependencies {
 }
 ```
 
-Nothing to add to your `AndroidManifest.xml` — the manifest merger folds in the
-`CAMERA`/`RECORD_AUDIO` permissions, the proxy activity, and the FileProvider.
-`lynx` is `compileOnly` in the module, so it links against your host's version.
+Your `AndroidManifest.xml` needs nothing added, because the manifest merger
+folds in the `CAMERA` and `RECORD_AUDIO` permissions, the proxy activity, and
+the FileProvider on its own. The module declares `lynx` as `compileOnly`, so it
+links against whatever version your host already ships.
 
 Then register both surfaces in your Lynx host:
 
@@ -135,8 +138,8 @@ ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
 
 ### 4. Verify
 
-Lynx has no autolinking, so those registration calls in steps 2 and 3 are the
-one thing that cannot be automated away. Confirm they took:
+Lynx has no autolinking, which makes those registration calls in steps 2 and 3
+the one part nobody can automate away for you. Confirm they took:
 
 ```ts
 import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
@@ -145,19 +148,19 @@ console.log(await getCameraInstallStatusAsync())
 await assertCameraInstalledAsync()
 ```
 
-If native setup is incomplete, the thrown error names the missing piece —
-`NativeModules`, `CameraModule`, a required native method, or a native/JS
-version mismatch.
+When native setup is incomplete, the thrown error names the missing piece,
+whether that turns out to be `NativeModules`, `CameraModule`, a required native
+method, or a native/JS version mismatch.
 
-Full details, including troubleshooting:
-[docs/ios-install.md](docs/ios-install.md) ·
-[docs/android-install.md](docs/android-install.md). `example/host-ios` is a
+Full details and troubleshooting live in
+[docs/ios-install.md](docs/ios-install.md) and
+[docs/android-install.md](docs/android-install.md), and `example/host-ios` is a
 working Lynx iOS host you can copy from.
 
 ## Example
 
-Render the element, then drive it through a handle. No framework wrapper is
-involved — this is plain TypeScript against the DOM-ish Lynx element:
+You render the element and then drive it through a handle. No framework wrapper
+sits in between, because this is plain TypeScript talking to the Lynx element:
 
 ```tsx
 <camera-view id="camera" active={true} facing="back" bindready={onReady} />
@@ -176,7 +179,7 @@ await camera.startRecording({ enableAudio: true })
 const video = await camera.stopRecording()
 ```
 
-Runnable demos, same core driven by two different frameworks:
+Two runnable demos drive that same core from different frameworks:
 [`example/react`](example/react) and [`example/vue`](example/vue).
 
 ## Platform support
@@ -184,50 +187,68 @@ Runnable demos, same core driven by two different frameworks:
 | Platform | Status | Verified |
 | -------- | ------ | -------- |
 | iOS | Alpha | Device-proven on a physical iPhone: preview, photo capture, front/back switch, close/reopen. Recording and session controls are written but unverified. |
-| Android | Experimental | Written to the same contract as device-proven iOS and **believed to work — but never compiled or run** on any device or emulator. See [docs/android-testing.md](docs/android-testing.md). |
+| Android | Experimental | Written to the same contract as device-proven iOS and believed to work, but never compiled or run on any device or emulator. See [docs/android-testing.md](docs/android-testing.md). |
 | Mock | Stable | Framework-neutral JS double for all hosts. |
 
-Android ships as experimental on purpose: the Kotlin/CameraX surface mirrors
+Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors
 [docs/native-contract.md](docs/native-contract.md) and the device-proven iOS
-behavior, so we expect it to work — but that expectation is unverified. Do not
-treat Android as supported until it has passed device acceptance.
+behavior, which is fair reason to expect it to work, but nobody has confirmed
+that on hardware yet. Treat Android as unsupported until it passes device
+acceptance.
 
 ## How it fits together
 
-TypeScript is the developer-facing API, Swift/AVFoundation powers iOS,
-Kotlin/CameraX powers Android, and Lynx's native view and module APIs bridge
-between them. React Native, Nitro Modules, and JSI are not dependencies.
+TypeScript is the developer-facing API, Swift and AVFoundation power iOS, Kotlin
+and CameraX power Android, and Lynx's native view and module APIs bridge between
+them. React Native, Nitro Modules, and JSI are not dependencies.
 
-**Two surfaces, and every operation belongs to exactly one:**
+The library exposes two surfaces, and every operation belongs to exactly one of
+them:
 
-- **Module** (`createCameraModule()` → `CameraModuleClient`) — stateless,
+- **Module** (`createCameraModule()` → `CameraModuleClient`) handles stateless,
   one-shot operations that need no rendered view: permissions, device discovery,
-  system-camera capture, photo-library picking.
-- **Session** (`createCameraViewHandle()` → `CameraViewHandle`) — controls tied
-  to a live `<camera-view>`: view capture, recording, focus, zoom, torch, `ping()`.
+  system-camera capture, and photo-library picking.
+- **Session** (`createCameraViewHandle()` → `CameraViewHandle`) handles controls
+  tied to a live `<camera-view>`: view capture, recording, focus, zoom, torch,
+  and `ping()`.
 
-**Captures return a native file path, not base64.** Display one with
-`file://${photo.path}`, upload by streaming the file, and treat the temp file as
-yours to persist or delete. base64 is an opt-in, `maxDimension`-bounded fallback
-for mock/web previews and JSON transports.
+Captures return a native file path rather than base64. You display one with
+`file://${photo.path}`, upload by streaming the file at that path, and own the
+temp file from that point on, to persist or delete as you see fit. base64 stays
+available as an opt-in fallback bounded by `maxDimension`, which is what you
+want for mock previews, web previews, and JSON transports.
 
 ## Links
 
 - [Install: iOS](docs/ios-install.md) · [Android](docs/android-install.md)
-- [Native contract](docs/native-contract.md) — props, methods, events, error codes
-- [Framework integration](docs/framework-integration.md) — the element and SelectorQuery contract
-- [Output transport](docs/output-transport.md) — file paths, lifetime, and cleanup ownership
+- [Native contract](docs/native-contract.md) covers props, methods, events, and error codes
+- [Framework integration](docs/framework-integration.md) covers the element and SelectorQuery contract
+- [Output transport](docs/output-transport.md) covers file paths, lifetime, and cleanup ownership
 - [Mock testing](docs/mock-testing.md) · [LynxExplorer](docs/lynx-explorer.md)
 - [Publishing](docs/publishing.md) · [Changelog](CHANGELOG.md)
-- [Roadmap](ROADMAP.md) — the single source of truth for status, gates, and known debt
+- [Roadmap](ROADMAP.md) is the single source of truth for status, gates, and known debt
 
-## Credits
+## Credits and licensing
 
-Thanks to [Marc Rousavy](https://github.com/mrousavy) and the VisionCamera
-contributors for building and maintaining the camera library this project draws
-on. VisionCamera is MIT licensed, and Chimera Camera preserves the required
-copyright and license notices for anything reused — see
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Chimera Camera is built off
+[`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera)
+by [Marc Rousavy](https://github.com/mrousavy) and its contributors, and the
+debt runs deeper than inspiration. This project lifts source, structure, and
+implementation approach from it wherever the MIT license allows, then rebuilds
+that work against Lynx rather than React Native. VisionCamera is copyright 2021
+Marc Rousavy and MIT licensed, and those terms carry over to everything ported
+here. It is worth saying plainly that this would be a much smaller project
+without it.
 
-This is **not** the official VisionCamera package and is not affiliated with it.
-Chimera Camera is MIT licensed; see [LICENSE](LICENSE).
+The camera glyph in the logo, the banner, and the example app icons comes from
+[Material Symbols](https://github.com/google/material-design-icons), copyright
+Google LLC, licensed under the Apache License 2.0. The original glyph was
+recolored from a solid fill to a violet-to-teal gradient and rasterized to PNG
+and WebP.
+
+Chimera Camera's own code is MIT licensed, and [LICENSE](LICENSE) has the text.
+The package declares `MIT AND Apache-2.0` because the shipped artwork derives
+from Apache-licensed material, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+carries the full notices for both.
+
+This is not the official VisionCamera package and has no affiliation with it.
