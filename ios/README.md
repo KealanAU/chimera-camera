@@ -9,10 +9,17 @@ Installing `@kealanau/chimera-camera` puts this folder in:
 node_modules/@kealanau/chimera-camera/ios
 ```
 
-Chimera Camera is not configured for Lynx's native-library/autolink tooling, so
-host apps must add these files to their Xcode target and register the module in
-their Lynx bootstrap. This is the supported path; autolink packaging is deferred
-as a distribution task (see `ROADMAP.md`).
+The package ships `ChimeraCamera.podspec` at its root, so the normal way to get
+these into a host is one Podfile line:
+
+```ruby
+pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'
+```
+
+Adding the files to an Xcode target by hand works too — the pod does nothing
+more than that plus `-ObjC`. Either way the host still registers the module in
+its Lynx bootstrap; Lynx has no autolinking (see `ROADMAP.md`). Full steps:
+[../docs/ios-install.md](../docs/ios-install.md).
 
 Sources:
 
@@ -24,7 +31,8 @@ Sources:
   compiled into the target; no bootstrap call needed.
 
 Both compile clean against Lynx 3.9.0 pods on Xcode 26. The Swift module
-needs `use_modular_headers!` in the host Podfile (for `import Lynx`). Embedded
+needs `use_modular_headers!` in the host Podfile (for `import Lynx`) — a
+podspec cannot set that for you. Embedded
 preview, capture, front/back switching, and close/reopen were exercised on a
 physical iPhone on 2026-07-10; remaining acceptance is tracked in `ROADMAP.md`.
 

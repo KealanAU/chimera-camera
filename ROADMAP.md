@@ -87,7 +87,7 @@ does not block implementation completion.
 - [x] Package example exposes explicit native/mock install status and covers
       capture → bounded base64 preview → host-provided upload mutation.
 - [ ] Build the the consuming app capture → preview → upload flow against
-      `createCameraAdapter({ mock: true })`.
+      `createCameraModule({ mock: true })`.
 - [ ] Expose `getCameraInstallStatus()` in the app so native versus mock use is
       explicit rather than an invisible fallback.
 
@@ -95,9 +95,22 @@ does not block implementation completion.
 
 - [ ] Verify ownership of the `@kealanau` npm scope.
 - [ ] Create an npm Automation token and add it as the `NPM_TOKEN` repository
-      secret.
+      secret. **This is the only thing still blocking the first publish.**
 - [x] Add `npm test` to `.github/workflows/release.yml` before publishing.
-- [ ] Publish with the `alpha` dist-tag and label the release iOS-only.
+- [x] Add the `repository` field to package.json — npm rejects a `--provenance`
+      publish without it, and the release workflow sets
+      `NPM_CONFIG_PROVENANCE=true`.
+- [x] Renumber to `0.0.1` and default the release workflow to the `latest`
+      dist-tag, so a plain `pnpm add @kealanau/chimera-camera` resolves.
+- [x] Fix the release cadence: `0.0.x` is the whole pre-alpha and `1.0.0` is the
+      launch, so every release between them is a patch. `pnpm run bump` is the
+      only bump path, and `tests/version-sync.test.js` fails if the version
+      leaves the `0.0.x` track.
+- [x] Rebuild the README as a package front page — banner, logo, features,
+      numbered install steps, pre-alpha warning. Artwork sources live in
+      `images/src/`; `node images/src/render.mjs` regenerates the WebP files.
+- [ ] Publish `0.0.1` and label the release iOS-only in the GitHub release notes
+      (Android is experimental; see the README support matrix).
 - [ ] Install the published artifact in a clean host and repeat the basic flow.
 - [x] Add `CHANGELOG.md`.
 
@@ -118,19 +131,34 @@ way on both platforms. Autolinked distribution is deferred (see below).
 Autolinking is a distribution convenience, not an architecture gate: it removes
 the per-host manual native wiring, nothing more. npm install already delivers
 the JS plus `ios/`/`android/` sources; manual integration works today (iOS is
-device-proven). With a single in-house consumer (the consuming app), this buys little, so
-it is deferred until an external consumer needs zero-setup installs — realistically
-a 1.0 distribution task. The install/version diagnostics stay the safety net for
-manually integrated hosts.
+device-proven). With a single in-house consumer (the consuming app), full autolinking buys
+little, so it stays deferred until an external consumer needs zero-setup
+installs — realistically a 1.0 distribution task.
 
+The cheap 80% landed for `0.0.1` (2026-07-24): the package ships standard
+platform packaging, so getting the sources into a host build is one Podfile line
+and one `settings.gradle` include instead of copying files. What autolinking
+would still add on top is discovery — removing the single Lynx bootstrap
+registration call per platform. The install/version diagnostics stay the safety
+net either way.
+
+- [x] Ship iOS/Android package metadata so hosts consume the sources through
+      the normal platform tooling: `ChimeraCamera.podspec` (unpinned `Lynx` so
+      it resolves against the host's pin; `-ObjC` so the
+      `LYNX_LAZY_REGISTER_UI` class survives a static link) and `android/` as a
+      consumable `com.android.library` module (manifest merger handles the
+      permissions, proxy activity, and FileProvider).
+- [x] Update install, publishing, platform, and npm documentation for the
+      packaged flow.
 - [ ] Migrate to Lynx native-library/autolink conventions using tooling from
       the same Lynx release channel as the consuming app.
-- [ ] Add generated/spec inputs and iOS/Android package metadata for
-      `CameraModule` and `camera-view` discovery.
-- [ ] Prove a clean host can install the package and discover both native
-      surfaces without copying sources or registering them by hand.
-- [ ] Update install, publishing, platform, and npm documentation for the
-      autolinked flow.
+- [ ] Add generated/spec inputs for `CameraModule` and `camera-view`
+      *discovery*, removing the per-host bootstrap registration call.
+- [ ] Prove a clean host can install the package and reach both native surfaces
+      without registering them by hand.
+- [ ] Verify the podspec end to end against a published tarball: `pod install`
+      from `node_modules` in a clean Lynx host, then a real capture on device.
+      Only `pod lib lint` has been run so far.
 - [x] Retain useful install/version diagnostics for absent, stale, or
       mismatched native builds.
 
@@ -168,7 +196,7 @@ header listing what to confirm.
       more view-session controls. Split into `CameraModuleClient`
       (`createCameraModule`/`createNativeCameraModule`) for module operations
       and `CameraViewHandle` for live-session controls; `CameraAdapter` and its
-      factories are `@deprecated`, unchanged at runtime, and removed in 1.0.
+      factories are deleted (never published, so no deprecation window needed).
 - [x] Preserve structured native error codes in JavaScript instead of reducing
       failures to message-only `Error` objects.
 - [x] Normalize prop defaults, result/event shapes, and unsupported-feature
@@ -316,10 +344,17 @@ the cross-platform Lynx surface is stable.
 
 ## Known debt
 
-- The package is not configured for Lynx autolinking, so native installation
-  requires manual host integration. Deferred by decision (2026-07-18): manual
-  integration is the supported path until an external consumer needs zero-setup
-  installs. Revisit as a 1.0 distribution task.
+- The package is not configured for Lynx autolinking, so a host still makes one
+  bootstrap registration call per platform. Getting the sources into the build
+  is no longer manual as of `0.0.1` — a podspec covers iOS and `android/` is a
+  consumable Gradle module — but discovery is not automated. Deferred by
+  decision (2026-07-18, narrowed 2026-07-24); revisit as a 1.0 distribution
+  task.
+- The podspec has passed `pod lib lint` (it resolves Lynx from trunk and
+  compiles both native surfaces) but has never been consumed from an actual
+  `node_modules` install. `example/host-ios` still compiles the `ios/` sources
+  directly via `project.yml`. Verify the pod path against a published tarball
+  before telling an external consumer to rely on it.
 - The Android Kotlin/CameraX surface is written to the contract and believed
   correct, but has never been compiled or run. Its device/emulator audit was
   deferred at the 0.2→0.3 transition (decision 2026-07-19). Android must not be

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Chimera Host</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Chimera Host needs the camera to preview and capture photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Chimera Host needs the microphone to record video with audio.</string>
+	<!-- Dev host: the Lynx bundle is fetched from the rspeedy dev server on your
+	     LAN. iOS 14+ blocks LAN connections without this key (silent -1004). -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Chimera Host loads the Lynx bundle from the dev server on your local network.</string>
+	<!-- Dev host only: the Lynx bundle is fetched over plain HTTP from the
+	     rspeedy dev server on your LAN. ponytail: arbitrary loads is fine for a
+	     local dev host; a shipping app would scope this to the dev server. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

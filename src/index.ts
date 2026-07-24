@@ -1,5 +1,4 @@
 export type {
-  CameraAdapter,
   CameraDevice,
   CameraErrorEvent,
   CameraModule,
@@ -35,16 +34,14 @@ export {
   CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,
   assertCameraInstalledAsync,
-  createCameraAdapter,
   createCameraModule,
-  createNativeCameraAdapter,
   createNativeCameraModule,
   getCameraInstallStatus,
   getCameraInstallStatusAsync,
   getNativeCameraModule,
   type CameraInstallStatus,
   type CameraInstallStatusCode,
-  type CreateCameraAdapterOptions,
+  type CreateCameraModuleOptions,
 } from './native.js'
 
 export {

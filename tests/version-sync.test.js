@@ -33,6 +33,22 @@ test('package.json version matches CHIMERA_CAMERA_JS_VERSION', () => {
   assert.equal(pkg.version, CHIMERA_CAMERA_JS_VERSION)
 })
 
+// Everything before the 1.0.0 launch is a patch bump — `pnpm run bump` is the
+// only supported way to move the version. Delete this test when cutting 1.0.0.
+test('version stays on the 0.0.x patch track until 1.0.0', () => {
+  assert.match(
+    pkg.version,
+    /^0\.0\.\d+$/,
+    `expected a 0.0.x patch version, got "${pkg.version}" — use \`pnpm run bump\``,
+  )
+})
+
+test('the podspec ships and reads its version from package.json', () => {
+  const podspec = readFileSync(new URL('../ChimeraCamera.podspec', import.meta.url), 'utf8')
+  assert.ok(podspec.includes("package['version']"), 'podspec must derive s.version from package.json')
+  assert.ok(pkg.files.includes('ChimeraCamera.podspec'), 'package.json files must ship the podspec')
+})
+
 test('iOS nativeVersion matches CHIMERA_CAMERA_JS_VERSION', () => {
   assert.ok(
     swift.includes(`nativeVersion = "${CHIMERA_CAMERA_JS_VERSION}"`),
@@ -75,7 +91,7 @@ test('iOS camera-view reconciles active state after app foregrounding', () => {
 // platforms must expose the same method, error-code, and event surface as the
 // contract (docs/native-contract.md). This guards against the two drifting.
 test('native camera-view exposes the 0.3 session controls and recording', () => {
-  for (const method of ['setZoom', 'setTorch', 'focusAtPoint', 'startRecording', 'stopRecording']) {
+  for (const method of ['setZoom', 'setTorch', 'setExposureBias', 'focusAtPoint', 'startRecording', 'stopRecording']) {
     assert.ok(cameraView.includes(`LYNX_UI_METHOD(${method})`), `iOS view is missing ${method}`)
     assert.ok(androidCameraView.includes(`fun ${method}(`), `Android view is missing ${method}`)
   }

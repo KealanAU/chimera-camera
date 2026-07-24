@@ -20,10 +20,10 @@ During early development, link the package from the local workspace:
 }
 ```
 
-After an alpha publish:
+After publishing:
 
 ```sh
-pnpm add @kealanau/chimera-camera@alpha
+pnpm add @kealanau/chimera-camera
 ```
 
 ## Basic Usage

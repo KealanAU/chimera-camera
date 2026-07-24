@@ -57,6 +57,24 @@ const photo = await handle.capturePhoto({ includeBase64: true, maxDimension: 160
 `maxDimension` caps the longest side in pixels before encoding, so a 4032×3024
 capture downscaled to 1600 is a fraction of the bridge cost.
 
+## Saving a result to the gallery
+
+Uploading and saving are separate choices — a capture returns a temp path, and
+you decide what to do with it. To keep a capture in the device's media library
+(iOS Photos, Android gallery), hand the file to `saveToLibrary`:
+
+```ts
+const photo = await handle.capturePhoto()
+await fetch(uploadUrl, { method: 'POST', body: fileBody(photo.path) }) // upload it
+await camera.saveToLibrary(photo)                                      // and/or keep it
+```
+
+`saveToLibrary` takes what capture returns (photo or video — inferred from the
+extension) and copies it into the library. iOS prompts for add-only photo-library
+permission the first time (`NSPhotoLibraryAddUsageDescription` required in
+`Info.plist`); Android needs no permission on API 29+. It does not delete the
+temp file — cleanup is still yours (below).
+
 ## File lifetime and cleanup ownership
 
 **The library does not delete these files.** They are written to the OS temp

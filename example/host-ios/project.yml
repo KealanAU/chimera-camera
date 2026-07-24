@@ -1,0 +1,61 @@
+# XcodeGen spec — regenerate the .xcodeproj with `xcodegen generate`.
+# We keep the generated project OUT of git (see .gitignore); this file is the
+# source of truth. `setup.sh` runs xcodegen + pod install for you.
+name: ChimeraHost
+options:
+  bundleIdPrefix: com.kealanau.chimeracamera
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    MARKETING_VERSION: "0.2.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Xcode 15+ defaults this to YES, which blocks the CocoaPods resource-copy
+    # phase and our dev-server script from writing files (sandbox deny -1).
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+targets:
+  ChimeraHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: ChimeraHost
+      # The package's iOS native sources, compiled straight into the host so
+      # CameraModule + <camera-view> are the REAL native surface on device.
+      - path: ../../ios/ChimeraCameraModule.swift
+        group: ChimeraCamera (package ios/)
+      - path: ../../ios/ChimeraCameraView.h
+        group: ChimeraCamera (package ios/)
+      - path: ../../ios/ChimeraCameraView.m
+        group: ChimeraCamera (package ios/)
+    settings:
+      base:
+        INFOPLIST_FILE: ChimeraHost/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.kealanau.chimeracamera.host
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        # Your own Apple team, from the environment (xcodegen expands ${VAR}).
+        # Unset is fine — Xcode then asks you to pick a team on first Run.
+        # Persist yours in a git-ignored .env next to this file; setup.sh loads it.
+        DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
+    postBuildScripts:
+      # Write the Mac's current LAN IP into the built app as DevServerHost.txt;
+      # RootViewController reads it to auto-discover the rspeedy dev server, so
+      # you never type a URL (and never get trapped on localhost). Writes to the
+      # build products dir, never the source tree.
+      - name: Write dev server host
+        basedOnDependencyAnalysis: false
+        script: |
+          set -u
+          # Use the IP of the interface the default route actually goes out of, so
+          # this works on Wi-Fi (en0), Ethernet, AND iPhone hotspot/USB (e.g. en7).
+          # Falls back to en0/en1, then localhost (simulator).
+          iface=$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')
+          ip=$(ipconfig getifaddr "$iface" 2>/dev/null || ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo localhost)
+          DEST_DIR="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+          mkdir -p "${DEST_DIR}"
+          printf '%s\n' "${ip}" > "${DEST_DIR}/DevServerHost.txt"
+          echo "Dev server host: ${ip}"

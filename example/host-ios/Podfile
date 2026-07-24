@@ -1,0 +1,38 @@
+source 'https://cdn.cocoapods.org/'
+platform :ios, '15.0'
+
+target 'ChimeraHost' do
+  # use_modular_headers! so ChimeraCameraModule.swift can `import Lynx`.
+  use_modular_headers!
+
+  # Lynx 3.9.0 host runtime. Framework pulls PrimJS (the JS engine) in
+  # transitively, so we don't pin PrimJS ourselves (no stable PrimJS 3.9.0
+  # exists on trunk — only what Lynx/Framework resolves).
+  pod 'Lynx', '3.9.0', :subspecs => ['Framework']
+  # Image lets <image> (the captured-photo preview) decode; Log + Http round out
+  # the default services. XElement is Lynx's standard element set.
+  pod 'LynxService', '3.9.0', :subspecs => ['Image', 'Log', 'Http']
+  pod 'SDWebImage', '5.15.5'
+  pod 'SDWebImageWebPCoder', '0.11.0'
+  pod 'XElement', '3.9.0'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
+
+    # Lynx pins -Werror as a PER-FILE COMPILER_FLAG on ~900 sources, and Xcode 26
+    # emits new deprecation warnings (e.g. -keyWindow) that trip it. Per-file flags
+    # come last on the clang line, so appending -Wno-error there (and nowhere else)
+    # is what actually wins.
+    next unless target.respond_to?(:source_build_phase)
+    target.source_build_phase.files.each do |file|
+      settings = file.settings
+      next unless settings && settings['COMPILER_FLAGS']
+      settings['COMPILER_FLAGS'] = "#{settings['COMPILER_FLAGS']} -Wno-error"
+      file.settings = settings
+    end
+  end
+end

@@ -57,6 +57,11 @@ export interface ImageOutputOptions {
 }
 
 export interface CapturePhotoOptions extends ImageOutputOptions {
+  /**
+   * Fires at the shutter only; the preview stays unlit (use `setTorch` for a
+   * constant light). `auto` leaves the decision to the OS scene metering.
+   * Ignored on devices with no flash unit. Default `off`.
+   */
   flash?: FlashMode
   /**
    * View-session capture only. The V0 system camera UI owns its shutter
@@ -93,6 +98,13 @@ export interface VideoFile {
 
 export interface CameraReadyEvent {
   deviceId: string
+  /** Device zoom envelope in videoZoomFactor units (iOS `min/maxAvailableVideoZoomFactor`). */
+  minZoom?: number
+  maxZoom?: number
+  /** videoZoomFactor at which the wide lens sits (display 1×); maps display multipliers → factors. */
+  wideFactor?: number
+  /** Zoom factors where the virtual device switches lenses optically (empty for single-lens devices). */
+  switchOverZoomFactors?: number[]
 }
 
 export interface CameraPingResult {
@@ -142,6 +154,8 @@ export interface CameraSessionMethods {
   focusAtPoint(point: Point): Promise<void>
   setZoom(value: number): Promise<void>
   setTorch(mode: TorchMode): Promise<void>
+  /** Exposure bias in EV; clamped to the device's supported range rather than rejecting. */
+  setExposureBias(bias: number): Promise<void>
 }
 
 export interface CameraViewMethods extends CameraSessionMethods {
@@ -162,14 +176,14 @@ export interface CameraModuleClient extends CameraModule {
   capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
   /** Picks an existing photo via the system library picker (no permission needed). */
   pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile>
+  /**
+   * Saves a captured photo or video temp file to the device's media library
+   * (iOS Photos, Android gallery/MediaStore). Orthogonal to capture: a capture
+   * returns a temp path you can upload; call this when the user wants it kept.
+   * Photo vs. video is inferred from the file extension. iOS needs the add-only
+   * photo-library permission (`NSPhotoLibraryAddUsageDescription`); Android needs
+   * `WRITE_EXTERNAL_STORAGE` only below API 29. Rejects `library/permission-denied`
+   * or `library/write-failed`.
+   */
+  saveToLibrary(file: PhotoFile | VideoFile): Promise<void>
 }
-
-/**
- * @deprecated The V0 combined adapter merges the stateless module surface with
- * live-session controls (`startRecording`/`stopRecording`/`focusAtPoint`/
- * `setZoom`/`setTorch`) that have no session on a module object and only throw.
- * Use `createCameraModule()` for permissions, device discovery, system capture,
- * and picking, and `createCameraViewHandle()` for live-session controls.
- * Scheduled for removal in 1.0.
- */
-export interface CameraAdapter extends CameraModuleClient, CameraSessionMethods {}

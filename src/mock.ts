@@ -36,8 +36,6 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
   const captureDelayMs = options.captureDelayMs ?? 0
 
   let recordingStartedAt: number | null = null
-  let zoom = 1
-  let torch: TorchMode = 'off'
 
   return {
     async getPermissions(): Promise<CameraPermissions> {
@@ -70,6 +68,11 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
       return mockPhotoResult(photo, options?.includeBase64)
     },
 
+    async saveToLibrary(_file: PhotoFile | VideoFile): Promise<void> {
+      // No device library under the mock; the call just resolves.
+      return
+    },
+
     async startRecording(options?: StartRecordingOptions): Promise<void> {
       // Mirror the native contract's rejections so apps exercise these paths.
       if (recordingStartedAt !== null) {
@@ -99,14 +102,16 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
       return
     },
 
-    async setZoom(value: number): Promise<void> {
-      zoom = value
-      void zoom
+    async setZoom(_value: number): Promise<void> {
+      return
     },
 
-    async setTorch(mode: TorchMode): Promise<void> {
-      torch = mode
-      void torch
+    async setTorch(_mode: TorchMode): Promise<void> {
+      return
+    },
+
+    async setExposureBias(_bias: number): Promise<void> {
+      return
     },
   }
 }

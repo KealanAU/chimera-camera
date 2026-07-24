@@ -1,9 +1,10 @@
-// Reference build config for the Chimera Camera Android sources. UNVERIFIED.
+// Build config for the Chimera Camera Android library.
 //
-// With no autolinking (deferred — see ROADMAP.md), a Lynx Android host integrates
-// these sources manually: either add this directory as a Gradle module, or point
-// a source set at android/src/main and add the dependencies below to the host.
-// Pin the Lynx dependency to the version the host app uses.
+// This directory is a consumable Gradle module: a host app includes it from
+// node_modules (see ../docs/android-install.md) rather than copying sources.
+// Lynx is compileOnly so the module links against whatever version the host
+// ships. Lynx has no autolinking (see ROADMAP.md), so the host still registers
+// the module and the camera-view behavior itself.
 
 plugins {
     id 'com.android.library'

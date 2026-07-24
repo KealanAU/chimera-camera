@@ -10,7 +10,6 @@ import type {
   VideoFile,
 } from './types.js'
 
-/** Tag name the native element registers under on iOS and Android. */
 export const CAMERA_VIEW_TAG = 'camera-view'
 
 interface SelectorQueryNode {
@@ -114,6 +113,10 @@ export function createCameraViewHandle(selector: string): CameraViewHandle {
 
     async setTorch(mode: TorchMode): Promise<void> {
       await invokeCameraViewMethod(selector, 'setTorch', { mode })
+    },
+
+    async setExposureBias(bias: number): Promise<void> {
+      await invokeCameraViewMethod(selector, 'setExposureBias', { bias })
     },
   }
 }

@@ -1,8 +1,20 @@
 {
   "name": "@kealanau/chimera-camera",
-  "version": "0.2.0-alpha.0",
+  "version": "0.0.1",
   "description": "A Lynx-native camera surface with plain TypeScript APIs and native iOS/Android hooks.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KealanAU/chimera-camera.git"
+  },
+  "homepage": "https://github.com/KealanAU/chimera-camera#readme",
+  "keywords": [
+    "lynx",
+    "camera",
+    "ios",
+    "android",
+    "native-module"
+  ],
   "type": "module",
   "packageManager": "pnpm@10.30.3",
   "sideEffects": false,
@@ -28,18 +40,26 @@
   },
   "files": [
     "dist",
+    "ChimeraCamera.podspec",
     "ios",
     "android",
     "docs",
     "example",
+    "images",
     "README.md",
     "CHANGELOG.md",
     "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "!docs/archive",
+    "!images/src",
+    "!example/**/dist",
+    "!example/**/node_modules"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "typecheck:examples": "pnpm --filter @chimera-camera/react --filter @chimera-camera/vue run typecheck",
     "build": "tsc -p tsconfig.json",
+    "bump": "node scripts/bump-patch.mjs",
     "pretest": "pnpm run build",
     "test": "node --test 'tests/*.test.js'"
   },
@@ -47,7 +67,6 @@
     "typescript": "^5.9.3"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

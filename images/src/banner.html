@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  Source for images/banner-light.png and images/banner-dark.png.
+  Regenerate both with: node images/src/render.mjs
+  (Chrome headless screenshots this at 2x; ?theme=dark picks the dark variant.)
+-->
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg-a: #f6f5ff;
+    --bg-b: #ffffff;
+    --glow: rgba(107, 71, 220, 0.18);
+    --glow-2: rgba(47, 211, 174, 0.16);
+    --title: #171233;
+    --tagline: #574f78;
+    --rule: rgba(23, 18, 51, 0.1);
+  }
+  .dark {
+    --bg-a: #171130;
+    --bg-b: #0f0b22;
+    --glow: rgba(122, 88, 240, 0.35);
+    --glow-2: rgba(47, 211, 174, 0.2);
+    --title: #ffffff;
+    --tagline: #a9a2c9;
+    --rule: rgba(255, 255, 255, 0.14);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    width: 1280px;
+    height: 264px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    background:
+      radial-gradient(680px 340px at 84% 8%, var(--glow), transparent 70%),
+      radial-gradient(520px 320px at 6% 104%, var(--glow-2), transparent 68%),
+      linear-gradient(160deg, var(--bg-a), var(--bg-b));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 0 60px;
+    box-sizing: border-box;
+  }
+
+  img {
+    height: 170px;
+    flex: none;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 66px;
+    font-weight: 700;
+    letter-spacing: -2.2px;
+    line-height: 1.02;
+    color: var(--title);
+  }
+
+  p {
+    margin: 14px 0 0;
+    font-size: 23px;
+    font-weight: 450;
+    letter-spacing: -0.2px;
+    color: var(--tagline);
+  }
+
+  /* Hairline under the wordmark, tinted with the mark's own gradient. */
+  .rule {
+    margin-top: 22px;
+    width: 232px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #2fd3ae, #4a87d6 52%, #6b47dc);
+  }
+</style>
+
+<img src="./logo.svg" alt="" />
+<div>
+  <h1>Chimera Camera</h1>
+  <p>A native camera for Lynx &mdash; iOS &amp; Android, from any JS framework.</p>
+  <div class="rule"></div>
+</div>
+
+<script>
+  if (location.search.includes('dark')) document.documentElement.className = 'dark'
+</script>

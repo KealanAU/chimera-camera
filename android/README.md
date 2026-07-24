@@ -15,17 +15,28 @@ Installing `@kealanau/chimera-camera` puts this folder in:
 node_modules/@kealanau/chimera-camera/android
 ```
 
-## Integration (manual — autolink is deferred)
+## Integration
 
-1. Add these sources to the host build: either include this directory as a Gradle
-   module, or point a source set at `android/src/main` and add the dependencies
-   from `build.gradle` (CameraX + AndroidX lifecycle). Pin `lynx` to the host's
-   version.
-2. Merge `src/main/AndroidManifest.xml` — the `CAMERA`/`RECORD_AUDIO` permissions,
-   the transparent `ChimeraProxyActivity`, and the `FileProvider`. Confirm the
-   FileProvider authority (`${applicationId}.chimeracamera.fileprovider`) matches
-   the one in `ChimeraProxyActivity`.
-3. Register the module and the `camera-view` behavior in the Lynx host:
+This directory is a complete `com.android.library` module, so the host includes
+it rather than copying sources. Full steps:
+[../docs/android-install.md](../docs/android-install.md).
+
+1. In the host's `settings.gradle`:
+
+   ```gradle
+   include ':chimera-camera'
+   project(':chimera-camera').projectDir =
+       new File(rootProject.projectDir, '../node_modules/@kealanau/chimera-camera/android')
+   ```
+
+   then `implementation project(':chimera-camera')` in the app module. `lynx` is
+   `compileOnly` here, so it links against the host's own Lynx.
+2. Nothing to merge by hand — the manifest merger pulls in
+   `src/main/AndroidManifest.xml` (the `CAMERA`/`RECORD_AUDIO` permissions, the
+   transparent `ChimeraProxyActivity`, and the `FileProvider` authority
+   `${applicationId}.chimeracamera.fileprovider`).
+3. Register the module and the `camera-view` behavior in the Lynx host — Lynx
+   has no autolinking, so this call is yours to make:
 
    ```kotlin
    LynxEnv.inst().registerModule("CameraModule", ChimeraCameraModule::class.java)

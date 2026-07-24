@@ -1,10 +1,13 @@
 package com.kealanau.chimeracamera
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.os.Build
+import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import com.lynx.jsbridge.LynxMethod
 import com.lynx.jsbridge.LynxModule
@@ -12,6 +15,8 @@ import com.lynx.react.bridge.Callback
 import com.lynx.react.bridge.JavaOnlyArray
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
+import java.io.File
+import java.io.IOException
 
 /**
  * UNVERIFIED FIRST CUT. Written to match docs/native-contract.md and the iOS
@@ -78,6 +83,72 @@ class ChimeraCameraModule(context: Context) : LynxModule(context) {
         ChimeraProxyActivity.start(appContext, ChimeraProxyActivity.MODE_PICK, options, callback)
     }
 
+    /**
+     * Saves a captured photo/video temp file to the gallery via MediaStore.
+     * API 29+ needs no permission (scoped storage); below that it needs
+     * WRITE_EXTERNAL_STORAGE, requested through the proxy activity here.
+     * Photo vs. video is inferred from the file extension.
+     */
+    @LynxMethod
+    fun saveToLibrary(options: ReadableMap, callback: Callback) {
+        val path = if (options.hasKey("path")) options.getString("path") else null
+        if (path.isNullOrEmpty()) {
+            callback.invoke(errorResult("library/write-failed", "No file path was provided to save."))
+            return
+        }
+        val file = File(path)
+
+        fun doSave() {
+            try {
+                saveToMediaStore(file)
+                callback.invoke(JavaOnlyMap())
+            } catch (error: Throwable) {
+                callback.invoke(errorResult("library/write-failed", error.message ?: "Could not save to the gallery."))
+            }
+        }
+
+        val needsLegacyStorage = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        if (!needsLegacyStorage || hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            doSave()
+            return
+        }
+        ChimeraProxyActivity.requestPermission(appContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+            if (hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                doSave()
+            } else {
+                callback.invoke(errorResult("library/permission-denied", "Storage permission is required to save to the gallery."))
+            }
+        }
+    }
+
+    private fun saveToMediaStore(file: File) {
+        val isVideo = file.extension.lowercase() in setOf("mov", "mp4", "m4v")
+        val collection =
+            if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
+            put(MediaStore.MediaColumns.MIME_TYPE, if (isVideo) "video/mp4" else "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, if (isVideo) "Movies" else "Pictures")
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+        }
+
+        val resolver = appContext.contentResolver
+        val uri = resolver.insert(collection, values) ?: throw IOException("MediaStore rejected the insert.")
+        resolver.openOutputStream(uri).use { output ->
+            file.inputStream().use { input ->
+                input.copyTo(output ?: throw IOException("No output stream for $uri."))
+            }
+        }
+        // IS_PENDING hides the row until we finish writing; clear it so it shows up.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+        }
+    }
+
     private fun requestPermission(permission: String, callback: Callback) {
         if (hasPermission(permission)) {
             callback.invoke(permissionStatus(permission))
@@ -121,7 +192,7 @@ class ChimeraCameraModule(context: Context) : LynxModule(context) {
         }
 
     companion object {
-        const val NATIVE_VERSION = "0.2.0-alpha.0"
+        const val NATIVE_VERSION = "0.0.1"
 
         fun errorResult(code: String, message: String): JavaOnlyMap {
             val error = JavaOnlyMap()

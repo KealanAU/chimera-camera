@@ -6,12 +6,12 @@ on:
       tag:
         description: npm dist-tag
         required: true
-        default: alpha
+        default: latest
         type: choice
         options:
-          - alpha
-          - beta
           - latest
+          - beta
+          - alpha
 
 permissions:
   contents: read

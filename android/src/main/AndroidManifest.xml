@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  UNVERIFIED. Manifest fragment for the Chimera Camera Android sources. The host
+  Manifest fragment for the Chimera Camera Android sources. The host
   app merges these permissions, the transparent proxy activity, and the
   FileProvider. Confirm the FileProvider authority matches the one used in
   ChimeraProxyActivity ("$packageName.chimeracamera.fileprovider").
@@ -9,6 +9,9 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- saveToLibrary only: API 29+ uses scoped storage and needs no permission. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 

@@ -4,7 +4,7 @@ import test, { afterEach } from 'node:test'
 import {
   CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,
-  createCameraAdapter,
+  createCameraModule,
   getCameraInstallStatus,
   getCameraInstallStatusAsync,
 } from '../dist/index.js'
@@ -61,13 +61,23 @@ test('reports a capture()-only host as stale and incomplete', () => {
   assert.equal(status.ok, false)
   assert.equal(status.code, 'native-methods-missing')
   assert.ok(status.missingMethods.includes('capturePhoto'))
-  assert.throws(() => createCameraAdapter(), /missing required methods/)
+  assert.throws(() => createCameraModule(), /missing required methods/)
 })
 
-test('createCameraAdapter rejects a registered module that cannot capture', () => {
+test('createCameraModule rejects a registered module that cannot capture', () => {
   globalThis.NativeModules = { CameraModule: { getPermissions: (cb) => cb({}) } }
-  assert.throws(() => createCameraAdapter(), /missing required methods/)
-  assert.equal(createCameraAdapter({ optional: true }), null)
+  assert.throws(() => createCameraModule(), /missing required methods/)
+  assert.equal(createCameraModule({ optional: true }), null)
+})
+
+test('createCameraModule rejects a capturePhoto-only host, matching install status', () => {
+  // capturePhoto present but the other required methods absent: createCameraModule
+  // must agree with getCameraInstallStatus instead of handing back a module whose
+  // getPermissions() throws at call time.
+  globalThis.NativeModules = { CameraModule: { capturePhoto: (_o, cb) => cb({}) } }
+  assert.equal(getCameraInstallStatus().ok, false)
+  assert.throws(() => createCameraModule(), /missing required methods/)
+  assert.equal(createCameraModule({ optional: true }), null)
 })
 
 test('reports installed for a complete native module', () => {
@@ -115,18 +125,18 @@ test('assertCameraInstalled throws an actionable message', () => {
   assert.doesNotThrow(() => assertCameraInstalled())
 })
 
-test('createCameraAdapter throws loudly when nothing is available', () => {
-  assert.throws(() => createCameraAdapter(), /not installed correctly/)
-  assert.throws(() => createCameraAdapter(), /LynxExplorer \/ Lynx Go/)
-  assert.throws(() => createCameraAdapter(), /mock: true/)
+test('createCameraModule throws loudly when nothing is available', () => {
+  assert.throws(() => createCameraModule(), /not installed correctly/)
+  assert.throws(() => createCameraModule(), /LynxExplorer \/ Lynx Go/)
+  assert.throws(() => createCameraModule(), /mock: true/)
 })
 
-test('createCameraAdapter({ optional: true }) returns null instead of throwing', () => {
-  assert.equal(createCameraAdapter({ optional: true }), null)
+test('createCameraModule({ optional: true }) returns null instead of throwing', () => {
+  assert.equal(createCameraModule({ optional: true }), null)
 })
 
-test('createCameraAdapter picks native or mock when available', async () => {
-  const mock = createCameraAdapter({ mock: true })
+test('createCameraModule picks native or mock when available', async () => {
+  const mock = createCameraModule({ mock: true })
   assert.equal((await mock.getPermissions()).camera, 'authorized')
 
   globalThis.NativeModules = {
@@ -134,6 +144,6 @@ test('createCameraAdapter picks native or mock when available', async () => {
       getPermissions: (callback) => callback({ camera: 'denied', microphone: 'denied' }),
     }),
   }
-  const native = createCameraAdapter()
+  const native = createCameraModule()
   assert.equal((await native.getPermissions()).camera, 'denied')
 })

@@ -39,6 +39,7 @@ const METHOD_PARAMS = [
   ['ping', [], {}],
   ['setZoom', [3], { value: 3 }],
   ['setTorch', ['on'], { mode: 'on' }],
+  ['setExposureBias', [1.5], { bias: 1.5 }],
   ['focusAtPoint', [{ x: 0.25, y: 0.75 }], { x: 0.25, y: 0.75 }],
   ['capturePhoto', [{ quality: 0.5, includeBase64: true, maxDimension: 1024 }], { quality: 0.5, includeBase64: true, maxDimension: 1024 }],
   ['startRecording', [{ enableAudio: true, maxDurationMs: 5000, maxFileSizeBytes: 4_000_000 }], { enableAudio: true, maxDurationMs: 5000, maxFileSizeBytes: 4_000_000 }],

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 320" width="252" height="320">
+  <defs>
+    <linearGradient id="cc-mark" gradientUnits="userSpaceOnUse" x1="8" y1="312" x2="238" y2="16">
+      <stop offset="0" stop-color="#2FD3AE" />
+      <stop offset="0.52" stop-color="#4A87D6" />
+      <stop offset="1" stop-color="#6B47DC" />
+    </linearGradient>
+
+    <!-- Camera module silhouette, reused as the shape and as the gap punched in the C. -->
+    <path id="cc-module" d="
+      M 164 112 L 198 112 Q 205 112 209 119 L 213 126 L 222 126
+      Q 244 126 244 148 L 244 194 Q 244 216 222 216 L 150 216
+      Q 128 216 128 194 L 128 148 Q 128 126 150 126 L 153 126 L 157 119
+      Q 161 112 164 112 Z
+      M 186 171 m -21 0 a 21 21 0 1 0 42 0 a 21 21 0 1 0 -42 0 Z
+    " />
+
+    <!-- Punches a transparent gap around the module so the mark reads on any background. -->
+    <mask id="cc-gap">
+      <rect x="0" y="0" width="252" height="320" fill="#fff" />
+      <use href="#cc-module" fill="#000" stroke="#000" stroke-width="22" stroke-linejoin="round" />
+    </mask>
+  </defs>
+
+  <!-- The C: a phone body bitten inward on the right, front-camera dot punched out. -->
+  <path mask="url(#cc-gap)" fill="url(#cc-mark)" fill-rule="evenodd" d="
+    M 36 0 L 142 0 Q 176 0 176 34 L 176 74
+    Q 176 98 152 104 Q 118 114 118 160 Q 118 206 152 216
+    Q 176 222 176 246 L 176 286 Q 176 320 142 320
+    L 36 320 Q 0 320 0 286 L 0 34 Q 0 0 36 0 Z
+    M 131 50 m -11 0 a 11 11 0 1 0 22 0 a 11 11 0 1 0 -22 0 Z
+  " />
+
+  <use href="#cc-module" fill="url(#cc-mark)" fill-rule="evenodd" />
+</svg>

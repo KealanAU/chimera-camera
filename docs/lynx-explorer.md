@@ -32,7 +32,7 @@ pnpm create rspeedy@latest camera-demo
 cd camera-demo
 
 # 2. Install this package. It is NOT on npm yet — use the local tarball:
-pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.2.0-alpha.0.tgz
+pnpm add /path/to/chimera-camera/kealanau-chimera-camera-0.0.1.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
 cp node_modules/@kealanau/chimera-camera/example/react/src/App.tsx src/App.tsx
@@ -51,10 +51,10 @@ Expected result on Lynx Go: an orange `MOCK ADAPTER` badge,
 mock capture. A green `NATIVE CAMERA` badge only appears in a custom host
 app that compiles this package's `ios/` sources.
 
-`example/MockCameraDemo.vue` targets the separate, pre-alpha Vue Lynx scaffold
-created with `npm create vue-lynx@latest`. It is not verified by this package.
 A standard `create-rspeedy` project is ReactLynx and uses the demo at
-`example/react/src/App.tsx`.
+`example/react/src/App.tsx`. For a Vue Lynx scaffold (`npm create
+vue-lynx@latest`), use `example/vue/src/App.vue` instead — it drives the same
+contract through the same `example/shared/camera-core.ts`.
 
 ## Mock Adapter Basics
 
@@ -86,8 +86,9 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@kealanau/chimera-camera/example/react/src/App.tsx   (ReactLynx — standard)
-node_modules/@kealanau/chimera-camera/example/MockCameraDemo.vue  (pre-alpha Vue Lynx target)
+node_modules/@kealanau/chimera-camera/example/react/src/App.tsx      (ReactLynx — standard)
+node_modules/@kealanau/chimera-camera/example/vue/src/App.vue        (Vue Lynx)
+node_modules/@kealanau/chimera-camera/example/shared/camera-core.ts  (shared by both)
 ```
 
 Both show the host-detection pattern, but only the ReactLynx example is the

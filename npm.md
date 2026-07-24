@@ -34,14 +34,14 @@ nothing. Since the package is MIT licensed and built on MIT-licensed
 VisionCamera ideas anyway, public is probably fine — but it should be a
 decision, not a surprise.
 
-## How to publish the alpha
+## How to publish
 
 The flow is already wired up; the steps are in
 [docs/publishing.md](docs/publishing.md). In short: create an npm automation
 token, add it to the GitHub repo as the `NPM_TOKEN` secret, then run the
-`Release` workflow manually from GitHub Actions with the `alpha` dist-tag.
-The workflow installs, builds, and runs
-`npm publish --access public --tag alpha --provenance`.
+`Release` workflow manually from GitHub Actions. It defaults to the `latest`
+dist-tag, so the published version is what a plain
+`pnpm add @kealanau/chimera-camera` resolves to.
 
 Before triggering it, the local sanity check is:
 
@@ -57,40 +57,73 @@ is the cheapest way to catch a stray file before it becomes public.
 ## What ships in the tarball
 
 The `files` list in package.json controls this: `dist/` (the compiled JS and
-type declarations), `ios/` and `android/` (native sources), `docs/` (including
-the archived planning specs), `example/`, plus the README, LICENSE, and
-third-party notices. Note that the native code ships as plain source, not as a
-prebuilt framework. The package is not configured for Lynx autolinking (deferred
-as a distribution task — see `ROADMAP.md`), so a host app that installs it
-compiles and registers the `ios/` (and eventually `android/`) sources itself —
-exactly what the consuming app's ios-host project does today, just from a different path.
+type declarations), `ChimeraCamera.podspec`, `ios/` and `android/` (native
+sources), `docs/`, `example/`, plus the README, LICENSE, and third-party
+notices.
+
+## What "it just works" does and doesn't mean
+
+The JavaScript half genuinely is automatic. Install the package, import from it,
+and the types, the mock adapter, and the install diagnostics are there — nothing
+else to do.
+
+The native half cannot be, and it is worth being precise about why. Two separate
+things would have to happen for a camera to appear with zero setup:
+
+1. **Get the native code into the app's build.** This part is now one line per
+   platform. iOS ships a CocoaPods podspec, so the host adds
+   `pod 'ChimeraCamera', :path => '../node_modules/@kealanau/chimera-camera'`
+   and `pod install` compiles the Swift and Objective-C into the app. Android
+   ships `android/` as a real `com.android.library` Gradle module, so the host
+   includes it in `settings.gradle` — and the Android manifest merger folds in
+   the camera permissions, the proxy activity, and the FileProvider on its own.
+
+2. **Tell Lynx the module exists at runtime.** This part is still one line of
+   host code: `config.register(ChimeraCameraModule.self)` on iOS,
+   `LynxEnv.inst().registerModule(...)` plus the `camera-view` behavior on
+   Android. React Native automates the equivalent step with autolinking; Lynx
+   has no such mechanism, so there is nothing to hook into. (`<camera-view>`
+   itself does self-register on iOS via `LYNX_LAZY_REGISTER_UI` — that is why the
+   podspec adds `-ObjC`, without which the linker would drop the class from a
+   static build and the element would silently never appear.)
+
+So the honest promise is: install, two build-config lines, one registration
+line. Not zero, but not "drag these files into Xcode" either.
+
+The native code also ships as plain source rather than a prebuilt
+`.xcframework` or `.aar`. That is deliberate: it links against whatever Lynx
+version the host pins, and a prebuilt binary would freeze one Lynx version into
+the package.
 
 ## Switching the consuming app over
 
-Once the package is on npm, the consuming app drops the sibling-checkout dependency in
-two moves. First, in the app:
+Once the package is on npm, the consuming app drops the sibling-checkout dependency:
 
 ```sh
-pnpm add @kealanau/chimera-camera@alpha
+pnpm add @kealanau/chimera-camera
 ```
 
-Then in `consumer-app/app/native/ios-host/project.yml`, swap the ChimeraCamera source
-path from `../../../../chimera-camera/ios` to
-`../../node_modules/@kealanau/chimera-camera/ios`. There is already a comment in
-that file marking this exact swap, so future-you will find it.
+Then remove the three `../../../../chimera-camera/ios/*` source entries from
+`consumer-app/app/native/ios-host/project.yml` and add the pod line to that host's
+`Podfile` instead. There is already a comment in `project.yml` marking the
+swap.
 
 ## Versioning
 
-The current version is `0.1.0-alpha.0`. The `-alpha.0` suffix is a prerelease
-identifier, and publishing under the `alpha` dist-tag means people only get it
-if they explicitly ask for `@alpha` — a plain `npm install
-@kealanau/chimera-camera` would not pick it up. That is the right posture while
-the API and native wiring are still moving (the roadmap has the bridge spike
-in progress and Android not started).
+The first published version is `0.0.1`, under the default `latest` dist-tag —
+so a plain `pnpm add @kealanau/chimera-camera` picks it up with no `@alpha`
+suffix. The `0.0.x` line *is* the alpha; there is no separate dist-tag to
+remember, and the README carries the pre-alpha warning where people actually
+read it.
 
-Bump the version every time you publish; npm refuses to republish an existing
-version. While things are unstable, bump the prerelease number
-(`0.1.0-alpha.1`, `.2`, and so on) for each alpha. When the V1 surface feels
-settled, drop the prerelease suffix, publish `0.1.0` under the default
-`latest` tag, and from there follow ordinary semver: patch for fixes, minor
-for new capability, major for breaking changes.
+Every release until launch is a patch bump: `0.0.1`, `0.0.2`, `0.0.3`, and so
+on. `1.0.0` is the first real launch, and there is deliberately nothing in
+between — no minor releases to reason about, no judgement call at release time
+about whether a change "deserves" one. `pnpm run bump` is the mechanism: it
+increments the patch across all four files that carry the version
+(`package.json`, `src/native.ts`, the Swift module, the Kotlin module), and
+`tests/version-sync.test.js` fails CI both if they drift apart and if the
+version ever leaves the `0.0.x` track. Cutting `1.0.0` means doing it by hand
+and deleting that guard on purpose.
+
+Bump every time you publish; npm refuses to republish an existing version.

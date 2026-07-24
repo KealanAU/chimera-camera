@@ -1,11 +1,12 @@
 import AVFoundation
 import Foundation
 import Lynx
+import Photos
 import UIKit
 
 @objcMembers
 public final class ChimeraCameraModule: NSObject, LynxModule {
-    private static let nativeVersion = "0.2.0-alpha.0"
+    private static let nativeVersion = "0.0.1"
 
     public static var name: String { "CameraModule" }
 
@@ -18,6 +19,7 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
             "getAvailableCameraDevices": NSStringFromSelector(#selector(getAvailableCameraDevices(_:))),
             "capturePhoto": NSStringFromSelector(#selector(capturePhoto(_:callback:))),
             "pickPhoto": NSStringFromSelector(#selector(pickPhoto(_:callback:))),
+            "saveToLibrary": NSStringFromSelector(#selector(saveToLibrary(_:callback:))),
         ]
     }
 
@@ -92,6 +94,49 @@ public final class ChimeraCameraModule: NSObject, LynxModule {
         DispatchQueue.main.async {
             SystemCameraCapture.present(options: options, source: .photoLibrary) { callback($0) }
         }
+    }
+
+    /// Saves a captured photo/video temp file to Photos. Needs the add-only
+    /// photo-library permission (`NSPhotoLibraryAddUsageDescription` in Info.plist);
+    /// requested here at save time. Photo vs. video is inferred from the extension.
+    public func saveToLibrary(_ options: [String: Any], callback: @escaping LynxCallbackBlock) {
+        guard let path = options["path"] as? String, !path.isEmpty else {
+            callback(Self.errorResult("library/write-failed", "No file path was provided to save."))
+            return
+        }
+        let url = URL(fileURLWithPath: path)
+        let isVideo = ["mov", "mp4", "m4v"].contains(url.pathExtension.lowercased())
+
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            guard status == .authorized || status == .limited else {
+                DispatchQueue.main.async {
+                    callback(Self.errorResult(
+                        "library/permission-denied",
+                        "Photo library add permission is required to save. Add NSPhotoLibraryAddUsageDescription to Info.plist."))
+                }
+                return
+            }
+            PHPhotoLibrary.shared().performChanges {
+                if isVideo {
+                    PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+                } else {
+                    PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+                }
+            } completionHandler: { success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        callback([:])
+                    } else {
+                        callback(Self.errorResult(
+                            "library/write-failed", error?.localizedDescription ?? "Could not save to the photo library."))
+                    }
+                }
+            }
+        }
+    }
+
+    private static func errorResult(_ code: String, _ message: String) -> [String: Any] {
+        ["error": ["code": code, "message": message]]
     }
 
     private func requestPermission(for mediaType: AVMediaType, callback: @escaping LynxCallbackBlock) {

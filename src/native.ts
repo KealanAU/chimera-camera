@@ -1,7 +1,6 @@
 import { createMockCameraModule, type MockCameraOptions } from './mock.js'
 import { ChimeraCameraError } from './types.js'
 import type {
-  CameraAdapter,
   CameraDevice,
   CameraErrorEvent,
   CameraModuleClient,
@@ -11,16 +10,13 @@ import type {
   PermissionStatus,
   PickPhotoOptions,
   PhotoFile,
-  Point,
-  StartRecordingOptions,
   TargetCameraPosition,
-  TorchMode,
   VideoFile,
 } from './types.js'
 
 declare const NativeModules: Record<string, unknown> | undefined
 
-export const CHIMERA_CAMERA_JS_VERSION = '0.2.0-alpha.0'
+export const CHIMERA_CAMERA_JS_VERSION = '0.0.1'
 
 type NativeCallback<T> = (result: T) => void
 
@@ -32,17 +28,18 @@ interface NativeCameraModuleShape {
   getAvailableCameraDevices?: (callback: NativeCallback<CameraDevice[] | NativeErrorResult>) => unknown
   capturePhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
   pickPhoto?: (options: Record<string, unknown>, callback: NativeCallback<PhotoFile | NativeErrorResult>) => unknown
+  saveToLibrary?: (options: Record<string, unknown>, callback: NativeCallback<NativeErrorResult | Record<string, never>>) => unknown
 }
 
 interface NativeErrorResult {
   error?: string | Partial<Pick<CameraErrorEvent, 'code' | 'message'>>
 }
 
-export interface CreateCameraAdapterOptions {
+export interface CreateCameraModuleOptions {
   nativeModuleName?: string
   mock?: boolean | MockCameraOptions
   /**
-   * By default createCameraAdapter throws when neither the native module nor
+   * By default createCameraModule throws when neither the native module nor
    * the mock is available, so hosts like LynxExplorer / Lynx Go fail loudly
    * with setup instructions. Pass `optional: true` to get `null` instead and
    * handle the fallback yourself.
@@ -77,13 +74,14 @@ export function getNativeCameraModule<T = NativeCameraModuleShape>(name = 'Camer
   }
 }
 
-export function createCameraModule(options?: CreateCameraAdapterOptions & { optional?: false }): CameraModuleClient
-export function createCameraModule(options: CreateCameraAdapterOptions & { optional: boolean }): CameraModuleClient | null
-export function createCameraModule(options: CreateCameraAdapterOptions = {}): CameraModuleClient | null {
+export function createCameraModule(options?: CreateCameraModuleOptions & { optional?: false }): CameraModuleClient
+export function createCameraModule(options: CreateCameraModuleOptions & { optional: boolean }): CameraModuleClient | null
+export function createCameraModule(options: CreateCameraModuleOptions = {}): CameraModuleClient | null {
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
-  // A registered module must actually be able to capture — otherwise a
-  // half-registered host would look "available" and only fail at capture time.
-  if (nativeModule && hasCaptureMethod(nativeModule)) return createNativeCameraModule(nativeModule)
+  // A registered module must expose every required method — otherwise a
+  // half-registered host would look "available" here yet report
+  // native-methods-missing from getCameraInstallStatus and throw at call time.
+  if (nativeModule && hasRequiredMethods(nativeModule)) return createNativeCameraModule(nativeModule)
   if (options.mock) {
     return createMockCameraModule(options.mock === true ? undefined : options.mock)
   }
@@ -91,29 +89,11 @@ export function createCameraModule(options: CreateCameraAdapterOptions = {}): Ca
   throw new Error(getCameraInstallStatus(options).message)
 }
 
-/**
- * @deprecated Returns the V0 combined {@link CameraAdapter}, whose
- * live-session controls only throw on a module object. Use
- * {@link createCameraModule} for module operations and `createCameraViewHandle()`
- * for live-session controls. Scheduled for removal in 1.0.
- */
-export function createCameraAdapter(options?: CreateCameraAdapterOptions & { optional?: false }): CameraAdapter
-export function createCameraAdapter(options: CreateCameraAdapterOptions & { optional: boolean }): CameraAdapter | null
-export function createCameraAdapter(options: CreateCameraAdapterOptions = {}): CameraAdapter | null {
-  const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
-  if (nativeModule && hasCaptureMethod(nativeModule)) return createNativeCameraAdapter(nativeModule)
-  if (options.mock) {
-    return createMockCameraModule(options.mock === true ? undefined : options.mock)
-  }
-  if (options.optional) return null
-  throw new Error(getCameraInstallStatus(options).message)
+function hasRequiredMethods(nativeModule: NativeCameraModuleShape): boolean {
+  return requiredNativeMethods.every((method) => typeof nativeModule[method] === 'function')
 }
 
-function hasCaptureMethod(nativeModule: NativeCameraModuleShape): boolean {
-  return typeof nativeModule.capturePhoto === 'function'
-}
-
-export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {}): CameraInstallStatus {
+export function getCameraInstallStatus(options: CreateCameraModuleOptions = {}): CameraInstallStatus {
   const nativeModuleName = options.nativeModuleName ?? 'CameraModule'
 
   if (options.mock) {
@@ -180,7 +160,7 @@ export function getCameraInstallStatus(options: CreateCameraAdapterOptions = {})
 }
 
 export async function getCameraInstallStatusAsync(
-  options: CreateCameraAdapterOptions = {},
+  options: CreateCameraModuleOptions = {},
 ): Promise<CameraInstallStatus> {
   const status = getCameraInstallStatus(options)
   if (!status.ok || status.code === 'mock') return status
@@ -208,12 +188,12 @@ export async function getCameraInstallStatusAsync(
   }
 }
 
-export function assertCameraInstalled(options: CreateCameraAdapterOptions = {}): void {
+export function assertCameraInstalled(options: CreateCameraModuleOptions = {}): void {
   const status = getCameraInstallStatus(options)
   if (!status.ok) throw new Error(status.message)
 }
 
-export async function assertCameraInstalledAsync(options: CreateCameraAdapterOptions = {}): Promise<void> {
+export async function assertCameraInstalledAsync(options: CreateCameraModuleOptions = {}): Promise<void> {
   const status = await getCameraInstallStatusAsync(options)
   if (!status.ok) throw new Error(status.message)
 }
@@ -257,37 +237,12 @@ export function createNativeCameraModule(nativeModule: NativeCameraModuleShape):
       if (!nativeModule.pickPhoto) throw unavailableMethodError('pickPhoto')
       return callNative((callback) => nativeModule.pickPhoto?.(pickOptionsToNative(options), callback))
     },
-  }
-}
 
-/**
- * @deprecated Wraps an already-resolved native module in the V0 combined
- * {@link CameraAdapter}. Its live-session methods only throw here. Use
- * {@link createNativeCameraModule} for module operations and
- * `createCameraViewHandle()` for live-session controls. Removed in 1.0.
- */
-export function createNativeCameraAdapter(nativeModule: NativeCameraModuleShape): CameraAdapter {
-  return {
-    ...createNativeCameraModule(nativeModule),
-
-    async startRecording(_options?: StartRecordingOptions): Promise<void> {
-      throw new Error('CameraModule.startRecording is not available yet.')
-    },
-
-    async stopRecording(): Promise<VideoFile> {
-      throw new Error('CameraModule.stopRecording is not available yet.')
-    },
-
-    async focusAtPoint(_point: Point): Promise<void> {
-      throw new Error('CameraModule.focusAtPoint is not available yet.')
-    },
-
-    async setZoom(_value: number): Promise<void> {
-      throw new Error('CameraModule.setZoom is not available yet.')
-    },
-
-    async setTorch(_mode: TorchMode): Promise<void> {
-      throw new Error('CameraModule.setTorch is not available yet.')
+    async saveToLibrary(file: PhotoFile | VideoFile): Promise<void> {
+      // Optional like pickPhoto; only the path is needed — native infers photo
+      // vs. video from the extension and persists it to the media library.
+      if (!nativeModule.saveToLibrary) throw unavailableMethodError('saveToLibrary')
+      await callNative((callback) => nativeModule.saveToLibrary?.({ path: file.path }, callback))
     },
   }
 }
@@ -318,30 +273,10 @@ function createMissingStatus(
 
 function createInstallErrorMessage(nativeModuleName: string, reason: string): string {
   return [
-    '@kealanau/chimera-camera native module is not installed correctly.',
-    '',
+    `@kealanau/chimera-camera native module (NativeModules.${nativeModuleName}) is not installed correctly.`,
     reason,
-    '',
-    `Expected native module: NativeModules.${nativeModuleName}`,
-    `JS package version: ${CHIMERA_CAMERA_JS_VERSION}`,
-    '',
-    'For iOS:',
-    '- Add node_modules/@kealanau/chimera-camera/ios/ChimeraCameraModule.swift to your Xcode target.',
-    '- Add NSCameraUsageDescription to Info.plist.',
-    '- Register ChimeraCameraModule in your LynxConfig.',
-    '',
-    'For Android:',
-    '- Add the package Android source/module to the host Gradle build.',
-    '- Add CAMERA permission to AndroidManifest.xml.',
-    '- Register CameraModule in the Lynx host app.',
-    '',
-    'For LynxExplorer / Lynx Go or JS-only development:',
-    '- The real camera cannot work in these hosts: they cannot compile this',
-    '  package\'s native source, even though the host app itself uses a camera',
-    '  (e.g. to scan QR codes).',
-    '- Use createCameraModule({ mock: true }) or createMockCameraModule().',
-    '',
-    'See docs/ios-install.md, docs/android-install.md, and docs/lynx-explorer.md.',
+    'For JS-only hosts like LynxExplorer / Lynx Go, use createCameraModule({ mock: true }).',
+    'Native setup: see docs/ios-install.md, docs/android-install.md, docs/lynx-explorer.md.',
   ].join('\n')
 }
 

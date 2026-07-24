@@ -106,6 +106,14 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         val quality = PhotoEncoder.clampQuality(if (params.hasKey("quality")) params.getDouble("quality") else 0.9)
         val includeBase64 = params.hasKey("includeBase64") && params.getBoolean("includeBase64")
         val maxDimension = if (params.hasKey("maxDimension")) params.getDouble("maxDimension").toInt() else 0
+        // Flash belongs to the capture, not the session: it fires with the shutter
+        // and leaves the preview dark (that's what setTorch is for). AUTO hands the
+        // decision to the OS scene metering. No-ops on devices without a flash unit.
+        capture.flashMode = when (if (params.hasKey("flash")) params.getString("flash") else "off") {
+            "on" -> ImageCapture.FLASH_MODE_ON
+            "auto" -> ImageCapture.FLASH_MODE_AUTO
+            else -> ImageCapture.FLASH_MODE_OFF
+        }
 
         val file = File(view.context.cacheDir, "chimera-camera-${UUID.randomUUID()}.jpg")
         val output = ImageCapture.OutputFileOptions.Builder(file).build()
@@ -159,6 +167,24 @@ class ChimeraCameraView(context: LynxContext) : LynxUI<PreviewView>(context), Li
         }
         val on = params.hasKey("mode") && params.getString("mode") == "on"
         cam.cameraControl.enableTorch(on)
+        callback.invoke(0, JavaOnlyMap())
+    }
+
+    @LynxUIMethod
+    fun setExposureBias(params: ReadableMap, callback: Callback) {
+        val cam = camera
+        if (!active || cam == null) {
+            callback.invoke(1, notActive())
+            return
+        }
+        // Bias arrives in EV; CameraX takes a compensation index (EV / step).
+        // Contract: clamp to the supported range rather than reject.
+        val bias = if (params.hasKey("bias")) params.getDouble("bias").toFloat() else 0f
+        val state = cam.cameraInfo.exposureState
+        val step = state.exposureCompensationStep
+        val range = state.exposureCompensationRange
+        val index = if (step.toFloat() != 0f) Math.round(bias / step.toFloat()) else 0
+        cam.cameraControl.setExposureCompensationIndex(index.coerceIn(range.lower, range.upper))
         callback.invoke(0, JavaOnlyMap())
     }
 

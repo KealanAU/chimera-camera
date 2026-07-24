@@ -7,6 +7,20 @@
 #import <Lynx/LynxPropsProcessor.h>
 #import <Lynx/LynxUIMethodProcessor.h>
 
+/// videoZoomFactor at which the WIDE lens sits (display 1×). On virtual devices
+/// whose base lens is the ultra-wide, that's the first lens switch-over factor;
+/// otherwise the base is already the wide lens, so 1.0. Lets the UI map its
+/// display multipliers (0.5×, 1×, 3×…) onto the device's real zoom factors.
+static CGFloat ChimeraWideFactor(AVCaptureDevice *device) {
+  NSArray<NSNumber *> *switches = device.virtualDeviceSwitchOverVideoZoomFactors;
+  NSArray<AVCaptureDevice *> *lenses = device.constituentDevices;
+  if (lenses.count > 1 && switches.count >= 1 &&
+      [lenses.firstObject.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInUltraWideCamera]) {
+    return switches.firstObject.doubleValue;
+  }
+  return 1.0;
+}
+
 @interface ChimeraCameraPreviewView : UIView
 @property(nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
 @end
@@ -149,6 +163,16 @@ LYNX_UI_METHOD(capturePhoto) {
   }
   BOOL includeBase64 = [params[@"includeBase64"] boolValue];
   CGFloat maxDimension = [params[@"maxDimension"] doubleValue];
+  // Flash belongs to the capture, not the session: it fires with the shutter and
+  // leaves the preview dark (that's what setTorch is for). `auto` hands the
+  // decision to the OS scene metering.
+  NSString *rawFlash = params[@"flash"];
+  AVCaptureFlashMode flashMode = AVCaptureFlashModeOff;
+  if ([rawFlash isEqualToString:@"on"]) {
+    flashMode = AVCaptureFlashModeOn;
+  } else if ([rawFlash isEqualToString:@"auto"]) {
+    flashMode = AVCaptureFlashModeAuto;
+  }
 
   dispatch_async(_sessionQueue, ^{
     if (!self->_photoOutput || !self->_session.isRunning) {
@@ -177,6 +201,10 @@ LYNX_UI_METHOD(capturePhoto) {
       AVVideoCodecKey : AVVideoCodecTypeJPEG,
       AVVideoCompressionPropertiesKey : @{AVVideoQualityKey : @(quality)}
     }];
+    // Silently ignored on devices without a flash, like the module surface.
+    if ([self->_photoOutput.supportedFlashModes containsObject:@(flashMode)]) {
+      settings.flashMode = flashMode;
+    }
 
     ChimeraCameraPhotoDelegate *delegate =
         [[ChimeraCameraPhotoDelegate alloc] initWithCompletion:^(NSData *data, NSError *error) {
@@ -305,6 +333,33 @@ LYNX_UI_METHOD(setTorch) {
   });
 }
 
+LYNX_UI_METHOD(setExposureBias) {
+  float bias = [params[@"bias"] floatValue];
+  dispatch_async(_sessionQueue, ^{
+    AVCaptureDevice *device = self->_input.device;
+    if (!device || !self->_session.isRunning) {
+      callback(kUIMethodInvalidStateError, @{
+        @"code" : @"capture/not-active",
+        @"message" : @"camera-view is not active; set active={true} and wait for the ready event."
+      });
+      return;
+    }
+    // Contract: clamp to the device's supported EV range rather than rejecting.
+    float clamped = MAX(device.minExposureTargetBias, MIN(bias, device.maxExposureTargetBias));
+    NSError *error;
+    if ([device lockForConfiguration:&error]) {
+      [device setExposureTargetBias:clamped completionHandler:nil];
+      [device unlockForConfiguration];
+      callback(kUIMethodSuccess, @{});
+    } else {
+      callback(kUIMethodOperationError, @{
+        @"code" : @"camera/native-error",
+        @"message" : error.localizedDescription ?: @"Could not set exposure."
+      });
+    }
+  });
+}
+
 LYNX_UI_METHOD(focusAtPoint) {
   // Point arrives in preview space (0..1). A fuller impl would map it through
   // previewLayer captureDevicePointOfInterestForPoint: for exact device coords;
@@ -380,9 +435,9 @@ LYNX_UI_METHOD(startRecording) {
     }
 
     // NOTE: movie output needs a preset the Photo preset does not provide, so the
-    // session switches to High here and is NOT restored afterwards — a fuller
-    // impl would restore the Photo preset or use AVAssetWriter for true
-    // simultaneous photo+video.
+    // session switches to High here; didFinishRecording restores the Photo preset.
+    // Stills captured *during* a recording are High-res only — true simultaneous
+    // full-res photo+video would need AVAssetWriter.
     [self->_session beginConfiguration];
     if (![self->_session.sessionPreset isEqualToString:AVCaptureSessionPresetHigh] &&
         [self->_session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
@@ -509,10 +564,26 @@ LYNX_UI_METHOD(stopRecording) {
                                          ? AVCaptureDevicePositionFront
                                          : AVCaptureDevicePositionBack;
   if (!self->_input || self->_input.device.position != position) {
-    AVCaptureDevice *device =
-        [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera
-                                           mediaType:AVMediaTypeVideo
-                                            position:position];
+    // Prefer the richest virtual device on the back (triple/dual-wide/dual) so
+    // zoom switches lenses OPTICALLY and the ultra-wide (0.5×) is available; fall
+    // back to the single wide-angle (digital-only) where there's no virtual device.
+    // We open at the wide lens below so the default framing is 1×, not 0.5×.
+    AVCaptureDevice *device = nil;
+    if (position == AVCaptureDevicePositionBack) {
+      for (AVCaptureDeviceType type in @[
+             AVCaptureDeviceTypeBuiltInTripleCamera,
+             AVCaptureDeviceTypeBuiltInDualWideCamera,
+             AVCaptureDeviceTypeBuiltInDualCamera
+           ]) {
+        device = [AVCaptureDevice defaultDeviceWithDeviceType:type mediaType:AVMediaTypeVideo position:position];
+        if (device) break;
+      }
+    }
+    if (!device) {
+      device = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera
+                                                 mediaType:AVMediaTypeVideo
+                                                  position:position];
+    }
     NSError *error;
     AVCaptureDeviceInput *input =
         device ? [AVCaptureDeviceInput deviceInputWithDevice:device error:&error] : nil;
@@ -527,6 +598,13 @@ LYNX_UI_METHOD(stopRecording) {
       self->_input = input;
     }
     [self->_session commitConfiguration];
+
+    // Open at the wide lens (display 1×). Without this a virtual device starts on
+    // its base ultra-wide lens (0.5×), which is a surprising default framing.
+    if (self->_input && [device lockForConfiguration:NULL]) {
+      device.videoZoomFactor = ChimeraWideFactor(device);
+      [device unlockForConfiguration];
+    }
 
     if (!self->_input) {
       [self emitEvent:@"error"
@@ -546,7 +624,17 @@ LYNX_UI_METHOD(stopRecording) {
   NSString *deviceId = self->_input.device.uniqueID;
   if (![deviceId isEqualToString:self->_readyDeviceId]) {
     self->_readyDeviceId = deviceId;
-    [self emitEvent:@"ready" detail:@{@"deviceId" : deviceId}];
+    AVCaptureDevice *dev = self->_input.device;
+    // Report the zoom envelope + the videoZoomFactors where lenses switch
+    // optically, so the UI can put its zoom stops on the real optical points.
+    [self emitEvent:@"ready"
+             detail:@{
+               @"deviceId" : deviceId,
+               @"minZoom" : @(dev.minAvailableVideoZoomFactor),
+               @"maxZoom" : @(dev.maxAvailableVideoZoomFactor),
+               @"wideFactor" : @(ChimeraWideFactor(dev)),
+               @"switchOverZoomFactors" : dev.virtualDeviceSwitchOverVideoZoomFactors ?: @[]
+             }];
   }
 }
 
@@ -573,6 +661,16 @@ LYNX_UI_METHOD(stopRecording) {
                                   error:(NSError *)error {
   dispatch_async(_sessionQueue, ^{
     self->_recording = NO;
+
+    // startRecording forced the session to High; restore Photo so later stills
+    // regain full resolution instead of being degraded for the session's life.
+    if (![self->_session.sessionPreset isEqualToString:AVCaptureSessionPresetPhoto] &&
+        [self->_session canSetSessionPreset:AVCaptureSessionPresetPhoto]) {
+      [self->_session beginConfiguration];
+      self->_session.sessionPreset = AVCaptureSessionPresetPhoto;
+      [self->_session commitConfiguration];
+    }
+
     LynxUIMethodCallbackBlock stop = self->_pendingStopCallback;
     self->_pendingStopCallback = nil;
 

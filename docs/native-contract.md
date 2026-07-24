@@ -25,7 +25,7 @@ Applied natively. A platform must use these when the prop is unset.
 | `quality`           | `0.9`          | JPEG quality, clamped to `0..1`.                          |
 | `includeBase64`     | `false`        | base64 rides along only when requested.                  |
 | `maxDimension`      | unset          | No downscale unless set; caps the longest side in pixels. |
-| `flash`             | `'off'`        | System-camera capture only; view capture ignores it.      |
+| `flash`             | `'off'`        | `off` \| `on` \| `auto`; honored by both system-camera and view capture. Fires at the shutter only — a lit preview is `setTorch`. `auto` is the OS scene-metering decision. Ignored on devices with no flash unit. |
 | `enableShutterSound`| `true`         | System-camera capture only; the OS UI owns the sound.     |
 | `facing`            | `'back'`       | System-camera capture only; view capture uses the prop.   |
 
@@ -47,6 +47,18 @@ Applied natively. A platform must use these when the prop is unset.
 Paths are **bare temp-file paths with no scheme**. See
 [output-transport.md](output-transport.md) for how a host displays (`file://`),
 uploads, and cleans up these files, and when base64 is the right fallback.
+
+## Saving to the media library
+
+`saveToLibrary(file)` (module surface) persists a captured photo or video temp
+file to the device's media library (iOS Photos, Android gallery/MediaStore) and
+resolves `void`. It is **orthogonal to capture**: a capture returns a temp path
+you can upload, and this is the separate "keep it" step — a host can upload,
+save, or both. Photo vs. video is inferred from the file extension
+(`.mov`/`.mp4`/`.m4v` are video). iOS requests the add-only photo-library
+permission at save time (`NSPhotoLibraryAddUsageDescription` must be in
+`Info.plist`); Android needs `WRITE_EXTERNAL_STORAGE` only below API 29. Rejects
+`library/permission-denied` or `library/write-failed`.
 
 ## Event payloads (`camera-view`)
 
@@ -72,6 +84,7 @@ uploads, and cleans up these files, and when base64 is the right fallback.
 | `setZoom(value)`      | `{ value: number }`        | Clamped to the device's `[minZoom, maxZoom]`; out-of-range clamps rather than rejecting. |
 | `setTorch(mode)`      | `{ mode: 'on' \| 'off' }`  | `camera/unsupported` when `hasTorch === false`.              |
 | `focusAtPoint(point)` | `{ x: number, y: number }` | Point in preview space, `0..1` on each axis. `camera/unsupported` when `supportsFocusMetering === false`. |
+| `setExposureBias(bias)` | `{ bias: number }`       | Exposure bias in EV; clamped to the device's supported range (iOS `min/maxExposureTargetBias`, Android `exposureCompensationRange × step`) rather than rejecting. |
 
 `zoom` and `torch` are also props; setting the prop and calling the method are
 equivalent, and the last write wins.
@@ -113,6 +126,8 @@ codes are not contract codes and normalize to `camera/native-error`.
 | `recording/in-progress`    | view          | `startRecording` while already recording (0.3).  |
 | `recording/not-active`     | view          | `stopRecording` with nothing recording (0.3).    |
 | `recording/failed`         | view          | Recording pipeline failed (0.3).                 |
+| `library/permission-denied`| module        | Media-library add permission denied (`saveToLibrary`). |
+| `library/write-failed`     | module        | Could not save the file to the media library.    |
 
 Platform-specific codes (`camera/no-presenter`, `camera/present-failed`) may have
 no Android equivalent; Android reports its own presentation failures under
