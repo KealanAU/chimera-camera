@@ -1,2 +1,25 @@
 packages:
-  - 'example/*'
+  - example/*
+
+# Both overrides exist to drag the vue example's dependency tree onto rsbuild 2,
+# which vue-lynx 0.5.1 predates (it peers on @rsbuild/core ^1.0.0 — that one
+# remaining install warning is cosmetic; the build works).
+#
+# serialize-javascript: 6.0.2 has an open advisory and the patch is 7.x, a major
+#   bump Dependabot won't take on a transitive dep, so it failed every run.
+# template-webpack-plugin: vue-lynx pins ^0.10.5, whose rspack-1-era Compilation
+#   API hands `chunkGroups` to debug-metadata-rsbuild-plugin in a shape rspack 2
+#   can't iterate. 0.13.0 is what the react example already resolves and works on.
+#
+# ponytail: both are pins to what react already uses, not new versions to maintain.
+# Drop them, and the patch below, when vue-lynx ships rsbuild 2 support.
+overrides:
+  serialize-javascript: ^7.0.7
+  '@lynx-js/template-webpack-plugin': ^0.13.0
+
+# Strips vue-lynx's hardcoded `tools.swc.jsc.target: 'es2019'`, which rspeedy 0.16+
+# rejects outright (it owns the SWC target via `env`). Patched at the source rather
+# than via a config plugin: the value reaching rspeedy comes from rsbuild's internal
+# config reduction, so no user-land modifyRsbuildConfig hook can reach it.
+patchedDependencies:
+  vue-lynx@0.5.1: patches/vue-lynx@0.5.1.patch

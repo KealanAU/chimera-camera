@@ -1,0 +1,16 @@
+diff --git a/plugin/dist/index.js b/plugin/dist/index.js
+index 94c09d845f853127a089077a4ca1d84d3814226c..ae981d6e67c4bd1a6517d4dc93dc4cf0f2e23bf5 100644
+--- a/plugin/dist/index.js
++++ b/plugin/dist/index.js
+@@ -20807,11 +20807,6 @@ function pluginVueLynx(options = {}) {
+                                 output: {
+                                     iife: false
+                                 }
+-                            },
+-                            swc: {
+-                                jsc: {
+-                                    target: 'es2019'
+-                                }
+                             }
+                         }
+                     });
