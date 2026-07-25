@@ -16,13 +16,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -46,13 +46,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -71,17 +71,34 @@ jobs:
         run: pnpm test
 
       # Guards the regression that shipped an 11.7MB / 103-file tarball:
-      # stale example build output and node_modules symlinks. Healthy: 76 files / 0.43MB.
+      # stale example build output and node_modules symlinks. Healthy: 78 files / 0.43MB.
       # images/ ships so the npm page renders standalone rather than relying on
       # npm rewriting relative paths to GitHub; images/src/ must not.
+      #
+      # Measures the extracted tarball rather than `pnpm pack --json`, which reports
+      # only paths — no entryCount, unpackedSize, or per-file size. Reading those off
+      # its output yields undefined, and `undefined > 90` is false, so both size
+      # guards would pass unconditionally. Extracting also avoids parsing `tar -tzvf`,
+      # whose column layout differs between the BSD tar here and GNU tar.
       - name: Validate package contents
         run: |
-          npm pack --dry-run --json | node -e "
-            const p = JSON.parse(require('fs').readFileSync(0, 'utf8'))[0];
+          pnpm pack --out /tmp/pkg.tgz
+          mkdir -p /tmp/packcheck && tar xzf /tmp/pkg.tgz -C /tmp/packcheck
+          node -e "
+            const fs = require('fs'), path = require('path');
             const fail = (m) => { console.error('pack regression: ' + m); process.exit(1); };
-            const leaked = p.files.map((f) => f.path).filter((f) => /node_modules|^example\/.*dist\/|^docs\/archive\/|^images\/src\//.test(f));
+            const root = '/tmp/packcheck/package';
+            const files = [];
+            (function walk(dir) {
+              for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                const p = path.join(dir, e.name);
+                e.isDirectory() ? walk(p) : files.push({ path: path.relative(root, p), size: fs.statSync(p).size });
+              }
+            })(root);
+            const unpackedSize = files.reduce((n, f) => n + f.size, 0);
+            const leaked = files.map((f) => f.path).filter((f) => /node_modules|^example\/.*dist\/|^docs\/archive\/|^images\/src\//.test(f));
             if (leaked.length) fail('leaked paths: ' + leaked.join(', '));
-            if (p.entryCount > 90) fail(p.entryCount + ' files, max 90');
-            if (p.unpackedSize > 600000) fail(p.unpackedSize + ' bytes unpacked, max 600000');
-            console.log('ok: ' + p.entryCount + ' files, ' + p.unpackedSize + ' unpacked, ' + p.size + ' packed');
+            if (files.length > 90) fail(files.length + ' files, max 90');
+            if (unpackedSize > 600000) fail(unpackedSize + ' bytes unpacked, max 600000');
+            console.log('ok: ' + files.length + ' files, ' + unpackedSize + ' unpacked, ' + fs.statSync('/tmp/pkg.tgz').size + ' packed');
           "
