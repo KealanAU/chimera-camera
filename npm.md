@@ -8,8 +8,10 @@ publishing actually does. The command-level detail lives in
 
 The package has never been published to npm, so nobody can `npm install` it yet.
 The only consumer today is `example/host-ios`, which compiles the `ios/` sources
-straight off disk. `npm pack --dry-run` is the cheapest way to see exactly what
-the registry would receive without sending anything.
+straight off disk. `pnpm pack --dry-run` is the cheapest way to see exactly what
+the registry would receive without sending anything — pnpm rather than npm
+because `pnpm publish` is what releases, and it strips `packageManager` from the
+published package.json, so the two disagree by a few bytes.
 
 ## What publishing actually means
 
@@ -35,9 +37,9 @@ dist-tag, so the published version is what a plain
 Before triggering it, the local sanity check is:
 
 ```sh
-npm install --ignore-scripts
-npm run build
-npm pack --dry-run
+pnpm install --ignore-scripts
+pnpm run build
+pnpm pack --dry-run
 ```
 
 That last command prints exactly which files would go into the tarball, which

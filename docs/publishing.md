@@ -11,7 +11,7 @@ The package is scoped as:
 ```sh
 pnpm install
 pnpm test              # builds, then runs the JS suite
-npm pack --dry-run     # exactly what npm would receive
+pnpm pack --dry-run    # exactly what the registry would receive
 pod lib lint ChimeraCamera.podspec --use-modular-headers --allow-warnings
 ```
 
