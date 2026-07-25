@@ -12,11 +12,11 @@ const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url),
 const swift = readFileSync(new URL('../ios/ChimeraCameraModule.swift', import.meta.url), 'utf8')
 const cameraView = readFileSync(new URL('../ios/ChimeraCameraView.m', import.meta.url), 'utf8')
 const kotlin = readFileSync(
-  new URL('../android/src/main/java/com/kealanau/chimeracamera/ChimeraCameraModule.kt', import.meta.url),
+  new URL('../android/src/main/java/com/vyui/chimeracamera/ChimeraCameraModule.kt', import.meta.url),
   'utf8',
 )
 const androidCameraView = readFileSync(
-  new URL('../android/src/main/java/com/kealanau/chimeracamera/ChimeraCameraView.kt', import.meta.url),
+  new URL('../android/src/main/java/com/vyui/chimeracamera/ChimeraCameraView.kt', import.meta.url),
   'utf8',
 )
 

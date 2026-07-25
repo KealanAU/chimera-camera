@@ -41,6 +41,9 @@ surfaces.
 4. Register the native module and the `camera-view` behavior in the Lynx host:
 
    ```kotlin
+   import com.vyui.chimeracamera.ChimeraCameraBehaviors
+   import com.vyui.chimeracamera.ChimeraCameraModule
+
    LynxEnv.inst().registerModule("CameraModule", ChimeraCameraModule::class.java)
 
    val builder = LynxViewBuilder()

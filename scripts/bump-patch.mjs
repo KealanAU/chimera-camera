@@ -21,7 +21,7 @@ const sites = [
   ['package.json', `"version": "${pkg.version}"`, `"version": "${next}"`],
   ['src/native.ts', `'${pkg.version}'`, `'${next}'`],
   ['ios/ChimeraCameraModule.swift', `"${pkg.version}"`, `"${next}"`],
-  ['android/src/main/java/com/kealanau/chimeracamera/ChimeraCameraModule.kt', `"${pkg.version}"`, `"${next}"`],
+  ['android/src/main/java/com/vyui/chimeracamera/ChimeraCameraModule.kt', `"${pkg.version}"`, `"${next}"`],
 ]
 
 for (const [file, from, to] of sites) {

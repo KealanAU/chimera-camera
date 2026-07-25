@@ -1,4 +1,4 @@
-package com.kealanau.chimeracamera
+package com.vyui.chimeracamera
 
 import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.behavior.LynxContext

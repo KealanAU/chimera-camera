@@ -1,4 +1,4 @@
-package com.kealanau.chimeracamera
+package com.vyui.chimeracamera
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

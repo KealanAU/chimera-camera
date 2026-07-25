@@ -1,4 +1,4 @@
-package com.kealanau.chimeracamera
+package com.vyui.chimeracamera
 
 import android.app.Activity
 import android.content.Context

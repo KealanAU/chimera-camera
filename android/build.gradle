@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace 'com.kealanau.chimeracamera'
+    namespace 'com.vyui.chimeracamera'
     compileSdk 34
 
     defaultConfig {
