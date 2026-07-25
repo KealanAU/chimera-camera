@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { CHIMERA_CAMERA_JS_VERSION } from '../dist/index.js'
+import { CHIMERA_CAMERA_JS_VERSION, getCameraInstallStatus } from '../dist/index.js'
 
 // The V0 contract (V0.md) requires package.json, CHIMERA_CAMERA_JS_VERSION, and
 // the Swift module's nativeVersion to be bumped together, and the Swift
@@ -20,17 +20,19 @@ const androidCameraView = readFileSync(
   'utf8',
 )
 
-const requiredNativeMethods = [
-  'getChimeraCameraNativeVersion',
-  'getPermissions',
-  'requestCameraPermission',
-  'requestMicrophonePermission',
-  'getAvailableCameraDevices',
-  'capturePhoto',
-]
+// Derived from the package's own install check rather than re-listed here: with
+// no NativeModules under Node, every required method comes back as missing.
+// Keeps this file from silently guarding a stale list if src/native.ts changes.
+const requiredNativeMethods = getCameraInstallStatus().missingMethods
 
 test('package.json version matches CHIMERA_CAMERA_JS_VERSION', () => {
   assert.equal(pkg.version, CHIMERA_CAMERA_JS_VERSION)
+})
+
+// Without this the two "registers every method" loops below would pass
+// vacuously if the install check ever stopped reporting the list.
+test('the install check reports the required native methods', () => {
+  assert.ok(requiredNativeMethods.length > 0, 'expected getCameraInstallStatus() to list the required methods')
 })
 
 // Everything before the 1.0.0 launch is a patch bump — `pnpm run bump` is the

@@ -18,6 +18,8 @@ declare const NativeModules: Record<string, unknown> | undefined
 
 export const CHIMERA_CAMERA_JS_VERSION = '0.0.1'
 
+const DEFAULT_NATIVE_MODULE_NAME = 'CameraModule'
+
 type NativeCallback<T> = (result: T) => void
 
 interface NativeCameraModuleShape {
@@ -65,7 +67,7 @@ export interface CameraInstallStatus {
   message: string
 }
 
-export function getNativeCameraModule<T = NativeCameraModuleShape>(name = 'CameraModule'): T | null {
+export function getNativeCameraModule<T = NativeCameraModuleShape>(name = DEFAULT_NATIVE_MODULE_NAME): T | null {
   try {
     if (typeof NativeModules === 'undefined') return null
     return (NativeModules[name] as T | undefined) ?? null
@@ -94,7 +96,7 @@ function hasRequiredMethods(nativeModule: NativeCameraModuleShape): boolean {
 }
 
 export function getCameraInstallStatus(options: CreateCameraModuleOptions = {}): CameraInstallStatus {
-  const nativeModuleName = options.nativeModuleName ?? 'CameraModule'
+  const nativeModuleName = options.nativeModuleName ?? DEFAULT_NATIVE_MODULE_NAME
 
   if (options.mock) {
     return {
@@ -235,7 +237,7 @@ export function createNativeCameraModule(nativeModule: NativeCameraModuleShape):
       // Optional on purpose: hosts compiled before this method exist happily
       // without it, so it is not in requiredNativeMethods.
       if (!nativeModule.pickPhoto) throw unavailableMethodError('pickPhoto')
-      return callNative((callback) => nativeModule.pickPhoto?.(pickOptionsToNative(options), callback))
+      return callNative((callback) => nativeModule.pickPhoto?.(imageOutputOptionsToNative(options), callback))
     },
 
     async saveToLibrary(file: PhotoFile | VideoFile): Promise<void> {
@@ -257,7 +259,7 @@ const requiredNativeMethods = [
 ] as const
 
 function createMissingStatus(
-  code: Exclude<CameraInstallStatusCode, 'mock' | 'installed' | 'native-methods-missing' | 'native-version-mismatch'>,
+  code: 'native-modules-missing' | 'native-module-missing',
   nativeModuleName: string,
   reason: string,
 ): CameraInstallStatus {
@@ -324,10 +326,6 @@ function captureOptionsToNative(options: CapturePhotoOptions | undefined): Recor
     enableShutterSound: options?.enableShutterSound ?? true,
     facing: options?.facing ?? 'back',
   }
-}
-
-function pickOptionsToNative(options: PickPhotoOptions | undefined): Record<string, unknown> {
-  return imageOutputOptionsToNative(options)
 }
 
 function imageOutputOptionsToNative(options: ImageOutputOptions | undefined): Record<string, unknown> {

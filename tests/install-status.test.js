@@ -9,14 +9,11 @@ import {
   getCameraInstallStatusAsync,
 } from '../dist/index.js'
 
-const REQUIRED_METHODS = [
-  'getChimeraCameraNativeVersion',
-  'getPermissions',
-  'requestCameraPermission',
-  'requestMicrophonePermission',
-  'getAvailableCameraDevices',
-  'capturePhoto',
-]
+// Same derivation as tests/version-sync.test.js: the install check is the source
+// of truth for this list, so a change in src/native.ts can't leave it stale.
+// An empty list here fails loudly rather than silently — completeNativeModule()
+// would return {} and every "installed" expectation below would break.
+const REQUIRED_METHODS = getCameraInstallStatus().missingMethods
 
 function completeNativeModule(overrides = {}) {
   const module = {}
