@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The examples import the workspace package by name, which resolves to
+      # dist/*.d.ts — without this they fail on TS2307.
+      - name: Build package
+        run: pnpm run build
+
       # tsc for ReactLynx, vue-tsc for the Vue SFC — both against @lynx-js/types.
       - name: Typecheck
         run: pnpm run typecheck:examples
