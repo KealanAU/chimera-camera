@@ -41,12 +41,21 @@ surfaces.
 4. Register the native module and the `camera-view` behavior in the Lynx host:
 
    ```kotlin
-   import com.vyui.chimeracamera.ChimeraCameraBehaviors
-   import com.vyui.chimeracamera.ChimeraCameraModule
+   import com.vyui.chimeracamera.ChimeraCamera
 
-   LynxEnv.inst().registerModule("CameraModule", ChimeraCameraModule::class.java)
+   // after the host's own LynxEnv.inst().init(...)
+   ChimeraCamera.register()
+   ```
 
-   val builder = LynxViewBuilder()
+   That registers both surfaces globally — the `CameraModule` native module and
+   the `camera-view` element — so a host with several LynxViews wires this once
+   rather than at every `LynxViewBuilder`. It must run after the host's
+   `LynxEnv.inst().init()`, since it reads `LynxEnv.inst()`.
+
+   To scope the element to a single view instead, the behaviors are still
+   available directly:
+
+   ```kotlin
    ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
    ```
 

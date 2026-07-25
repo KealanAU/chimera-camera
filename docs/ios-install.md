@@ -51,19 +51,32 @@ line registers the module.
    <string>This app saves photos and videos you capture to your library.</string>
    ```
 
-4. Register the native module in the Lynx bootstrap.
+4. Register the native module in the Lynx bootstrap:
 
-   The Swift class is `ChimeraCameraModule`, and it registers itself to JavaScript
-   as `CameraModule`.
+   ```swift
+   _ = LynxEnv.sharedInstance()
+   ChimeraCamera.register()
+   ```
+
+   That registers `CameraModule` on the global config, so every `LynxView` built
+   afterwards resolves it. `<camera-view>` needs nothing — it self-registers via
+   `LYNX_LAZY_REGISTER_UI`.
+
+   If your host builds its own per-view `LynxConfig` instead of using the global
+   one, that config bypasses the global registration and needs the module
+   directly:
 
    ```swift
    let config = LynxConfig(provider: templateProvider)
    config.register(ChimeraCameraModule.self)
    ```
 
+   `example/host-ios` takes this second path, because it supplies a custom
+   template provider for the dev server.
+
 The exact bootstrap location depends on the host app's Lynx setup. That one
-`config.register` line is the only hand-wiring left; Lynx has no autolinking, so
-nothing can discover the module for you (see `ROADMAP.md`).
+`register()` call is the only hand-wiring left at runtime; Lynx has no
+autolinking, so nothing can discover the module for you (see `ROADMAP.md`).
 
 ## Verify Registration
 

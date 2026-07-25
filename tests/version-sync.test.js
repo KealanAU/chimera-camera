@@ -77,6 +77,42 @@ test('Android module exposes every method the install check requires', () => {
   }
 })
 
+// The one-call host registration helpers. Neither platform is compiled in CI, so
+// this is a surface check: that both exist, register under the name JS resolves
+// ("CameraModule"), and register globally rather than per-view. It cannot prove
+// they run correctly on device.
+test('both platforms expose a one-call registration helper', () => {
+  const swiftHelper = readFileSync(new URL('../ios/ChimeraCamera.swift', import.meta.url), 'utf8')
+  assert.match(swiftHelper, /static func register\(\)/, 'iOS helper must expose register()')
+  assert.ok(
+    swiftHelper.includes('LynxEnv.sharedInstance().config.register(ChimeraCameraModule.self)'),
+    'iOS helper must register the module on the global LynxEnv config',
+  )
+
+  const kotlinHelper = readFileSync(
+    new URL('../android/src/main/java/com/vyui/chimeracamera/ChimeraCamera.kt', import.meta.url),
+    'utf8',
+  )
+  assert.match(kotlinHelper, /fun register\(\)/, 'Android helper must expose register()')
+  assert.ok(
+    kotlinHelper.includes('registerModule("CameraModule", ChimeraCameraModule::class.java)'),
+    'Android helper must register the module as "CameraModule"',
+  )
+  assert.ok(
+    kotlinHelper.includes('addBehaviors(ChimeraCameraBehaviors.behaviors())'),
+    'Android helper must register the camera-view behaviors globally on LynxEnv',
+  )
+})
+
+// `<camera-view>` is automatic on iOS only; if this macro is ever dropped the
+// element silently stops resolving and the install docs become wrong.
+test('iOS camera-view still self-registers', () => {
+  assert.ok(
+    cameraView.includes('LYNX_LAZY_REGISTER_UI("camera-view")'),
+    'ChimeraCameraView.m must keep LYNX_LAZY_REGISTER_UI("camera-view")',
+  )
+})
+
 test('iOS camera-view has deterministic alpha capture guards', () => {
   assert.ok(cameraView.includes('@"capture/in-progress"'))
   assert.ok(cameraView.includes('params[@"maxDimension"]'))
