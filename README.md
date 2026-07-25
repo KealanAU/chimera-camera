@@ -95,6 +95,8 @@ Two runnable demos drive that same core from different frameworks:
 | Android | Experimental | Written to the same contract as device-proven iOS and believed to work, but never compiled or run on any device or emulator. See [docs/android-testing.md](docs/android-testing.md). |
 | Mock | Stable | Framework-neutral JS double for all hosts. |
 
+Minimums: **iOS 15** deployment target, **Android 7.0** (`minSdk` 24).
+
 Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors
 [docs/native-contract.md](docs/native-contract.md) and the device-proven iOS
 behavior, which is fair reason to expect it to work, but nobody has confirmed

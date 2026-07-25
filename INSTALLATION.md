@@ -39,6 +39,12 @@ sources and registers them, which is what the remaining steps cover.
 
 ## 2. iOS
 
+Requires an **iOS 15 deployment target**. The podspec declares it, so `pod
+install` enforces it — but a host that compiles `ios/` directly (XcodeGen, or
+files dragged into Xcode) never reads the podspec and fails mid-build instead,
+typically on `PHPhotoLibrary.requestAuthorization(for:)` "is only available in
+iOS 14 or newer". Set `IPHONEOS_DEPLOYMENT_TARGET` to `15.0` in that case.
+
 Add the pod to your `Podfile` and run `pod install`:
 
 ```ruby
@@ -93,6 +99,8 @@ If you do not use CocoaPods, add the three files in
 all the pod does anyway.
 
 ## 3. Android
+
+Requires **`minSdk` 24** (Android 7.0), which the shipped module declares.
 
 The shipped `android/` folder is a complete `com.android.library` module. In
 `settings.gradle`:
