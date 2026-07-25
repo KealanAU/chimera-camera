@@ -28,11 +28,15 @@ anything downloaded in that window is already gone.
 ## How to publish
 
 The flow is already wired up; the steps are in
-[docs/publishing.md](docs/publishing.md). In short: create an npm automation
-token, add it to the GitHub repo as the `NPM_TOKEN` secret, then run the
-`Release` workflow manually from GitHub Actions. It defaults to the `latest`
-dist-tag, so the published version is what a plain
+[docs/publishing.md](docs/publishing.md). In short: publish `0.0.1` by hand once,
+register this repo as a trusted publisher on npmjs.com, then run the `Release`
+workflow manually from GitHub Actions for every release after that. It defaults
+to the `latest` dist-tag, so the published version is what a plain
 `pnpm add @vyui/chimera-camera` resolves to.
+
+There is no publish token anywhere in the repo. The workflow authenticates by
+OIDC, exchanging a GitHub-issued token for a short-lived registry credential at
+publish time — nothing long-lived to leak, nothing to rotate.
 
 Before triggering it, the local sanity check is:
 

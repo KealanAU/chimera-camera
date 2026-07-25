@@ -16,7 +16,7 @@
     "native-module"
   ],
   "type": "module",
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@11.17.0",
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

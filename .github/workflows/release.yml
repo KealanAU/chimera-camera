@@ -47,8 +47,17 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # Authenticates via OIDC trusted publishing — no NPM_TOKEN secret. pnpm
+      # exchanges the id-token above for a short-lived registry credential, so
+      # there is no long-lived token to leak. Requires the trusted publisher to
+      # be configured on npmjs.com against THIS repo and workflow filename.
+      #
+      # setup-node's registry-url writes `_authToken=${NODE_AUTH_TOKEN}` into
+      # .npmrc, and NODE_AUTH_TOKEN is deliberately unset here. pnpm 11.1.3+
+      # treats an unresolved ${VAR} placeholder as empty instead of sending it
+      # verbatim as a bearer token, which is what made this 404 before
+      # (pnpm/pnpm#11513) — so this needs pnpm >= 11.1.3, not just >= 11.
       - name: Publish
         run: pnpm publish --access public --tag "${{ inputs.tag }}" --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"

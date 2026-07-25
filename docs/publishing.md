@@ -28,9 +28,20 @@ One-time repository setup:
 
 1. The `@vyui` org already exists and publishes `@vyui/core`, `@vyui/kit`, and
    `@vyui/cli`, so the scope needs no setup.
-2. Create an npm **automation** token (granular tokens work; classic
-   "Automation" is simplest, and it must bypass 2FA for CI).
-3. Add it to the GitHub repository as the `NPM_TOKEN` secret.
+2. Publish `0.0.1` **once by hand** (`pnpm publish --access public`). npm exposes
+   the trusted-publisher setting under a package's own settings page, so the
+   package has to exist before step 3 — this is a one-time chicken-and-egg, not
+   a per-release step.
+3. On npmjs.com → the package → Settings → Trusted Publisher, add a GitHub
+   Actions publisher: owner `KealanAU`, repository `chimera-camera`, workflow
+   filename `release.yml`, environment `npm-publish`. The workflow filename must
+   match exactly, extension included.
+
+There is deliberately **no `NPM_TOKEN` secret**. Authentication is OIDC trusted
+publishing: the workflow's `id-token: write` permission lets pnpm exchange a
+GitHub-issued OIDC token for a short-lived registry credential, so there is no
+long-lived token in the repo to leak or rotate. This needs pnpm **11.1.3 or
+later** — see the comment in `release.yml` for why the floor is that specific.
 
 Then, per release:
 

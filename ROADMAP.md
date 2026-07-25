@@ -96,8 +96,12 @@ does not block implementation completion.
 - [x] Publish under the established `@vyui` scope (alongside `@vyui/core`,
       `@vyui/kit`, `@vyui/cli`) rather than a personal one — same Lynx audience,
       one brand. Docs land at `chimeracamera.vyui.dev`.
-- [ ] Create an npm Automation token and add it as the `NPM_TOKEN` repository
-      secret. **This is the only thing still blocking the first publish.**
+- [x] Authenticate the release workflow with OIDC trusted publishing instead of a
+      long-lived `NPM_TOKEN` secret. Needs pnpm >= 11.1.3, so the repo runs
+      pnpm 11.
+- [ ] Publish `0.0.1` by hand, then register this repo as a trusted publisher on
+      npmjs.com (npm only exposes that setting on an existing package).
+      **This is the only thing still blocking the first publish.**
 - [x] Add `npm test` to `.github/workflows/release.yml` before publishing.
 - [x] Add the `repository` field to package.json — npm rejects a `--provenance`
       publish without it, and the release workflow sets
