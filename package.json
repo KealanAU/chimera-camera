@@ -1,6 +1,6 @@
 {
-  "name": "@vyui/chimera-camera",
-  "version": "0.0.1",
+  "name": "@vyui/camera",
+  "version": "0.0.2",
   "description": "A Lynx-native camera surface with plain TypeScript APIs and native iOS/Android hooks.",
   "license": "MIT AND Apache-2.0",
   "repository": {

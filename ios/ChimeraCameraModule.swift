@@ -6,7 +6,7 @@ import UIKit
 
 @objcMembers
 public final class ChimeraCameraModule: NSObject, LynxModule {
-    private static let nativeVersion = "0.0.1"
+    private static let nativeVersion = "0.0.2"
 
     public static var name: String { "CameraModule" }
 

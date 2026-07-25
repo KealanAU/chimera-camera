@@ -3,7 +3,7 @@
 The package is scoped as:
 
 ```text
-@vyui/chimera-camera
+@vyui/camera
 ```
 
 ## Local Validation
@@ -48,7 +48,7 @@ Then, per release:
 1. `pnpm run bump` — patch only, and it rewrites all four version sites at once.
 2. Update `CHANGELOG.md` and commit.
 3. Run the `Release` workflow manually. The dist-tag defaults to `latest`, which
-   is what a plain `pnpm add @vyui/chimera-camera` resolves to. Pick
+   is what a plain `pnpm add @vyui/camera` resolves to. Pick
    `alpha`/`beta` only for a release you do *not* want as the default.
 
 ### Every release before 1.0.0 is a patch
@@ -77,7 +77,7 @@ unpublishing within 72 hours.
 ## Installing In A Lynx App
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 The npm package includes JavaScript, TypeScript declarations, docs, a CocoaPods

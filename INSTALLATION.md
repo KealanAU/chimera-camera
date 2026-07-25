@@ -11,7 +11,7 @@ a working Lynx iOS host you can copy from.
 ## 1. Install the package
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 JavaScript needs nothing further. The types, the mock adapter, and the install
@@ -19,7 +19,7 @@ diagnostics all work immediately, so you can build a complete capture flow
 before touching a native host:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -47,7 +47,7 @@ target 'YourApp' do
   use_modular_headers!
 
   pod 'Lynx', '3.9.0', :subspecs => ['Framework']   # your own Lynx pin
-  pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
+  pod 'ChimeraCamera', :path => '../node_modules/@vyui/camera'
 end
 ```
 
@@ -89,7 +89,7 @@ config.register(ChimeraCameraModule.self)
 ```
 
 If you do not use CocoaPods, add the three files in
-`node_modules/@vyui/chimera-camera/ios` to your app target directly, which is
+`node_modules/@vyui/camera/ios` to your app target directly, which is
 all the pod does anyway.
 
 ## 3. Android
@@ -100,7 +100,7 @@ The shipped `android/` folder is a complete `com.android.library` module. In
 ```gradle
 include ':chimera-camera'
 project(':chimera-camera').projectDir =
-    new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
+    new File(rootProject.projectDir, '../node_modules/@vyui/camera/android')
 ```
 
 In your app module's `build.gradle`:
@@ -139,7 +139,7 @@ ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
 Confirm the wiring took:
 
 ```ts
-import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
+import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/camera'
 
 console.log(await getCameraInstallStatusAsync())
 await assertCameraInstalledAsync()

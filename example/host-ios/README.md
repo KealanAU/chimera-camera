@@ -43,7 +43,7 @@ The `.xcodeproj`, `.xcworkspace`, `Pods/`, and `.env` are generated or local
 1. Start a dev server (either framework — both serve `main.lynx.bundle`):
 
    ```sh
-   pnpm --filter @vyui/chimera-camera run build   # once
+   pnpm --filter @vyui/camera run build   # once
    pnpm --filter @chimera-camera/react run dev         # ReactLynx
    # or
    pnpm --filter @chimera-camera/vue run dev           # Vue Lynx

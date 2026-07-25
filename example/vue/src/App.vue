@@ -142,7 +142,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue-lynx'
 
-import type { FlashMode, PhotoFile, TargetCameraPosition } from '@vyui/chimera-camera'
+import type { FlashMode, PhotoFile, TargetCameraPosition } from '@vyui/camera'
 
 import {
   cameraModule,

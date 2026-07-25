@@ -40,7 +40,7 @@ API is plain TypeScript that any JS framework can drive.
 ## Installation
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 That is everything JavaScript needs. The types, the mock adapter, and the
@@ -48,7 +48,7 @@ install diagnostics work immediately, so you can build a complete capture flow
 before touching a native host:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -72,7 +72,7 @@ sits in between, because this is plain TypeScript talking to the Lynx element:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@vyui/chimera-camera'
+import { createCameraViewHandle } from '@vyui/camera'
 
 const camera = createCameraViewHandle('#camera')
 

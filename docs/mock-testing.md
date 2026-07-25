@@ -1,6 +1,6 @@
 # Mock Testing
 
-`@vyui/chimera-camera/mock` provides a dev-only camera adapter for Lynx
+`@vyui/camera/mock` provides a dev-only camera adapter for Lynx
 Explorer, web preview, tests, and apps that have not wired native iOS/Android
 camera code yet.
 
@@ -15,7 +15,7 @@ During early development, link the package from the local workspace:
 ```json
 {
   "dependencies": {
-    "@vyui/chimera-camera": "file:../../chimera-camera"
+    "@vyui/camera": "file:../../chimera-camera"
   }
 }
 ```
@@ -23,15 +23,15 @@ During early development, link the package from the local workspace:
 After publishing:
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 ## Basic Usage
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
-import { createMockCameraModule } from '@vyui/chimera-camera/mock'
-import type { CameraModuleClient } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
+import { createMockCameraModule } from '@vyui/camera/mock'
+import type { CameraModuleClient } from '@vyui/camera'
 
 const camera: CameraModuleClient =
   createCameraModule({ optional: true }) ?? createMockCameraModule()
@@ -43,7 +43,7 @@ const photo = await camera.capturePhoto()
 Or force the mock explicitly:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -59,7 +59,7 @@ The default mock returns:
 ## Custom Fixtures
 
 ```ts
-import { createMockCameraModule } from '@vyui/chimera-camera/mock'
+import { createMockCameraModule } from '@vyui/camera/mock'
 
 export const camera = createMockCameraModule({
   permissions: {
@@ -82,9 +82,9 @@ If your app already has a single native-camera boundary module, that boundary ca
 resolve a real native module first and fall back to the mock in development:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
-import { createMockCameraModule } from '@vyui/chimera-camera/mock'
-import type { CameraModuleClient } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
+import { createMockCameraModule } from '@vyui/camera/mock'
+import type { CameraModuleClient } from '@vyui/camera'
 
 const camera: CameraModuleClient | null =
   createCameraModule({ optional: true }) ??

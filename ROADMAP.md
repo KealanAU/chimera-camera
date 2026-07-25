@@ -113,7 +113,7 @@ does not block implementation completion.
       publish without it, and the release workflow sets
       `NPM_CONFIG_PROVENANCE=true`.
 - [x] Renumber to `0.0.1` and default the release workflow to the `latest`
-      dist-tag, so a plain `pnpm add @vyui/chimera-camera` resolves.
+      dist-tag, so a plain `pnpm add @vyui/camera` resolves.
 - [x] Fix the release cadence: `0.0.x` is the whole pre-alpha and `1.0.0` is the
       launch, so every release between them is a patch. `pnpm run bump` is the
       only bump path, and `tests/version-sync.test.js` fails if the version

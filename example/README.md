@@ -5,7 +5,7 @@ native/mock detection, capture, JavaScript preview, and a host-provided upload
 mutation.
 
 > Reading this from the npm tarball instead of the repo? Each app's
-> `package.json` depends on `"@vyui/chimera-camera": "workspace:*"`, which
+> `package.json` depends on `"@vyui/camera": "workspace:*"`, which
 > only resolves inside this repo's pnpm workspace. Swap it for the published
 > version you installed (e.g. `"^0.0.1"`) before running an install.
 > The `pnpm --filter` commands below are likewise repo-local.
@@ -57,7 +57,7 @@ sparkling-app/
 ```
 
 Sparkling owns the native shell and routing; each framework keeps its own build
-entry and consumes the same `@vyui/chimera-camera` package and the same
+entry and consumes the same `@vyui/camera` package and the same
 registered native surface. Both bundles are runnable rspeedy apps today
 (`pnpm --filter @chimera-camera/react run dev`,
 `pnpm --filter @chimera-camera/vue run dev`) and each drives the same core with
@@ -85,7 +85,7 @@ a host app that compiles the iOS sources this looks like:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@vyui/chimera-camera'
+import { createCameraViewHandle } from '@vyui/camera'
 
 const camera = createCameraViewHandle('#camera')
 console.log(await camera.ping()) // { ok: true }
