@@ -1,5 +1,5 @@
 import { createMockCameraModule, type MockCameraOptions } from './mock.js'
-import { ChimeraCameraError } from './types.js'
+import { ChimeraCameraError, pickDefaultCamera } from './types.js'
 import type {
   CameraDevice,
   CameraErrorEvent,
@@ -218,9 +218,7 @@ export function createNativeCameraModule(nativeModule: NativeCameraModuleShape):
     },
 
     async getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null> {
-      const devices = await this.getAvailableCameraDevices()
-      const matching = devices.filter((device) => device.position === position)
-      return matching.find((device) => device.deviceType === 'wide-angle') ?? matching[0] ?? null
+      return pickDefaultCamera(await this.getAvailableCameraDevices(), position)
     },
 
     async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {

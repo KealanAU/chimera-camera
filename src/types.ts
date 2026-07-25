@@ -30,6 +30,15 @@ export interface CameraDevice {
   supportsFocusMetering: boolean
 }
 
+/** Shared by the native module and the mock so tests get production's camera. */
+export function pickDefaultCamera(
+  devices: CameraDevice[],
+  position: TargetCameraPosition,
+): CameraDevice | null {
+  const matching = devices.filter((device) => device.position === position)
+  return matching.find((device) => device.deviceType === 'wide-angle') ?? matching[0] ?? null
+}
+
 export class ChimeraCameraError extends Error {
   readonly code: string
   readonly cause?: unknown

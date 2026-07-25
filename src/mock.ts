@@ -1,5 +1,5 @@
 import { SAMPLE_PHOTO_FIXTURE } from './fixtures.js'
-import { ChimeraCameraError } from './types.js'
+import { ChimeraCameraError, pickDefaultCamera } from './types.js'
 import type {
   CameraModuleClient,
   CameraDevice,
@@ -53,7 +53,7 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
     },
 
     async getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null> {
-      return devices.find((device) => device.position === position) ?? null
+      return pickDefaultCamera(devices, position)
     },
 
     async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {
@@ -109,6 +109,7 @@ export function defaultMockDevices(): CameraDevice[] {
       id: 'mock-back-camera',
       localizedName: 'Mock Back Camera',
       position: 'back',
+      deviceType: 'wide-angle',
       minZoom: 1,
       maxZoom: 8,
       hasFlash: true,
@@ -119,6 +120,7 @@ export function defaultMockDevices(): CameraDevice[] {
       id: 'mock-front-camera',
       localizedName: 'Mock Front Camera',
       position: 'front',
+      deviceType: 'wide-angle',
       minZoom: 1,
       maxZoom: 4,
       hasFlash: false,
