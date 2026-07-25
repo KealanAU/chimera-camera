@@ -10,7 +10,7 @@ The normalized native contract lives in
 `docs/archive/`. [README.md](README.md) explains the project and architecture
 without duplicating the working checklist here.
 
-Last reconciled: 2026-07-19.
+Last reconciled: 2026-07-25.
 
 ## Current checkpoint
 
@@ -99,9 +99,15 @@ does not block implementation completion.
 - [x] Authenticate the release workflow with OIDC trusted publishing instead of a
       long-lived `NPM_TOKEN` secret. Needs pnpm >= 11.1.3, so the repo runs
       pnpm 11.
-- [ ] Publish `0.0.1` by hand, then register this repo as a trusted publisher on
-      npmjs.com (npm only exposes that setting on an existing package).
-      **This is the only thing still blocking the first publish.**
+- [x] Publish `0.0.1` by hand (2026-07-25). Shows `kealanau` as publisher rather
+      than GitHub Actions, since it predates the trusted-publisher registration,
+      and it carries no provenance attestation for the same reason.
+- [ ] Register this repo as a trusted publisher on npmjs.com — package settings,
+      owner `KealanAU`, repo `chimera-camera`, workflow `release.yml`, environment
+      `npm-publish`. npm only exposes that setting on a package that already
+      exists, which is why the first publish had to be manual. Until this is
+      done the `Release` workflow cannot authenticate, so `0.0.2` onward would
+      have to be published by hand too.
 - [x] Add `npm test` to `.github/workflows/release.yml` before publishing.
 - [x] Add the `repository` field to package.json — npm rejects a `--provenance`
       publish without it, and the release workflow sets
@@ -342,20 +348,102 @@ An app installs one npm package, lets Lynx autolink it, renders the same native
 equivalent preview, photo, recording, control, lifecycle, and error behavior on
 iOS and Android.
 
+## VisionCamera parity
+
+Reconciled against the `upstream/vision-camera` reference clone at **5.1.0** on
+2026-07-25. Parity is not a release gate (see *Explicitly deferred* below), but
+the gap should be known rather than assumed.
+
+Note what 5.1.0 is before reading the gaps: a Nitro-based rearchitecture built
+around composable *outputs* (photo, video, frame, depth, object, preview) plus a
+`CameraController` that exposes hardware knobs individually. Chimera is a
+stateless module plus one `<camera-view>` element. So the useful comparison is
+coverage of the capture loop, not surface area — matching the upstream shape is
+explicitly not a goal.
+
+### Covered
+
+Permissions (camera + microphone), device discovery and front/back selection,
+preview with `resizeMode`, photo capture, video start/stop, zoom, tap-to-focus,
+torch, flash, exposure bias, active-state lifecycle, and error events. Upstream
+carries more depth on most of these — animated zoom, focus modes, torch strength,
+exposure locking — but the operation exists on both sides.
+
+`CameraReadyEvent`'s `wideFactor` and `switchOverZoomFactors` cover the same
+display-multiplier ↔ zoom-factor mapping upstream exposes as
+`displayableZoomFactor`.
+
+### Present here, absent upstream
+
+- `pickPhoto()` — system photo-library picker. Upstream has no picker; RN
+  consumers reach for a separate library.
+- `saveToLibrary()` — same; upstream leaves this to camera-roll packages.
+- The mock adapter and `getCameraInstallStatus()` install diagnostics.
+
+For a photo-upload flow these three are worth more than most of the gaps below.
+
+### Known gaps, not triaged
+
+Distinct from the deferral list — these are simply unexamined, not decided
+against:
+
+- Recording: no pause / resume / cancel; no codec, bitrate, or file-type control.
+- No format selection at all — target resolution and fps are not exposed.
+- Orientation: only the `orientation` field on `PhotoFile`; upstream has a full
+  orientation manager.
+- No HDR / dynamic range, stabilization mode, or white balance (modes, gains,
+  temperature/tint).
+- Photo output is JPEG-only (`UIImageJPEGRepresentation`); no HEIC or container
+  choice, and no quality prioritization.
+- No low-light boost, distortion correction, mirror mode, or camera calibration
+  data.
+
+### Candidates for after 0.3
+
+Not committed, and deliberately none of them architectural:
+
+1. **Pause / resume recording** — the cheapest real gap, and the one most visible
+   in a recording UI.
+2. **Format selection** (target resolution, fps) — unblocks callers who care
+   about payload size, which is the same audience `maxDimension` already serves.
+3. **HEIC / photo container format** — meaningful payload reduction on iOS for a
+   one-flag change at the capture site.
+
+Orientation is the gap most likely to cause visible bugs, but it is also the most
+work and touches both platforms; it belongs with the 1.0 hardening pass that
+already lists "verify orientation and output metadata where hosts rotate".
+
 ## Explicitly deferred
 
-Filters, barcode scanning, frame processors, RAW capture, GPU pipelines, and
-VisionCamera feature parity are not release blockers. Evaluate them only after
-the cross-platform Lynx surface is stable.
+Filters, barcode scanning, frame processors, RAW capture, GPU pipelines, depth
+output, and object detection are not release blockers — all of them are separate
+packages upstream too. Evaluate them only after the cross-platform Lynx surface
+is stable.
 
 ## Known debt
 
 - The package is not configured for Lynx autolinking, so a host still makes one
-  bootstrap registration call per platform. Getting the sources into the build
-  is no longer manual as of `0.0.1` — a podspec covers iOS and `android/` is a
-  consumable Gradle module — but discovery is not automated. Deferred by
-  decision (2026-07-18, narrowed 2026-07-24); revisit as a 1.0 distribution
-  task.
+  bootstrap registration call per platform — now literally one,
+  `ChimeraCamera.register()`, which also moved the Android `camera-view`
+  behaviors onto `LynxEnv` globally instead of per `LynxViewBuilder`. Getting the
+  sources into the build is no longer manual as of `0.0.1` — a podspec covers iOS
+  and `android/` is a consumable Gradle module — but discovery is not automated.
+  Deferred by decision (2026-07-18, narrowed 2026-07-24 and 2026-07-25); revisit
+  as a 1.0 distribution task.
+
+  The remaining manual step is the build config — the Podfile pod, the
+  `settings.gradle` include, the `build.gradle` dependency — and that part is not
+  automatable at all: no npm package can edit a host's build files, and Lynx has
+  no equivalent to React Native's autolinking CLI. A `postinstall` is the wrong
+  tool for it too, since pnpm's `strictDepBuilds` blocks dependency build scripts
+  by default and `--ignore-scripts` would skip it silently. See the "Why there is
+  no setup script" section in [INSTALLATION.md](INSTALLATION.md).
+
+- `ChimeraCamera.register()` ships unverified on both platforms. It is guarded
+  only by grep-level surface tests in `tests/version-sync.test.js`, which prove
+  the call sites exist and target the global registries but cannot prove they run
+  on device. It sits on the startup path for every consumer, so it should be
+  exercised through `example/host-ios` before Android is called supported.
 - The podspec has passed `pod lib lint` (it resolves Lynx from trunk and
   compiles both native surfaces) but has never been consumed from an actual
   `node_modules` install. `example/host-ios` still compiles the `ios/` sources
