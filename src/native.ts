@@ -1,5 +1,5 @@
 import { createMockCameraModule, type MockCameraOptions } from './mock.js'
-import { ChimeraCameraError } from './types.js'
+import { ChimeraCameraError, pickDefaultCamera } from './types.js'
 import type {
   CameraDevice,
   CameraErrorEvent,
@@ -68,12 +68,8 @@ export interface CameraInstallStatus {
 }
 
 export function getNativeCameraModule<T = NativeCameraModuleShape>(name = DEFAULT_NATIVE_MODULE_NAME): T | null {
-  try {
-    if (typeof NativeModules === 'undefined') return null
-    return (NativeModules[name] as T | undefined) ?? null
-  } catch {
-    return null
-  }
+  if (typeof NativeModules === 'undefined') return null
+  return (NativeModules[name] as T | undefined) ?? null
 }
 
 export function createCameraModule(options?: CreateCameraModuleOptions & { optional?: false }): CameraModuleClient
@@ -110,13 +106,7 @@ export function getCameraInstallStatus(options: CreateCameraModuleOptions = {}):
     }
   }
 
-  let modules: Record<string, unknown> | undefined
-  try {
-    modules = typeof NativeModules === 'undefined' ? undefined : NativeModules
-  } catch {
-    modules = undefined
-  }
-
+  const modules = typeof NativeModules === 'undefined' ? undefined : NativeModules
   if (!modules) {
     return createMissingStatus(
       'native-modules-missing',
@@ -170,23 +160,11 @@ export async function getCameraInstallStatusAsync(
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
   if (!nativeModule?.getChimeraCameraNativeVersion) return status
 
-  let nativeVersion: string
-  try {
-    nativeVersion = await callNative(nativeModule.getChimeraCameraNativeVersion.bind(nativeModule))
-  } catch (error) {
-    // A version probe that throws is still a broken install — report it as one
-    // so assertCameraInstalledAsync surfaces the setup guide instead of a raw
-    // native error.
-    return {
-      ...status,
-      ok: false,
-      code: 'native-version-mismatch',
-      message: createInstallErrorMessage(
-        status.nativeModuleName,
-        `Native version check failed: ${error instanceof Error ? error.message : String(error)}`,
-      ),
-    }
-  }
+  // A rejected probe becomes a version that cannot match, so it lands in the
+  // mismatch branch below rather than throwing a raw native error at the caller.
+  const nativeVersion = await callNative<string>(
+    nativeModule.getChimeraCameraNativeVersion.bind(nativeModule),
+  ).catch((error: unknown) => `unavailable (${error instanceof Error ? error.message : String(error)})`)
 
   if (nativeVersion !== CHIMERA_CAMERA_JS_VERSION) {
     return {
@@ -240,9 +218,7 @@ export function createNativeCameraModule(nativeModule: NativeCameraModuleShape):
     },
 
     async getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null> {
-      const devices = await this.getAvailableCameraDevices()
-      const matching = devices.filter((device) => device.position === position)
-      return matching.find((device) => device.deviceType === 'wide-angle') ?? matching[0] ?? null
+      return pickDefaultCamera(await this.getAvailableCameraDevices(), position)
     },
 
     async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {

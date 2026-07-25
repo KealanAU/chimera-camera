@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test, { afterEach } from 'node:test'
 
-import { ChimeraCameraError, createCameraViewHandle } from '../dist/index.js'
+import { ChimeraCameraError, createCameraViewHandle, createNativeCameraModule } from '../dist/index.js'
 import { createMockCameraModule } from '../dist/mock.js'
 
 // Executable mirror of docs/native-contract.md. Every framework binding drives
@@ -103,6 +103,26 @@ test('mock rejects audio recording without microphone permission, matching nativ
     assert.equal(error.code, 'camera/permission-denied')
     return true
   })
+})
+
+test('mock and native getDefaultCamera pick the same device', async () => {
+  const devices = [
+    { id: 'triple', localizedName: 'Back Triple', position: 'back', deviceType: 'triple' },
+    { id: 'wide', localizedName: 'Back Wide', position: 'back', deviceType: 'wide-angle' },
+    { id: 'selfie', localizedName: 'Front', position: 'front', deviceType: 'wide-angle' },
+  ]
+  const mock = createMockCameraModule({ devices })
+  const native = createNativeCameraModule({ getAvailableCameraDevices: (callback) => callback(devices) })
+
+  for (const position of ['back', 'front', 'external']) {
+    assert.deepEqual(
+      await mock.getDefaultCamera(position),
+      await native.getDefaultCamera(position),
+      `getDefaultCamera('${position}') drifted between the mock and the native module`,
+    )
+  }
+  assert.equal((await mock.getDefaultCamera('back')).id, 'wide')
+  assert.equal(await mock.getDefaultCamera('external'), null)
 })
 
 test('mock rejects a second startRecording with recording/in-progress, matching native', async () => {

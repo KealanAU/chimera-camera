@@ -30,6 +30,15 @@ export interface CameraDevice {
   supportsFocusMetering: boolean
 }
 
+/** Shared by the native module and the mock so tests get production's camera. */
+export function pickDefaultCamera(
+  devices: CameraDevice[],
+  position: TargetCameraPosition,
+): CameraDevice | null {
+  const matching = devices.filter((device) => device.position === position)
+  return matching.find((device) => device.deviceType === 'wide-angle') ?? matching[0] ?? null
+}
+
 export class ChimeraCameraError extends Error {
   readonly code: string
   readonly cause?: unknown
@@ -125,14 +134,6 @@ export interface RecordingFinishedEvent {
   file: VideoFile
 }
 
-export interface CameraModule {
-  getPermissions(): Promise<CameraPermissions>
-  requestCameraPermission(): Promise<PermissionStatus>
-  requestMicrophonePermission(): Promise<PermissionStatus>
-  getAvailableCameraDevices(): Promise<CameraDevice[]>
-  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
-}
-
 export interface CameraViewProps {
   active?: boolean
   cameraId?: string
@@ -171,7 +172,12 @@ export type PickPhotoOptions = ImageOutputOptions
  * are deliberately absent; they belong to a rendered `<camera-view>` reached
  * through `createCameraViewHandle()`.
  */
-export interface CameraModuleClient extends CameraModule {
+export interface CameraModuleClient {
+  getPermissions(): Promise<CameraPermissions>
+  requestCameraPermission(): Promise<PermissionStatus>
+  requestMicrophonePermission(): Promise<PermissionStatus>
+  getAvailableCameraDevices(): Promise<CameraDevice[]>
+  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
   /** System-camera photo capture. Opens the OS camera UI; no rendered view needed. */
   capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
   /** Picks an existing photo via the system library picker (no permission needed). */

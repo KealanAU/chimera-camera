@@ -39,11 +39,10 @@ sources and registers them, which is what the remaining steps cover.
 
 ## 2. iOS
 
-Requires an **iOS 15 deployment target**. The podspec declares it, so `pod
-install` enforces it — but a host that compiles `ios/` directly (XcodeGen, or
-files dragged into Xcode) never reads the podspec and fails mid-build instead,
-typically on `PHPhotoLibrary.requestAuthorization(for:)` "is only available in
-iOS 14 or newer". Set `IPHONEOS_DEPLOYMENT_TARGET` to `15.0` in that case.
+Requires an **iOS 15 deployment target**, which the podspec enforces. A host
+compiling `ios/` directly never reads the podspec, so set
+`IPHONEOS_DEPLOYMENT_TARGET` to `15.0` yourself or the build fails on
+`PHPhotoLibrary.requestAuthorization(for:)`.
 
 Add the pod to your `Podfile` and run `pod install`:
 

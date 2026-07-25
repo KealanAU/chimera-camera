@@ -1,5 +1,5 @@
 import { SAMPLE_PHOTO_FIXTURE } from './fixtures.js'
-import { ChimeraCameraError } from './types.js'
+import { ChimeraCameraError, pickDefaultCamera } from './types.js'
 import type {
   CameraModuleClient,
   CameraDevice,
@@ -9,10 +9,8 @@ import type {
   PermissionStatus,
   PickPhotoOptions,
   PhotoFile,
-  Point,
   StartRecordingOptions,
   TargetCameraPosition,
-  TorchMode,
   VideoFile,
 } from './types.js'
 
@@ -55,7 +53,7 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
     },
 
     async getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null> {
-      return devices.find((device) => device.position === position) ?? null
+      return pickDefaultCamera(devices, position)
     },
 
     async capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile> {
@@ -68,10 +66,7 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
       return mockPhotoResult(photo, options?.includeBase64)
     },
 
-    async saveToLibrary(_file: PhotoFile | VideoFile): Promise<void> {
-      // No device library under the mock; the call just resolves.
-      return
-    },
+    async saveToLibrary(): Promise<void> {},
 
     async startRecording(options?: StartRecordingOptions): Promise<void> {
       // Mirror the native contract's rejections so apps exercise these paths.
@@ -98,21 +93,13 @@ export function createMockCameraModule(options: MockCameraOptions = {}): CameraM
       }
     },
 
-    async focusAtPoint(_point: Point): Promise<void> {
-      return
-    },
+    async focusAtPoint(): Promise<void> {},
 
-    async setZoom(_value: number): Promise<void> {
-      return
-    },
+    async setZoom(): Promise<void> {},
 
-    async setTorch(_mode: TorchMode): Promise<void> {
-      return
-    },
+    async setTorch(): Promise<void> {},
 
-    async setExposureBias(_bias: number): Promise<void> {
-      return
-    },
+    async setExposureBias(): Promise<void> {},
   }
 }
 
@@ -122,6 +109,7 @@ export function defaultMockDevices(): CameraDevice[] {
       id: 'mock-back-camera',
       localizedName: 'Mock Back Camera',
       position: 'back',
+      deviceType: 'wide-angle',
       minZoom: 1,
       maxZoom: 8,
       hasFlash: true,
@@ -132,6 +120,7 @@ export function defaultMockDevices(): CameraDevice[] {
       id: 'mock-front-camera',
       localizedName: 'Mock Front Camera',
       position: 'front',
+      deviceType: 'wide-angle',
       minZoom: 1,
       maxZoom: 4,
       hasFlash: false,
