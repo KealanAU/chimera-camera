@@ -29,12 +29,8 @@ interface SelectorQuery {
 declare const lynx: { createSelectorQuery?: () => SelectorQuery } | undefined
 
 function resolveSelectorQuery(): SelectorQuery | null {
-  try {
-    if (typeof lynx === 'undefined' || typeof lynx?.createSelectorQuery !== 'function') return null
-    return lynx.createSelectorQuery()
-  } catch {
-    return null
-  }
+  if (typeof lynx === 'undefined' || typeof lynx?.createSelectorQuery !== 'function') return null
+  return lynx.createSelectorQuery()
 }
 
 export function isCameraViewBridgeAvailable(): boolean {

@@ -125,14 +125,6 @@ export interface RecordingFinishedEvent {
   file: VideoFile
 }
 
-export interface CameraModule {
-  getPermissions(): Promise<CameraPermissions>
-  requestCameraPermission(): Promise<PermissionStatus>
-  requestMicrophonePermission(): Promise<PermissionStatus>
-  getAvailableCameraDevices(): Promise<CameraDevice[]>
-  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
-}
-
 export interface CameraViewProps {
   active?: boolean
   cameraId?: string
@@ -171,7 +163,12 @@ export type PickPhotoOptions = ImageOutputOptions
  * are deliberately absent; they belong to a rendered `<camera-view>` reached
  * through `createCameraViewHandle()`.
  */
-export interface CameraModuleClient extends CameraModule {
+export interface CameraModuleClient {
+  getPermissions(): Promise<CameraPermissions>
+  requestCameraPermission(): Promise<PermissionStatus>
+  requestMicrophonePermission(): Promise<PermissionStatus>
+  getAvailableCameraDevices(): Promise<CameraDevice[]>
+  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
   /** System-camera photo capture. Opens the OS camera UI; no rendered view needed. */
   capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
   /** Picks an existing photo via the system library picker (no permission needed). */
