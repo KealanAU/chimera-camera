@@ -170,7 +170,24 @@ export async function getCameraInstallStatusAsync(
   const nativeModule = getNativeCameraModule<NativeCameraModuleShape>(options.nativeModuleName)
   if (!nativeModule?.getChimeraCameraNativeVersion) return status
 
-  const nativeVersion = await callNative(nativeModule.getChimeraCameraNativeVersion.bind(nativeModule))
+  let nativeVersion: string
+  try {
+    nativeVersion = await callNative(nativeModule.getChimeraCameraNativeVersion.bind(nativeModule))
+  } catch (error) {
+    // A version probe that throws is still a broken install — report it as one
+    // so assertCameraInstalledAsync surfaces the setup guide instead of a raw
+    // native error.
+    return {
+      ...status,
+      ok: false,
+      code: 'native-version-mismatch',
+      message: createInstallErrorMessage(
+        status.nativeModuleName,
+        `Native version check failed: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    }
+  }
+
   if (nativeVersion !== CHIMERA_CAMERA_JS_VERSION) {
     return {
       ...status,
