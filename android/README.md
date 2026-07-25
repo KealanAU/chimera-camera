@@ -9,10 +9,10 @@ Android target.
 > `../docs/android-testing.md`) before treating Android as working. Each file
 > carries an `UNVERIFIED` header noting what to confirm.
 
-Installing `@vyui/chimera-camera` puts this folder in:
+Installing `@vyui/camera` puts this folder in:
 
 ```text
-node_modules/@vyui/chimera-camera/android
+node_modules/@vyui/camera/android
 ```
 
 ## Integration
@@ -26,7 +26,7 @@ it rather than copying sources. Full steps:
    ```gradle
    include ':chimera-camera'
    project(':chimera-camera').projectDir =
-       new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
+       new File(rootProject.projectDir, '../node_modules/@vyui/camera/android')
    ```
 
    then `implementation project(':chimera-camera')` in the app module. `lynx` is

@@ -11,7 +11,7 @@ a working Lynx iOS host you can copy from.
 ## 1. Install the package
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 JavaScript needs nothing further. The types, the mock adapter, and the install
@@ -19,7 +19,7 @@ diagnostics all work immediately, so you can build a complete capture flow
 before touching a native host:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -39,6 +39,12 @@ sources and registers them, which is what the remaining steps cover.
 
 ## 2. iOS
 
+Requires an **iOS 15 deployment target**. The podspec declares it, so `pod
+install` enforces it — but a host that compiles `ios/` directly (XcodeGen, or
+files dragged into Xcode) never reads the podspec and fails mid-build instead,
+typically on `PHPhotoLibrary.requestAuthorization(for:)` "is only available in
+iOS 14 or newer". Set `IPHONEOS_DEPLOYMENT_TARGET` to `15.0` in that case.
+
 Add the pod to your `Podfile` and run `pod install`:
 
 ```ruby
@@ -47,7 +53,7 @@ target 'YourApp' do
   use_modular_headers!
 
   pod 'Lynx', '3.9.0', :subspecs => ['Framework']   # your own Lynx pin
-  pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'
+  pod 'ChimeraCamera', :path => '../node_modules/@vyui/camera'
 end
 ```
 
@@ -89,10 +95,12 @@ config.register(ChimeraCameraModule.self)
 ```
 
 If you do not use CocoaPods, add the three files in
-`node_modules/@vyui/chimera-camera/ios` to your app target directly, which is
+`node_modules/@vyui/camera/ios` to your app target directly, which is
 all the pod does anyway.
 
 ## 3. Android
+
+Requires **`minSdk` 24** (Android 7.0), which the shipped module declares.
 
 The shipped `android/` folder is a complete `com.android.library` module. In
 `settings.gradle`:
@@ -100,7 +108,7 @@ The shipped `android/` folder is a complete `com.android.library` module. In
 ```gradle
 include ':chimera-camera'
 project(':chimera-camera').projectDir =
-    new File(rootProject.projectDir, '../node_modules/@vyui/chimera-camera/android')
+    new File(rootProject.projectDir, '../node_modules/@vyui/camera/android')
 ```
 
 In your app module's `build.gradle`:
@@ -139,7 +147,7 @@ ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
 Confirm the wiring took:
 
 ```ts
-import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
+import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/camera'
 
 console.log(await getCameraInstallStatusAsync())
 await assertCameraInstalledAsync()

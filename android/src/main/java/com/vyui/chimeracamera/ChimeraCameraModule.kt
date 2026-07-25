@@ -192,7 +192,7 @@ class ChimeraCameraModule(context: Context) : LynxModule(context) {
         }
 
     companion object {
-        const val NATIVE_VERSION = "0.0.1"
+        const val NATIVE_VERSION = "0.0.2"
 
         fun errorResult(code: String, message: String): JavaOnlyMap {
             val error = JavaOnlyMap()

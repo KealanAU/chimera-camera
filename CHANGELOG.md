@@ -3,6 +3,15 @@
 All notable changes to Chimera Camera are documented here. Until the API is
 stable, prerelease entries may include breaking changes.
 
+## 0.0.2 — Renamed to `@vyui/camera`
+
+The npm name was never a decision, just the repo name carried along through two
+renames (`@kealanau/lynx-camera` → `@kealanau/chimera-camera` → `@vyui/…`). The
+scope already says whose camera it is, so the package is now `@vyui/camera`.
+`@vyui/chimera-camera` stops at `0.0.1` and is deprecated pointing here. The
+repo, the podspec (`ChimeraCamera`), and the Android namespace
+(`com.vyui.chimeracamera`) keep the Chimera name — only the npm package moved.
+
 ## 0.0.1 — First published release
 
 Renumbered from the unpublished `0.2.0-alpha.0`. Nothing had ever been published

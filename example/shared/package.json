@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@vyui/chimera-camera": "workspace:*",
+    "@vyui/camera": "workspace:*",
     "@lynx-js/types": "^4.1.0"
   }
 }

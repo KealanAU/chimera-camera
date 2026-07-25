@@ -4,6 +4,7 @@ import test, { afterEach } from 'node:test'
 import {
   CHIMERA_CAMERA_JS_VERSION,
   assertCameraInstalled,
+  assertCameraInstalledAsync,
   createCameraModule,
   getCameraInstallStatus,
   getCameraInstallStatusAsync,
@@ -114,6 +115,20 @@ test('async status flags a native/JS version mismatch', async () => {
   assert.equal(status.ok, false)
   assert.equal(status.code, 'native-version-mismatch')
   assert.equal(status.nativeVersion, '9.9.9')
+})
+
+test('async status reports a failed version probe instead of rejecting', async () => {
+  globalThis.NativeModules = {
+    CameraModule: completeNativeModule({
+      getChimeraCameraNativeVersion: (callback) => callback({ error: 'jni boom' }),
+    }),
+  }
+  const status = await getCameraInstallStatusAsync()
+  assert.equal(status.ok, false)
+  assert.equal(status.code, 'native-version-mismatch')
+  assert.match(status.message, /jni boom/)
+  assert.match(status.message, /docs\/ios-install\.md/)
+  await assert.rejects(assertCameraInstalledAsync(), /docs\/ios-install\.md/)
 })
 
 test('assertCameraInstalled throws an actionable message', () => {

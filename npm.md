@@ -17,7 +17,7 @@ published package.json, so the two disagree by a few bytes.
 
 Publishing uploads a tarball of the package to the npm registry under the
 `@vyui` scope — the same org as `@vyui/core` and `@vyui/kit` — so the full
-name is `@vyui/chimera-camera`.
+name is `@vyui/camera`.
 
 The repository is public and the package is MIT licensed, so everything in the
 tarball is readable either way: the compiled JS, the Swift and Kotlin sources,
@@ -32,7 +32,7 @@ The flow is already wired up; the steps are in
 register this repo as a trusted publisher on npmjs.com, then run the `Release`
 workflow manually from GitHub Actions for every release after that. It defaults
 to the `latest` dist-tag, so the published version is what a plain
-`pnpm add @vyui/chimera-camera` resolves to.
+`pnpm add @vyui/camera` resolves to.
 
 There is no publish token anywhere in the repo. The workflow authenticates by
 OIDC, exchanging a GitHub-issued token for a short-lived registry credential at
@@ -67,7 +67,7 @@ things would have to happen for a camera to appear with zero setup:
 
 1. **Get the native code into the app's build.** This part is now one line per
    platform. iOS ships a CocoaPods podspec, so the host adds
-   `pod 'ChimeraCamera', :path => '../node_modules/@vyui/chimera-camera'`
+   `pod 'ChimeraCamera', :path => '../node_modules/@vyui/camera'`
    and `pod install` compiles the Swift and Objective-C into the app. Android
    ships `android/` as a real `com.android.library` Gradle module, so the host
    includes it in `settings.gradle` — and the Android manifest merger folds in
@@ -93,7 +93,7 @@ the package.
 ## Versioning
 
 The first published version is `0.0.1`, under the default `latest` dist-tag —
-so a plain `pnpm add @vyui/chimera-camera` picks it up with no `@alpha`
+so a plain `pnpm add @vyui/camera` picks it up with no `@alpha`
 suffix. The `0.0.x` line *is* the alpha; there is no separate dist-tag to
 remember, and the README carries the pre-alpha warning where people actually
 read it.

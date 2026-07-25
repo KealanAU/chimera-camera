@@ -7,7 +7,7 @@ you normally skip setup and just do these two things.
 
 ```sh
 pnpm install                                        # if node_modules is gone
-pnpm --filter @vyui/chimera-camera run build    # build the package once
+pnpm --filter @vyui/camera run build    # build the package once
 pnpm --filter @chimera-camera/react run dev         # ReactLynx  (or ...vue for Vue)
 ```
 

@@ -40,7 +40,7 @@ API is plain TypeScript that any JS framework can drive.
 ## Installation
 
 ```sh
-pnpm add @vyui/chimera-camera
+pnpm add @vyui/camera
 ```
 
 That is everything JavaScript needs. The types, the mock adapter, and the
@@ -48,7 +48,7 @@ install diagnostics work immediately, so you can build a complete capture flow
 before touching a native host:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -72,7 +72,7 @@ sits in between, because this is plain TypeScript talking to the Lynx element:
 ```
 
 ```ts
-import { createCameraViewHandle } from '@vyui/chimera-camera'
+import { createCameraViewHandle } from '@vyui/camera'
 
 const camera = createCameraViewHandle('#camera')
 
@@ -94,6 +94,8 @@ Two runnable demos drive that same core from different frameworks:
 | iOS | Alpha | Device-proven on a physical iPhone: preview, photo capture, front/back switch, close/reopen. Recording and session controls are written but unverified. |
 | Android | Experimental | Written to the same contract as device-proven iOS and believed to work, but never compiled or run on any device or emulator. See [docs/android-testing.md](docs/android-testing.md). |
 | Mock | Stable | Framework-neutral JS double for all hosts. |
+
+Minimums: **iOS 15** deployment target, **Android 7.0** (`minSdk` 24).
 
 Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors
 [docs/native-contract.md](docs/native-contract.md) and the device-proven iOS

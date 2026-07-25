@@ -20,7 +20,7 @@ a dev server.
 
 ```sh
 pnpm install
-pnpm --filter @vyui/chimera-camera run build
+pnpm --filter @vyui/camera run build
 pnpm --filter @chimera-camera/react run dev   # scan the QR code with Lynx Go
 ```
 
@@ -35,7 +35,7 @@ cd camera-demo
 pnpm add /path/to/chimera-camera/vyui-chimera-camera-0.0.1.tgz
 
 # 3. Replace src/App.tsx with the ReactLynx demo:
-cp node_modules/@vyui/chimera-camera/example/react/src/App.tsx src/App.tsx
+cp node_modules/@vyui/camera/example/react/src/App.tsx src/App.tsx
 
 # 4. Start the dev server and scan its QR code with Lynx Go
 pnpm dev
@@ -61,7 +61,7 @@ contract through the same `example/shared/camera-core.ts`.
 Use these hosts with the mock adapter first:
 
 ```ts
-import { createCameraModule } from '@vyui/chimera-camera'
+import { createCameraModule } from '@vyui/camera'
 
 const camera = createCameraModule({ mock: true })
 ```
@@ -69,7 +69,7 @@ const camera = createCameraModule({ mock: true })
 The install checker also reports mock mode:
 
 ```ts
-import { getCameraInstallStatus } from '@vyui/chimera-camera'
+import { getCameraInstallStatus } from '@vyui/camera'
 
 console.log(getCameraInstallStatus({ mock: true }))
 ```
@@ -86,9 +86,9 @@ This lets an app visualize:
 For a visual starting point, copy or adapt:
 
 ```text
-node_modules/@vyui/chimera-camera/example/react/src/App.tsx      (ReactLynx — standard)
-node_modules/@vyui/chimera-camera/example/vue/src/App.vue        (Vue Lynx)
-node_modules/@vyui/chimera-camera/example/shared/camera-core.ts  (shared by both)
+node_modules/@vyui/camera/example/react/src/App.tsx      (ReactLynx — standard)
+node_modules/@vyui/camera/example/vue/src/App.vue        (Vue Lynx)
+node_modules/@vyui/camera/example/shared/camera-core.ts  (shared by both)
 ```
 
 Both show the host-detection pattern, but only the ReactLynx example is the

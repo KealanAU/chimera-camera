@@ -59,7 +59,7 @@ jobs:
 
       # Only the library subtree; the example/ Lynx apps are not built in CI.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @vyui/chimera-camera
+        run: pnpm install --frozen-lockfile --filter @vyui/camera
 
       - name: Typecheck
         run: pnpm run typecheck

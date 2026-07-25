@@ -10,7 +10,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@vyui/chimera-camera": "workspace:*",
+    "@vyui/camera": "workspace:*",
     "vue": "^3.5.40",
     "vue-lynx": "^0.5.1"
   },
