@@ -71,12 +71,22 @@ Add the usage strings to `Info.plist`:
 Then register the module in your Lynx bootstrap:
 
 ```swift
-let config = LynxConfig(provider: templateProvider)
-config.register(ChimeraCameraModule.self)
+_ = LynxEnv.sharedInstance()
+ChimeraCamera.register()
 ```
 
 The element registers itself through `LYNX_LAZY_REGISTER_UI`, so `<camera-view>`
 needs no bootstrap call of its own.
+
+If your host builds its own per-view `LynxConfig` rather than using the global
+one, that config bypasses the global registration and needs the module directly —
+this is the path `example/host-ios` takes, since it supplies a custom template
+provider:
+
+```swift
+let config = LynxConfig(provider: templateProvider)
+config.register(ChimeraCameraModule.self)
+```
 
 If you do not use CocoaPods, add the three files in
 `node_modules/@vyui/chimera-camera/ios` to your app target directly, which is
@@ -106,19 +116,27 @@ folds in the `CAMERA` and `RECORD_AUDIO` permissions, the proxy activity, and
 the FileProvider on its own. The module declares `lynx` as `compileOnly`, so it
 links against whatever version your host already ships.
 
-Then register both surfaces in your Lynx host:
+Then register both surfaces in your Lynx host, after your own
+`LynxEnv.inst().init(...)`:
 
 ```kotlin
-LynxEnv.inst().registerModule("CameraModule", ChimeraCameraModule::class.java)
+import com.vyui.chimeracamera.ChimeraCamera
 
-val builder = LynxViewBuilder()
+ChimeraCamera.register()
+```
+
+That registers the module and the `camera-view` element globally on `LynxEnv`, so
+a host with several LynxViews wires this once rather than at every
+`LynxViewBuilder`. To scope the element to a single view instead, the behaviors
+are still available directly:
+
+```kotlin
 ChimeraCameraBehaviors.behaviors().forEach { builder.addBehavior(it) }
 ```
 
 ## 4. Verify
 
-Lynx has no autolinking, which makes those registration calls in steps 2 and 3
-the one part nobody can automate away for you. Confirm they took:
+Confirm the wiring took:
 
 ```ts
 import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/chimera-camera'
@@ -130,6 +148,25 @@ await assertCameraInstalledAsync()
 When native setup is incomplete, the thrown error names the missing piece,
 whether that turns out to be `NativeModules`, `CameraModule`, a required native
 method, or a native/JS version mismatch.
+
+## Why there is no setup script
+
+Steps 2 and 3 are hand-edits on purpose. Lynx has no autolinking, and the parts
+that stay manual are the build-config lines — the `Podfile` pod, the
+`settings.gradle` include, the `build.gradle` dependency. No npm package can write
+those for you: they live in your repo, in a layout only you know, and a
+half-applied edit to a `Podfile` is worse than a copy-paste.
+
+A `postinstall` would not help either. pnpm blocks dependency build scripts by
+default (`strictDepBuilds`), so it would fail your install until you added an
+`allowBuilds` entry for this package, and `--ignore-scripts` is common enough in
+CI that it would silently skip for anyone using it — leaving you to believe setup
+ran when it did not.
+
+So the runtime half is down to one call per platform, `ChimeraCamera.register()`,
+and the build half is the four snippets above. If something is off,
+`getCameraInstallStatusAsync()` names the missing piece rather than failing
+vaguely.
 
 ## Troubleshooting
 
