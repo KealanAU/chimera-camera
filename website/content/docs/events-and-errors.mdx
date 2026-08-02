@@ -1,0 +1,57 @@
+---
+title: Events And Errors
+description: V1 events use stable detail payloads and platform-neutral error codes.
+icon: Radio
+---
+
+Event names and `detail` shapes should be identical on Android and iOS even when the native event mechanisms differ.
+
+## Events
+
+```ts
+export interface CameraReadyEvent {
+  deviceId: string
+}
+
+export interface CameraErrorEvent {
+  code: string
+  message: string
+  cause?: unknown
+}
+
+export interface RecordingStartedEvent {
+  path?: string
+}
+
+export interface RecordingFinishedEvent {
+  file: VideoFile
+}
+```
+
+## Event ownership
+
+`CameraView` emits view-scoped events:
+
+- `ready`
+- `error`
+- `recordingStarted`
+- `recordingFinished`
+
+`CameraModule` returns promises for module operations. It should reject with normalized errors instead of emitting view events.
+
+## Error codes
+
+V1 should use stable JavaScript error codes for common failures:
+
+| Code | Meaning |
+| --- | --- |
+| `permission-denied` | Camera or microphone permission is denied. |
+| `permission-restricted` | The platform prevents permission from being granted. |
+| `device-unavailable` | The requested camera device cannot be opened. |
+| `device-not-found` | The requested `cameraId` is not available. |
+| `session-inactive` | A capture or recording command was called before the session was active. |
+| `capture-failed` | Photo capture failed after the command was accepted. |
+| `recording-failed` | Video recording failed after the command was accepted. |
+| `unsupported-control` | The selected device does not support the requested control. |
+
+Platform-specific native errors can still be attached as `cause`, but application code should be able to branch on `code`.

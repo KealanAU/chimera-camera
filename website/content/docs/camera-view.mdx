@@ -1,0 +1,57 @@
+---
+title: CameraView
+description: CameraView is the Lynx native element that owns preview rendering and session commands.
+icon: Camera
+---
+
+`CameraView` is the native UI component for Chimera Camera. It owns preview rendering, receives view props, exposes imperative methods, and emits view-scoped events.
+
+## Element name
+
+The target Lynx native element tag is:
+
+```text
+camera-view
+```
+
+## Props
+
+```ts
+export interface CameraViewProps {
+  active?: boolean
+  cameraId?: string
+  facing?: TargetCameraPosition
+  resizeMode?: PreviewResizeMode
+  torch?: TorchMode
+  zoom?: number
+  enableAudio?: boolean
+  onReady?: (event: CameraReadyEvent) => void
+  onError?: (event: CameraErrorEvent) => void
+  onRecordingStarted?: (event: RecordingStartedEvent) => void
+  onRecordingFinished?: (event: RecordingFinishedEvent) => void
+}
+```
+
+## Methods
+
+```ts
+export interface CameraViewMethods {
+  ping(): Promise<{ ok: true }>
+  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
+  startRecording(options?: StartRecordingOptions): Promise<void>
+  stopRecording(): Promise<VideoFile>
+  focusAtPoint(point: Point): Promise<void>
+  setZoom(value: number): Promise<void>
+  setTorch(mode: TorchMode): Promise<void>
+}
+```
+
+## Bridge spike method
+
+`ping()` is part of the bridge spike. It proves that JavaScript can call an imperative native view method before camera behavior is implemented.
+
+The method should stay in V1 until the bridge has been validated on both platforms. It can be removed after the project has a replacement health-check or test path.
+
+## Session state
+
+Preview, capture, recording, focus, zoom, and torch belong to the mounted camera view because they depend on the active camera session. Permission and device discovery belong to `CameraModule`.

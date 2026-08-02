@@ -1,0 +1,19 @@
+{
+  "title": "Chimera Camera",
+  "description": "V1 documentation for the Chimera Camera surface layer",
+  "root": true,
+  "pages": [
+    "---Start---",
+    "index",
+    "bridge-spike",
+    "---Public Surface---",
+    "api-surface",
+    "camera-module",
+    "camera-view",
+    "events-and-errors",
+    "---Native Work---",
+    "native-bridge",
+    "camera-mvp",
+    "upstream-strategy"
+  ]
+}

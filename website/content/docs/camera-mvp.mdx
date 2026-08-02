@@ -1,0 +1,38 @@
+---
+title: Camera MVP
+description: After the bridge spike, V1 is complete when real devices can preview, capture, record, and control the camera.
+icon: ListChecks
+---
+
+After the bridge spike, V1 moves from bridge proof to real camera behavior.
+
+## Acceptance criteria
+
+The camera MVP is complete when real iOS and Android devices can:
+
+- Request and check camera permission.
+- Request and check microphone permission.
+- List available camera devices.
+- Render live preview.
+- Switch or select front and back cameras.
+- Capture a photo and return a local file path.
+- Start and stop video recording and return a local file path.
+- Set zoom where supported.
+- Set torch where supported.
+- Focus at a point where supported.
+- Survive mount, unmount, app background, and app foreground transitions without crashing.
+
+## Implementation order
+
+1. Implement permission and device discovery in `CameraModule`.
+2. Attach native preview rendering to `CameraView`.
+3. Add photo capture and file return values.
+4. Add video recording with optional audio.
+5. Add zoom, torch, and tap-to-focus controls.
+6. Harden lifecycle and interruption behavior.
+
+## Test focus
+
+Automated tests should cover the TypeScript exports, option validation, error normalization, and permission state mapping.
+
+Manual device testing should cover permission denial, permission revocation, camera already in use, front/back switching, rapid mount/unmount, app background/foreground transitions, and interrupted recording.

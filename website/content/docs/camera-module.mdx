@@ -1,0 +1,53 @@
+---
+title: CameraModule
+description: CameraModule handles permissions and device discovery outside the preview view.
+icon: Settings2
+---
+
+`CameraModule` is the native module side of Chimera Camera. It handles app-level operations that do not need a mounted preview view.
+
+## Interface
+
+```ts
+export interface CameraModule {
+  getPermissions(): Promise<CameraPermissions>
+  requestCameraPermission(): Promise<PermissionStatus>
+  requestMicrophonePermission(): Promise<PermissionStatus>
+  getAvailableCameraDevices(): Promise<CameraDevice[]>
+  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
+}
+```
+
+## Responsibilities
+
+`CameraModule` owns:
+
+- Reading camera and microphone permission state.
+- Requesting camera permission.
+- Requesting microphone permission.
+- Listing available camera devices.
+- Selecting a default camera for a target position.
+
+It does not own preview rendering, capture, recording, focus, zoom, or torch. Those remain on `CameraView` because they are session-scoped.
+
+## Native expectations
+
+Android should use app or activity permission APIs directly.
+
+iOS should use `AVCaptureDevice.authorizationStatus(for:)` and `AVCaptureDevice.requestAccess(for:)`.
+
+Microphone permission is only required when video recording uses audio.
+
+## Permission statuses
+
+Native platform-specific states should normalize into the shared TypeScript union:
+
+```ts
+export type PermissionStatus =
+  | 'not-determined'
+  | 'authorized'
+  | 'denied'
+  | 'restricted'
+```
+
+Errors should normalize into stable JavaScript error codes so callers do not have to branch on platform-specific exception types.

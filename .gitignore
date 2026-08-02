@@ -7,3 +7,7 @@ upstream/
 
 .DS_Store
 *.tgz
+
+# Next.js / fumadocs build output in the website package.
+website/.next/
+website/.source/

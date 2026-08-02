@@ -1,0 +1,59 @@
+---
+title: V1 Overview
+description: Chimera Camera V1 is a thin native camera surface for Lynx apps.
+icon: Rocket
+---
+
+Chimera Camera V1 is the smallest useful native camera surface that proves Lynx JavaScript can talk to real iOS and Android camera engines.
+
+It is deliberately narrower than a full VisionCamera port. V1 focuses on a plain TypeScript API, a native Lynx view, a native module for app-level operations, and enough bridge plumbing to validate props, methods, and events before the camera engine work grows.
+
+## Goal
+
+Build a framework-neutral JavaScript API over platform-native camera engines:
+
+- TypeScript is the public developer surface.
+- Android camera work is handled by Kotlin and CameraX.
+- iOS camera work is handled by Swift or Objective-C++ and AVFoundation.
+- Lynx owns native view registration, imperative methods, modules, and events.
+
+## Surface model
+
+V1 has two bridge surfaces:
+
+| Surface | Responsibility |
+| --- | --- |
+| `CameraView` | Preview rendering, view props, imperative view methods, and view-scoped events. |
+| `CameraModule` | Permissions, microphone access, and device discovery. It does not render preview. |
+
+Keeping the two surfaces separate is part of the contract. Permissions and device enumeration are app/module concerns; preview, focus, zoom, capture, and recording are view/session concerns.
+
+## First milestone
+
+The first implementation milestone is the [bridge spike](./bridge-spike). It is complete when the example app can render a native `camera-view` placeholder, pass props into native code, call `ping()`, and receive a native `ready` event in JavaScript.
+
+Camera preview is not required for that spike. The spike exists to prove the Lynx bridge before the camera session work starts.
+
+## V1 includes
+
+- Camera and microphone permission checks and requests.
+- Front and back camera selection.
+- Live preview.
+- Photo capture to a local file.
+- Video recording to a local file.
+- Torch, zoom, and tap-to-focus where supported.
+- Stable event and error shapes across platforms.
+- Basic lifecycle handling for mount, unmount, background, foreground, and permission changes.
+
+## V1 excludes
+
+- Framework wrapper components or hooks.
+- Web support.
+- Frame processors.
+- Skia integration.
+- Barcode scanning.
+- Depth, RAW, and HDR tuning beyond default platform behavior.
+
+## Upstream position
+
+VisionCamera is a reference and selective port source, not a runtime dependency. Any copied or substantially derived source needs to preserve the MIT license attribution already captured in the repository notices.

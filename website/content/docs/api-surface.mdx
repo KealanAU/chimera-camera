@@ -1,0 +1,90 @@
+---
+title: API Surface
+description: The V1 public API is plain TypeScript that can be consumed from any Lynx JavaScript integration.
+icon: Code2
+---
+
+The V1 API is framework-neutral TypeScript, usable from React, Vue, Svelte, or plain Lynx JavaScript.
+
+## Types
+
+```ts
+export type PermissionStatus =
+  | 'not-determined'
+  | 'authorized'
+  | 'denied'
+  | 'restricted'
+
+export type CameraPosition = 'front' | 'back' | 'external' | 'unspecified'
+export type TargetCameraPosition = 'front' | 'back' | 'external'
+export type TorchMode = 'on' | 'off'
+export type FlashMode = 'off' | 'on' | 'auto'
+export type PreviewResizeMode = 'cover' | 'contain'
+```
+
+## Shared objects
+
+```ts
+export interface Size {
+  width: number
+  height: number
+}
+
+export interface Point {
+  x: number
+  y: number
+}
+
+export interface CameraDevice {
+  id: string
+  localizedName: string
+  position: CameraPosition
+  minZoom: number
+  maxZoom: number
+  hasFlash: boolean
+  hasTorch: boolean
+  supportsFocusMetering: boolean
+}
+
+export interface CameraPermissions {
+  camera: PermissionStatus
+  microphone: PermissionStatus
+}
+```
+
+## Files and options
+
+```ts
+export interface PhotoFile {
+  path: string
+  width?: number
+  height?: number
+  orientation?: string
+}
+
+export interface VideoFile {
+  path: string
+  durationMs?: number
+  sizeBytes?: number
+}
+
+export interface CapturePhotoOptions {
+  flash?: FlashMode
+  enableShutterSound?: boolean
+}
+
+export interface StartRecordingOptions {
+  enableAudio?: boolean
+  maxDurationMs?: number
+  maxFileSizeBytes?: number
+}
+```
+
+## Surfaces
+
+The public API is split into [CameraModule](./camera-module) and [CameraView](./camera-view):
+
+- `CameraModule` handles permissions and device discovery.
+- `CameraView` owns preview rendering and session-scoped commands.
+
+This split keeps app-level concerns separate from view/session state.

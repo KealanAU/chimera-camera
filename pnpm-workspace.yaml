@@ -1,12 +1,17 @@
 packages:
   - example/*
+  - website
 
 # pnpm 11 defaults strictDepBuilds to true, so every dependency with a build
 # script has to be answered for explicitly. core-js's postinstall only prints its
 # funding notice, and it was already not running under pnpm 10 (nothing listed it
 # in the old onlyBuiltDependencies), so false keeps the behaviour identical.
+# esbuild and sharp install platform binaries the website toolchain executes
+# (next build / next image optimization), so they have to run.
 allowBuilds:
   core-js: false
+  esbuild: true
+  sharp: true
 
 # Both overrides exist to drag the vue example's dependency tree onto rsbuild 2,
 # which vue-lynx 0.5.1 predates (it peers on @rsbuild/core ^1.0.0 — that one
