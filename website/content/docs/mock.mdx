@@ -1,0 +1,92 @@
+---
+title: Mock Adapter
+description: A dev-only camera double so app flows can be built and tested before any native wiring exists.
+icon: FlaskConical
+---
+
+`@vyui/camera/mock` is a dev-only camera adapter for Lynx Explorer, web preview, unit tests, and
+apps that have not wired native iOS/Android code yet.
+
+The mock is intentionally plain TypeScript. It does not render native preview, request OS
+permissions, or touch device hardware. It mirrors the JS-facing contract so app flows can be built
+and tested before native integration.
+
+## Basic usage
+
+Force the mock explicitly:
+
+```ts
+import { createCameraModule } from '@vyui/camera'
+
+const camera = createCameraModule({ mock: true })
+
+const permissions = await camera.getPermissions()
+const photo = await camera.capturePhoto()
+```
+
+Or resolve the real native module first and fall back:
+
+```ts
+import { createCameraModule } from '@vyui/camera'
+import { createMockCameraModule } from '@vyui/camera/mock'
+import type { CameraModuleClient } from '@vyui/camera'
+
+const camera: CameraModuleClient =
+  createCameraModule({ optional: true }) ?? createMockCameraModule()
+```
+
+`optional: true` is what makes this work. By default `createCameraModule()` **throws** when neither
+the native module nor the mock is available, so a host like LynxExplorer fails loudly with setup
+instructions instead of silently doing nothing. `optional` turns that throw into `null` and hands
+the fallback decision to you.
+
+## What the default mock returns
+
+- Authorized camera and microphone permissions
+- One fake back camera and one fake front camera
+- A small JPEG fixture as `photo.base64`, behind a `mock://` path
+- Mock recording metadata from `startRecording()` / `stopRecording()`
+
+> [!NOTE]
+> The mock's `path` is a `mock://` URL with no real file behind it, so mock-backed previews must
+> display via the base64 data URI rather than `file://`. See [Output transport](./output-transport)
+> for picking the right source.
+
+## Custom fixtures
+
+```ts
+import { createMockCameraModule } from '@vyui/camera/mock'
+
+export const camera = createMockCameraModule({
+  permissions: {
+    camera: 'authorized',
+    microphone: 'denied',
+  },
+  photo: {
+    path: 'mock://test/photo.jpg',
+    width: 320,
+    height: 280,
+    mime: 'image/jpeg',
+    base64: '...',
+  },
+})
+```
+
+Overriding `permissions` is how you exercise the denial branches of a flow without an OS prompt.
+
+## Guarding production
+
+```ts
+const camera: CameraModuleClient | null =
+  createCameraModule({ optional: true }) ??
+  (import.meta.env.DEV ? createMockCameraModule() : null)
+```
+
+Production apps should not silently use the mock unless that is an intentional product fallback —
+a shipped app quietly returning a fixture photo is worse than one that fails.
+
+## Native is still required for device testing
+
+The mock proves JS app flows and nothing more. Real device testing still requires the host app to
+compile the package's native sources into the app target, register the module and element, and add
+the platform usage strings. [Installation](./installation) covers all of it.

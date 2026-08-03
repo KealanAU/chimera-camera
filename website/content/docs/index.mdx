@@ -1,59 +1,94 @@
 ---
-title: V1 Overview
-description: Chimera Camera V1 is a thin native camera surface for Lynx apps.
+title: Overview
+description: Chimera Camera is a native camera library for Lynx, driven from plain TypeScript.
 icon: Rocket
 ---
 
-Chimera Camera V1 is the smallest useful native camera surface that proves Lynx JavaScript can talk to real iOS and Android camera engines.
+Chimera Camera is a native camera library for [Lynx](https://lynxjs.org), built off the
+work in [`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera).
+It targets Lynx directly instead of wrapping React Native, which is why the public API is
+plain TypeScript that any JS framework can drive.
 
-It is deliberately narrower than a full VisionCamera port. V1 focuses on a plain TypeScript API, a native Lynx view, a native module for app-level operations, and enough bridge plumbing to validate props, methods, and events before the camera engine work grows.
+> [!WARNING]
+> **Pre-alpha.** The package publishes as `0.0.x` while the surface settles. Any release can
+> break you — read [Platform support](#platform-support) before depending on this. The first
+> real launch will be `1.0.0`.
 
-## Goal
+## What you get
 
-Build a framework-neutral JavaScript API over platform-native camera engines:
+- Photo capture, through an embedded preview or the system camera
+- Video recording with optional audio *(written, unverified)*
+- Zoom, torch, tap-to-focus, and exposure bias *(written, unverified)*
+- Front/back switching, `resizeMode`, and live `active` toggling
+- Photo-library picking and saving back to the library
+- Camera and microphone permission checks and requests
+- Framework-neutral: React, Vue, Svelte, or plain TypeScript, all unwrapped
+- A [mock adapter](./mock), so app flows can be built before any native wiring exists
+- [Install diagnostics](./install-diagnostics) that name the native step you are missing
+- [File paths across the bridge](./output-transport) rather than multi-megabyte base64 payloads
 
-- TypeScript is the public developer surface.
-- Android camera work is handled by Kotlin and CameraX.
-- iOS camera work is handled by Swift or Objective-C++ and AVFoundation.
-- Lynx owns native view registration, imperative methods, modules, and events.
+## Two surfaces
 
-## Surface model
+Every operation belongs to exactly one of two surfaces, and the split is part of the contract.
 
-V1 has two bridge surfaces:
+| Surface | Created by | Owns |
+| ------- | ---------- | ---- |
+| [Module](./camera-module) | `createCameraModule()` → `CameraModuleClient` | Stateless one-shots that need no rendered view: permissions, device discovery, system-camera capture, photo picking, saving to the library. |
+| [Session](./camera-view) | `createCameraViewHandle()` → `CameraViewHandle` | Controls tied to a live `<camera-view>`: view capture, recording, focus, zoom, torch, exposure, and `ping()`. |
 
-| Surface | Responsibility |
-| --- | --- |
-| `CameraView` | Preview rendering, view props, imperative view methods, and view-scoped events. |
-| `CameraModule` | Permissions, microphone access, and device discovery. It does not render preview. |
+Permissions and device enumeration are app-level concerns; preview, focus, zoom, capture, and
+recording depend on an active camera session. Keeping them apart means a permission check never
+needs a mounted element, and a capture never needs a permission round-trip it did not ask for.
 
-Keeping the two surfaces separate is part of the contract. Permissions and device enumeration are app/module concerns; preview, focus, zoom, capture, and recording are view/session concerns.
+## A complete flow
 
-## First milestone
+```tsx
+<camera-view id="camera" active={true} facing="back" bindready={onReady} />
+```
 
-The first implementation milestone is the [bridge spike](./bridge-spike). It is complete when the example app can render a native `camera-view` placeholder, pass props into native code, call `ping()`, and receive a native `ready` event in JavaScript.
+```ts
+import { createCameraModule, createCameraViewHandle } from '@vyui/camera'
 
-Camera preview is not required for that spike. The spike exists to prove the Lynx bridge before the camera session work starts.
+const module = createCameraModule()
+await module.requestCameraPermission()
 
-## V1 includes
+const camera = createCameraViewHandle('#camera')
+const photo = await camera.capturePhoto({ flash: 'auto' })
 
-- Camera and microphone permission checks and requests.
-- Front and back camera selection.
-- Live preview.
-- Photo capture to a local file.
-- Video recording to a local file.
-- Torch, zoom, and tap-to-focus where supported.
-- Stable event and error shapes across platforms.
-- Basic lifecycle handling for mount, unmount, background, foreground, and permission changes.
+console.log(photo.path)            // display with `file://${photo.path}`
+await module.saveToLibrary(photo)  // and/or keep it
+```
 
-## V1 excludes
+Two runnable demos drive that same core from different frameworks: `example/react` and
+`example/vue`.
 
-- Framework wrapper components or hooks.
-- Web support.
-- Frame processors.
-- Skia integration.
-- Barcode scanning.
-- Depth, RAW, and HDR tuning beyond default platform behavior.
+## Platform support
 
-## Upstream position
+| Platform | Status | Verified |
+| -------- | ------ | -------- |
+| iOS | Alpha | Device-proven on a physical iPhone: preview, photo capture, front/back switch, close/reopen. Recording and session controls are written but unverified. |
+| Android | Experimental | Written to the same [native contract](./native-contract) as device-proven iOS and believed to work, but never compiled or run on any device or emulator. |
+| Mock | Stable | Framework-neutral JS double for all hosts. |
 
-VisionCamera is a reference and selective port source, not a runtime dependency. Any copied or substantially derived source needs to preserve the MIT license attribution already captured in the repository notices.
+Minimums: **iOS 15** deployment target, **Android 7.0** (`minSdk` 24).
+
+Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors the native contract
+and the device-proven iOS behavior, which is fair reason to expect it to work, but nobody has
+confirmed that on hardware yet. Treat Android as unsupported until it passes device acceptance.
+
+## Not in scope
+
+Framework wrapper components or hooks, web support, frame processors, Skia integration, barcode
+scanning, and depth/RAW/HDR tuning beyond default platform behavior. React Native, Nitro Modules,
+and JSI are not dependencies and will not become ones.
+
+## Credits
+
+Chimera Camera lifts source, structure, and implementation approach from
+[`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera) by
+[Marc Rousavy](https://github.com/mrousavy) and its contributors wherever the MIT license allows,
+then rebuilds that work against Lynx rather than React Native. VisionCamera is copyright 2021
+Marc Rousavy and MIT licensed, and those terms carry over to everything ported here. This would be
+a much smaller project without it.
+
+This is not the official VisionCamera package and has no affiliation with it.

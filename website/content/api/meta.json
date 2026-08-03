@@ -1,6 +1,6 @@
 {
   "title": "API Reference",
-  "description": "Manual V1 API reference for Chimera Camera",
+  "description": "The public TypeScript surface of @vyui/camera",
   "root": true,
   "pages": ["index"]
 }
