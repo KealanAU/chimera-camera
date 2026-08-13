@@ -1,5 +1,3 @@
-import { createGenerator } from 'fumadocs-typescript'
-import { AutoTypeTable } from 'fumadocs-typescript/ui'
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion'
 import { CalloutDescription } from 'fumadocs-ui/components/callout'
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock'
@@ -18,8 +16,6 @@ import type {
   MdxComponentOptions,
 } from '@/lib/mdx/types'
 import { mergeClassNames } from '@/lib/mdx/utils'
-
-const generator = createGenerator()
 
 type CodeBlockRendererProps = ComponentProps<'pre'> &
   Partial<ComponentProps<typeof CodeBlock>>
@@ -110,9 +106,6 @@ export function getMDXComponents(
     'callout-root': MdxCalloutContainer,
     'callout-title': MdxCalloutTitle,
     'callout-body': CalloutDescription,
-    AutoTypeTable: (props) => (
-      <AutoTypeTable {...props} generator={generator} />
-    ),
     img: MdxImage,
     h3,
     h4,

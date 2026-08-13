@@ -1,0 +1,108 @@
+---
+title: Native contract
+description: The single normalized contract every native platform implements — defaults, result shapes, and session controls.
+icon: FileCode2
+---
+
+The single normalized contract every native platform implements. iOS conforms today; Android is
+written to match it exactly but has never been compiled or run.
+
+This page is what a JavaScript caller can rely on regardless of platform, and what a native
+implementation has to satisfy.
+
+## Prop defaults
+
+Applied **natively**. A platform must use these when the prop is unset, so an unset prop behaves
+identically everywhere.
+
+| Prop | Default | Notes |
+| ---- | ------- | ----- |
+| `active` | `false` | No session until `true`. |
+| `facing` | `'back'` | `front` \| `back`; `external` where hardware exists. |
+| `resizeMode` | `'cover'` | `cover` = fill/crop, `contain` = fit/letterbox. |
+| `cameraId` | unset | Not yet honored; selection is `facing`-based. |
+| `torch` | `'off'` | Session control *(written, unverified)*. |
+| `zoom` | `1` | Session control *(written, unverified)*. |
+| `enableAudio` | `false` | Recording only *(written, unverified)*. |
+
+## Option defaults
+
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `quality` | `0.9` | JPEG quality, clamped to `0..1`. |
+| `includeBase64` | `false` | base64 rides along only when requested. |
+| `maxDimension` | unset | No downscale unless set; caps the longest side in pixels. |
+| `flash` | `'off'` | `off` \| `on` \| `auto`; honored by both system-camera and view capture. Fires at the shutter only — a lit preview is `setTorch`. `auto` is the OS scene-metering decision. Ignored on devices with no flash unit. |
+| `enableShutterSound` | `true` | System-camera capture only; the OS UI owns the sound. |
+| `facing` | `'back'` | System-camera capture only; view capture uses the prop. |
+
+## Result shapes
+
+`PhotoFile` is identical across module capture, module pick, and view capture:
+
+| Field | Type | Guarantee |
+| ----- | ---- | --------- |
+| `path` | string | Bare filesystem path to a JPEG temp file (no scheme). |
+| `width` | number | Integer pixels. |
+| `height` | number | Integer pixels. |
+| `orientation` | string | `'up'` (portrait-locked until host orientation lands). |
+| `mime` | string | `'image/jpeg'`. |
+| `base64` | string? | Present only when `includeBase64` is set. |
+
+`VideoFile` *(written, unverified)*: `{ path, durationMs?, sizeBytes? }`.
+
+Paths are **bare temp-file paths with no scheme**. See [Output transport](./output-transport) for
+how a host displays (`file://`), uploads, and cleans up these files, and when base64 is the right
+fallback.
+
+## Event payloads
+
+| Event | Detail | Status |
+| ----- | ------ | ------ |
+| `ready` | `{ deviceId, minZoom?, maxZoom?, wideFactor?, switchOverZoomFactors? }` | implemented |
+| `error` | `{ code: string, message: string }` | implemented |
+| `recordingStarted` | `{ path?: string }` | written, unverified |
+| `recordingFinished` | `{ file: VideoFile }` | written, unverified |
+
+## Session controls
+
+> [!WARNING]
+> **Implemented on both platforms, unverified.** Written to this contract but not compiled or run.
+
+These `camera-view` methods require an active session — `active={true}` and a `ready` event. Called
+before then they reject `capture/not-active`.
+
+| Method | Params | Behavior / errors |
+| ------ | ------ | ----------------- |
+| `setZoom(value)` | `{ value: number }` | Clamped to the device's `[minZoom, maxZoom]`; out-of-range clamps rather than rejecting. |
+| `setTorch(mode)` | `{ mode: 'on' \| 'off' }` | `camera/unsupported` when `hasTorch === false`. |
+| `focusAtPoint(point)` | `{ x: number, y: number }` | Point in preview space, `0..1` on each axis. `camera/unsupported` when `supportsFocusMetering === false`. |
+| `setExposureBias(bias)` | `{ bias: number }` | Exposure bias in EV; clamped to the device's supported range (iOS `min/maxExposureTargetBias`, Android `exposureCompensationRange × step`) rather than rejecting. |
+
+`zoom` and `torch` are also props; setting the prop and calling the method are equivalent, and the
+last write wins.
+
+## Recording
+
+| Method | Params | Behavior / errors |
+| ------ | ------ | ----------------- |
+| `startRecording()` | `{ enableAudio?, maxDurationMs?, maxFileSizeBytes? }` | Records to a temp file. `recording/in-progress` if already recording. With `enableAudio`, microphone permission must be granted or it rejects `camera/permission-denied` — request it via the [module](./camera-module) first. Emits `recordingStarted` with the output `path` on success. |
+| `stopRecording()` | — | Resolves a `VideoFile` and emits `recordingFinished` with that file. `recording/not-active` if nothing is recording. `recording/failed` on a pipeline error; `capture/write-failed` if the file cannot be finalized. |
+
+`maxDurationMs` and `maxFileSizeBytes` are best-effort native limits; hitting one stops recording as
+if `stopRecording()` were called, and a `recordingFinished` event fires.
+
+## Platform stacks
+
+Native implementation details differ, but JavaScript never branches on platform for this surface.
+
+| | iOS | Android |
+| --- | --- | --- |
+| Camera engine | AVFoundation | CameraX |
+| Preview | `AVCaptureVideoPreviewLayer` | `androidx.camera.view.PreviewView` |
+| Element registration | `LYNX_LAZY_REGISTER_UI` | Lynx `Behavior` + `LynxUI` |
+| View methods | `LYNX_UI_METHOD` | `@LynxUIMethod` |
+| Events | Lynx iOS event pipeline | `LynxDetailEvent` |
+
+Both platforms preserve the `camera-view` tag name, the prop names, the method names and return
+values, the event names and `detail` shapes, and the [error codes](./errors).

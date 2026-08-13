@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "chimera-camera-docs",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Creates the hostname + DNS record on deploy, as long as vyui.dev is a zone
+  // on the same account. No dashboard step for the domain.
+  "routes": [{ "pattern": "camera.vyui.dev", "custom_domain": true }],
+  // The bundle sits just over the 3 MiB free-plan ceiling unminified.
+  "minify": true,
+  "observability": {
+    "enabled": true
+  }
+}

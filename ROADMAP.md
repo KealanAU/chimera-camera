@@ -95,7 +95,7 @@ does not block implementation completion.
 
 - [x] Publish under the established `@vyui` scope (alongside `@vyui/core`,
       `@vyui/kit`, `@vyui/cli`) rather than a personal one — same Lynx audience,
-      one brand. Docs land at `chimeracamera.vyui.dev`.
+      one brand. Docs land at `camera.vyui.dev`.
 - [x] Authenticate the release workflow with OIDC trusted publishing instead of a
       long-lived `NPM_TOKEN` secret. Needs pnpm >= 11.1.3, so the repo runs
       pnpm 11.
@@ -125,6 +125,14 @@ does not block implementation completion.
       (Android is experimental; see the README support matrix).
 - [ ] Install the published artifact in a clean host and repeat the basic flow.
 - [x] Add `CHANGELOG.md`.
+- [x] Host the docs on Cloudflare Workers via `@opennextjs/cloudflare`
+      (`website/wrangler.jsonc`). Not Pages: `@cloudflare/next-on-pages` is
+      deprecated and never supported Next 15+. `pnpm --filter
+      @chimera-camera/website deploy` publishes.
+- [ ] Connect Workers Builds to this repo so pushes to `main` deploy — root
+      directory `website`, no CI workflow needed. One-time dashboard step (the
+      GitHub app install); the `camera.vyui.dev` custom domain is declared in
+      `wrangler.jsonc` and created by the first deploy.
 
 ### 0.1 exit criteria
 

@@ -1,0 +1,66 @@
+---
+title: Errors
+description: Every native failure reaches JavaScript as a ChimeraCameraError with a stable code.
+icon: TriangleAlert
+---
+
+Every failure reaches JavaScript as a `ChimeraCameraError` carrying a stable `.code` and a
+`.message`. Application code branches on `code`; the platform-specific detail is available on
+`.cause` when a native layer supplied one.
+
+```ts
+import { ChimeraCameraError } from '@vyui/camera'
+
+try {
+  await camera.capturePhoto()
+} catch (error) {
+  if (error instanceof ChimeraCameraError && error.code === 'capture/not-active') {
+    // set active={true} and wait for `ready`
+  }
+}
+```
+
+## How errors arrive
+
+| Surface | Transport |
+| ------- | --------- |
+| [Module](./camera-module) methods | The native callback's `{ error: { code, message } }`, rethrown as a rejected promise. |
+| [View](./camera-view) methods | The SelectorQuery `fail` payload `{ code, message }`. |
+| View lifecycle | The `error` event's `detail: { code, message }`. |
+
+String codes are preserved verbatim. Numeric Lynx transport codes are **not** contract codes and
+normalize to `camera/native-error`.
+
+## Codes
+
+| Code | Surface | Meaning |
+| ---- | ------- | ------- |
+| `camera/method-unavailable` | module | Required native method not registered. |
+| `camera/native-error` | module + view | Generic native failure, or an uncoded native error. |
+| `camera/unavailable` | module + view | No camera hardware, source, or `facing` device. |
+| `camera/permission-denied` | view | Camera permission denied — request it via the module. |
+| `camera/no-presenter` | module (iOS) | No view controller to present the system UI. |
+| `camera/present-failed` | module (iOS) | System camera UI failed to present. |
+| `camera/unsupported` | view | Torch or focus unsupported by the device. |
+| `capture/not-active` | view | View not active or not ready; set `active` and await `ready`. |
+| `capture/in-progress` | module + view | Another capture is already running. |
+| `capture/cancelled` | module | User cancelled the system capture. |
+| `capture/failed` | view | Capture pipeline failed. |
+| `capture/encode-failed` | module | Could not read or encode the image. |
+| `capture/write-failed` | module + view | Could not write the temp file. |
+| `recording/in-progress` | view | `startRecording` while already recording. |
+| `recording/not-active` | view | `stopRecording` with nothing recording. |
+| `recording/failed` | view | Recording pipeline failed. |
+| `library/permission-denied` | module | Media-library add permission denied (`saveToLibrary`). |
+| `library/write-failed` | module | Could not save the file to the media library. |
+
+Platform-specific codes (`camera/no-presenter`, `camera/present-failed`) may have no Android
+equivalent; Android reports its own presentation failures under `camera/native-error` unless a
+shared code is added to the [native contract](./native-contract) first.
+
+## Setup failures are not these
+
+A missing or half-registered native module is a *setup* problem, not a runtime camera failure, and
+it surfaces separately: `createCameraModule()` throws a plain `Error` naming the missing piece, and
+[`getCameraInstallStatus()`](./install-diagnostics) reports it as a status code you can inspect
+without a throw.

@@ -1,53 +1,154 @@
 ---
-title: CameraModule
-description: CameraModule handles permissions and device discovery outside the preview view.
+title: Camera module
+description: Stateless one-shots that need no rendered view — permissions, devices, system capture, picking, and saving.
 icon: Settings2
 ---
 
-`CameraModule` is the native module side of Chimera Camera. It handles app-level operations that do not need a mounted preview view.
+`createCameraModule()` returns a `CameraModuleClient`: the stateless half of the library. Everything
+on it is a one-shot operation that needs no rendered element and no live session — permissions,
+device discovery, system-camera capture, photo-library picking, and saving a file back to the
+library.
 
-## Interface
+Live-session controls (recording, focus, zoom, torch) are deliberately absent. They belong to a
+rendered [`<camera-view>`](./camera-view).
 
 ```ts
-export interface CameraModule {
-  getPermissions(): Promise<CameraPermissions>
-  requestCameraPermission(): Promise<PermissionStatus>
-  requestMicrophonePermission(): Promise<PermissionStatus>
-  getAvailableCameraDevices(): Promise<CameraDevice[]>
-  getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
+import { createCameraModule } from '@vyui/camera'
+
+const camera = createCameraModule()
+```
+
+## Creating a client
+
+```ts
+interface CreateCameraModuleOptions {
+  /** Override the registered native module name. Defaults to `'CameraModule'`. */
+  nativeModuleName?: string
+  /** Use the mock adapter. Pass fixtures to customise it. */
+  mock?: boolean | MockCameraOptions
+  /** Return `null` instead of throwing when nothing is available. */
+  optional?: boolean
 }
 ```
 
-## Responsibilities
+By default `createCameraModule()` **throws** when neither the native module nor the mock is
+available, so a host that never registered the native side fails loudly with setup instructions
+rather than silently doing nothing. The thrown message is the same one
+[`getCameraInstallStatus()`](./install-diagnostics) produces, so it names the missing piece.
 
-`CameraModule` owns:
-
-- Reading camera and microphone permission state.
-- Requesting camera permission.
-- Requesting microphone permission.
-- Listing available camera devices.
-- Selecting a default camera for a target position.
-
-It does not own preview rendering, capture, recording, focus, zoom, or torch. Those remain on `CameraView` because they are session-scoped.
-
-## Native expectations
-
-Android should use app or activity permission APIs directly.
-
-iOS should use `AVCaptureDevice.authorizationStatus(for:)` and `AVCaptureDevice.requestAccess(for:)`.
-
-Microphone permission is only required when video recording uses audio.
-
-## Permission statuses
-
-Native platform-specific states should normalize into the shared TypeScript union:
+A native module only counts as available if it exposes *every* required method — a half-registered
+host is treated as missing rather than looking available and then failing at call time.
 
 ```ts
-export type PermissionStatus =
-  | 'not-determined'
-  | 'authorized'
-  | 'denied'
-  | 'restricted'
+createCameraModule()                     // throws with setup instructions if unwired
+createCameraModule({ mock: true })       // always the mock
+createCameraModule({ optional: true })   // CameraModuleClient | null
 ```
 
-Errors should normalize into stable JavaScript error codes so callers do not have to branch on platform-specific exception types.
+See [Mock adapter](./mock) for the fallback patterns.
+
+## Permissions
+
+```ts
+getPermissions(): Promise<CameraPermissions>
+requestCameraPermission(): Promise<PermissionStatus>
+requestMicrophonePermission(): Promise<PermissionStatus>
+```
+
+Platform states normalize into one union so callers never branch on platform-specific values:
+
+```ts
+type PermissionStatus = 'not-determined' | 'authorized' | 'denied' | 'restricted'
+
+interface CameraPermissions {
+  camera: PermissionStatus
+  microphone: PermissionStatus
+}
+```
+
+Microphone permission is only needed when recording with audio. Request it here *before*
+`startRecording({ enableAudio: true })` — the view rejects `camera/permission-denied` if it is
+missing.
+
+## Device discovery
+
+```ts
+getAvailableCameraDevices(): Promise<CameraDevice[]>
+getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
+```
+
+```ts
+interface CameraDevice {
+  id: string
+  localizedName: string
+  /** Stable native camera kind, used to prefer physical wide-angle cameras. */
+  deviceType?: 'wide-angle' | 'ultra-wide' | 'telephoto' | 'dual' | 'dual-wide' | 'triple' | 'external' | 'unknown'
+  position: 'front' | 'back' | 'external' | 'unspecified'
+  minZoom: number
+  maxZoom: number
+  hasFlash: boolean
+  hasTorch: boolean
+  supportsFocusMetering: boolean
+}
+```
+
+`getDefaultCamera('back')` prefers a physical wide-angle camera at the requested position, falling
+back to the first device there, and resolves `null` when the position has none. The same selection
+function backs the mock, so tests get production's choice rather than an approximation of it.
+
+## System-camera capture
+
+```ts
+capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
+```
+
+Opens the OS camera UI and resolves the captured photo. No rendered view is needed, which makes this
+the shortest path to a photo — but the OS owns the UI, so you get no preview control, no live
+session, and no recording. For an embedded preview, use
+[`<camera-view>`'s `capturePhoto()`](./camera-view) instead; the two return the identical
+`PhotoFile`.
+
+`facing` and `enableShutterSound` apply here only; the view-session capture takes its camera from
+the `facing` prop and does not own the system shutter sound. Rejects `capture/cancelled` when the
+user backs out.
+
+## Photo-library picking
+
+```ts
+pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile>
+```
+
+Opens the system library picker and resolves the chosen photo as the same `PhotoFile` a capture
+returns, so a "take one or choose one" flow has a single downstream path. Needs no permission on
+either platform — the system picker runs out of process and hands back only what the user selected.
+
+`PickPhotoOptions` is `ImageOutputOptions`: `quality`, `includeBase64`, and `maxDimension`. Flash
+and facing do not apply to an existing photo.
+
+## Saving to the library
+
+```ts
+saveToLibrary(file: PhotoFile | VideoFile): Promise<void>
+```
+
+Persists a captured temp file to the device's media library (iOS Photos, Android
+gallery/MediaStore). It is **orthogonal to capture**: a capture returns a temp path you can upload,
+and this is the separate "keep it" step — a host can upload, save, or both.
+
+```ts
+const photo = await camera.capturePhoto()
+await upload(photo.path)             // send it
+await camera.saveToLibrary(photo)    // and/or keep it
+```
+
+Photo vs. video is inferred from the file extension (`.mov`, `.mp4`, `.m4v` are video). iOS requests
+the add-only photo-library permission at save time, so `NSPhotoLibraryAddUsageDescription` must be
+in `Info.plist`; Android needs `WRITE_EXTERNAL_STORAGE` only below API 29. Rejects
+`library/permission-denied` or `library/write-failed`.
+
+It does not delete the temp file — [cleanup is still yours](./output-transport#file-lifetime-and-cleanup-ownership).
+
+## Errors
+
+Every failure reaches JS as a `ChimeraCameraError` with a stable `.code`. Module errors ride the
+native callback as `{ error: { code, message } }`. The full table is in [Errors](./errors).

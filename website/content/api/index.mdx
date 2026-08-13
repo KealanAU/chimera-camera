@@ -1,102 +1,133 @@
 ---
-title: V1 API Reference
-description: Public TypeScript contracts for the Chimera Camera V1 surface.
+title: API Reference
+description: The public TypeScript surface of @vyui/camera.
 icon: Code2
 ---
 
-This is the hand-authored V1 API reference until the TypeScript package foundation exists and TypeDoc can generate reference pages from source.
+Everything `@vyui/camera` exports. This is hand-maintained against `src/` until the TypeDoc
+pipeline is pointed at this package; the [docs](/docs) explain when to reach for each piece.
 
-## Type aliases
+## Entry points
 
-```ts
-export type PermissionStatus =
-  | 'not-determined'
-  | 'authorized'
-  | 'denied'
-  | 'restricted'
+| Import | Contents |
+| ------ | -------- |
+| `@vyui/camera` | Types, the module and view factories, and the install diagnostics. |
+| `@vyui/camera/mock` | `createMockCameraModule()` and its fixture options. Dev-only. |
 
-export type CameraPosition = 'front' | 'back' | 'external' | 'unspecified'
-export type TargetCameraPosition = 'front' | 'back' | 'external'
-export type TorchMode = 'on' | 'off'
-export type FlashMode = 'off' | 'on' | 'auto'
-export type PreviewResizeMode = 'cover' | 'contain'
-```
-
-## Shared interfaces
+## Factories
 
 ```ts
-export interface Size {
-  width: number
-  height: number
-}
+/** Stateless module surface. Throws unless `optional` is set and nothing is available. */
+export function createCameraModule(options?: CreateCameraModuleOptions): CameraModuleClient
+export function createCameraModule(
+  options: CreateCameraModuleOptions & { optional: boolean },
+): CameraModuleClient | null
 
-export interface Point {
-  x: number
-  y: number
-}
+/** Wrap an already-resolved native module object. */
+export function createNativeCameraModule(nativeModule: unknown): CameraModuleClient
 
-export interface CameraDevice {
-  id: string
-  localizedName: string
-  position: CameraPosition
-  minZoom: number
-  maxZoom: number
-  hasFlash: boolean
-  hasTorch: boolean
-  supportsFocusMetering: boolean
-}
+/** Typed handle over a rendered `<camera-view>`, reached by selector. */
+export function createCameraViewHandle(selector: string): CameraViewHandle
 
-export interface CameraPermissions {
-  camera: PermissionStatus
-  microphone: PermissionStatus
+export interface CreateCameraModuleOptions {
+  nativeModuleName?: string
+  mock?: boolean | MockCameraOptions
+  optional?: boolean
 }
 ```
 
-## File interfaces
+## Install diagnostics
 
 ```ts
-export interface PhotoFile {
-  path: string
-  width?: number
-  height?: number
-  orientation?: string
-}
+export const CHIMERA_CAMERA_JS_VERSION: string
 
-export interface VideoFile {
-  path: string
-  durationMs?: number
-  sizeBytes?: number
+export function getCameraInstallStatus(options?: CreateCameraModuleOptions): CameraInstallStatus
+export function getCameraInstallStatusAsync(
+  options?: CreateCameraModuleOptions,
+): Promise<CameraInstallStatus>
+
+export function assertCameraInstalled(options?: CreateCameraModuleOptions): void
+export function assertCameraInstalledAsync(options?: CreateCameraModuleOptions): Promise<void>
+
+export function getNativeCameraModule<T>(name?: string): T | null
+
+export type CameraInstallStatusCode =
+  | 'mock'
+  | 'installed'
+  | 'native-modules-missing'
+  | 'native-module-missing'
+  | 'native-methods-missing'
+  | 'native-version-mismatch'
+
+export interface CameraInstallStatus {
+  ok: boolean
+  code: CameraInstallStatusCode
+  nativeModuleName: string
+  jsVersion: string
+  nativeVersion?: string
+  missingMethods: string[]
+  message: string
 }
 ```
 
-## Options
+## Bridge primitives
 
 ```ts
-export interface CapturePhotoOptions {
-  flash?: FlashMode
-  enableShutterSound?: boolean
-}
+export const CAMERA_VIEW_TAG: 'camera-view'
 
-export interface StartRecordingOptions {
-  enableAudio?: boolean
-  maxDurationMs?: number
-  maxFileSizeBytes?: number
-}
+/** True when a Lynx SelectorQuery exists in this runtime. */
+export function isCameraViewBridgeAvailable(): boolean
+
+/** Raw SelectorQuery invoke, for a method the typed handle does not cover. */
+export function invokeCameraViewMethod<T = unknown>(
+  selector: string,
+  method: string,
+  params?: Record<string, unknown>,
+): Promise<T>
 ```
 
-## CameraModule
+## Surfaces
 
 ```ts
-export interface CameraModule {
+/**
+ * Stateless module surface: one-shot operations that need no rendered view.
+ * Live-session controls are deliberately absent — they belong to CameraViewHandle.
+ */
+export interface CameraModuleClient {
   getPermissions(): Promise<CameraPermissions>
   requestCameraPermission(): Promise<PermissionStatus>
   requestMicrophonePermission(): Promise<PermissionStatus>
   getAvailableCameraDevices(): Promise<CameraDevice[]>
   getDefaultCamera(position: TargetCameraPosition): Promise<CameraDevice | null>
+  /** System-camera photo capture. Opens the OS camera UI; no rendered view needed. */
+  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
+  /** Picks an existing photo via the system library picker (no permission needed). */
+  pickPhoto(options?: PickPhotoOptions): Promise<PhotoFile>
+  /** Saves a captured photo or video temp file to the device's media library. */
+  saveToLibrary(file: PhotoFile | VideoFile): Promise<void>
+}
+
+export interface CameraSessionMethods {
+  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
+  startRecording(options?: StartRecordingOptions): Promise<void>
+  stopRecording(): Promise<VideoFile>
+  focusAtPoint(point: Point): Promise<void>
+  setZoom(value: number): Promise<void>
+  setTorch(mode: TorchMode): Promise<void>
+  /** Exposure bias in EV; clamped to the device's supported range rather than rejecting. */
+  setExposureBias(bias: number): Promise<void>
+}
+
+export interface CameraViewMethods extends CameraSessionMethods {
+  ping(): Promise<CameraPingResult>
+}
+
+export interface CameraViewHandle extends CameraViewMethods {
+  selector: string
 }
 ```
 
-## CameraViewProps
+## View props
 
 ```ts
 export interface CameraViewProps {
@@ -114,25 +145,80 @@ export interface CameraViewProps {
 }
 ```
 
-## CameraViewMethods
+In a Lynx template these are bound as `bindready`, `binderror`, `bindrecordingstarted`, and
+`bindrecordingfinished`, with the payload on `event.detail`.
+
+## Options
 
 ```ts
-export interface CameraViewMethods {
-  ping(): Promise<{ ok: true }>
-  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
-  startRecording(options?: StartRecordingOptions): Promise<void>
-  stopRecording(): Promise<VideoFile>
-  focusAtPoint(point: Point): Promise<void>
-  setZoom(value: number): Promise<void>
-  setTorch(mode: TorchMode): Promise<void>
+export interface ImageOutputOptions {
+  /** JPEG quality 0..1. Default 0.9. */
+  quality?: number
+  /** Include the JPEG as base64. Off by default. */
+  includeBase64?: boolean
+  /** Downscale images whose longest side exceeds this pixel count. */
+  maxDimension?: number
+}
+
+export interface CapturePhotoOptions extends ImageOutputOptions {
+  /**
+   * Fires at the shutter only; the preview stays unlit (use `setTorch` for a
+   * constant light). `auto` leaves the decision to the OS scene metering.
+   * Ignored on devices with no flash unit. Default `off`.
+   */
+  flash?: FlashMode
+  /** System-camera capture only; the OS UI owns its shutter sound. */
+  enableShutterSound?: boolean
+  /** System-camera capture only; view capture uses the `facing` prop. */
+  facing?: CameraFacing
+}
+
+export type PickPhotoOptions = ImageOutputOptions
+
+export interface StartRecordingOptions {
+  enableAudio?: boolean
+  maxDurationMs?: number
+  maxFileSizeBytes?: number
 }
 ```
+
+## Results
+
+```ts
+export interface PhotoFile {
+  path: string
+  width?: number
+  height?: number
+  orientation?: string
+  mime?: string
+  base64?: string
+}
+
+export interface VideoFile {
+  path: string
+  durationMs?: number
+  sizeBytes?: number
+}
+
+export interface CameraPingResult {
+  ok: true
+}
+```
+
+`path` is a bare filesystem path with no scheme — display it as `file://${path}`.
 
 ## Events
 
 ```ts
 export interface CameraReadyEvent {
   deviceId: string
+  /** Device zoom envelope in videoZoomFactor units. */
+  minZoom?: number
+  maxZoom?: number
+  /** Factor at which the wide lens sits (display 1×); maps display multipliers to factors. */
+  wideFactor?: number
+  /** Factors where the virtual device switches lenses optically. */
+  switchOverZoomFactors?: number[]
 }
 
 export interface CameraErrorEvent {
@@ -147,5 +233,71 @@ export interface RecordingStartedEvent {
 
 export interface RecordingFinishedEvent {
   file: VideoFile
+}
+```
+
+## Devices and permissions
+
+```ts
+export interface CameraDevice {
+  id: string
+  localizedName: string
+  /** Stable native camera kind used to prefer physical wide-angle cameras. */
+  deviceType?:
+    | 'wide-angle' | 'ultra-wide' | 'telephoto'
+    | 'dual' | 'dual-wide' | 'triple'
+    | 'external' | 'unknown'
+  position: CameraPosition
+  minZoom: number
+  maxZoom: number
+  hasFlash: boolean
+  hasTorch: boolean
+  supportsFocusMetering: boolean
+}
+
+export interface CameraPermissions {
+  camera: PermissionStatus
+  microphone: PermissionStatus
+}
+
+/** Shared by the native module and the mock so tests get production's camera. */
+export function pickDefaultCamera(
+  devices: CameraDevice[],
+  position: TargetCameraPosition,
+): CameraDevice | null
+```
+
+## Errors
+
+```ts
+export class ChimeraCameraError extends Error {
+  readonly code: string
+  readonly cause?: unknown
+}
+```
+
+Codes are listed in [Errors](/docs/errors).
+
+## Type aliases
+
+```ts
+export type PermissionStatus = 'not-determined' | 'authorized' | 'denied' | 'restricted'
+
+export type CameraFacing = 'front' | 'back'
+export type TargetCameraPosition = CameraFacing | 'external'
+export type CameraPosition = TargetCameraPosition | 'unspecified'
+
+export type TorchMode = 'on' | 'off'
+export type FlashMode = 'off' | 'on' | 'auto'
+export type PreviewResizeMode = 'cover' | 'contain'
+
+export interface Size {
+  width: number
+  height: number
+}
+
+export interface Point {
+  x: number
+  y: number
 }
 ```

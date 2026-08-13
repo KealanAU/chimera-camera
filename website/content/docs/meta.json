@@ -1,19 +1,19 @@
 {
   "title": "Chimera Camera",
-  "description": "V1 documentation for the Chimera Camera surface layer",
+  "description": "A native camera library for Lynx apps",
   "root": true,
   "pages": [
     "---Start---",
     "index",
-    "bridge-spike",
-    "---Public Surface---",
-    "api-surface",
-    "camera-module",
+    "installation",
+    "mock",
+    "---Surfaces---",
     "camera-view",
-    "events-and-errors",
-    "---Native Work---",
-    "native-bridge",
-    "camera-mvp",
-    "upstream-strategy"
+    "camera-module",
+    "---Reference---",
+    "native-contract",
+    "output-transport",
+    "errors",
+    "install-diagnostics"
   ]
 }

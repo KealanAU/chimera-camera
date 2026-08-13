@@ -1,57 +1,165 @@
 ---
-title: CameraView
-description: CameraView is the Lynx native element that owns preview rendering and session commands.
+title: camera-view
+description: The Lynx element that owns preview and the live session, driven imperatively through a typed handle.
 icon: Camera
 ---
 
-`CameraView` is the native UI component for Chimera Camera. It owns preview rendering, receives view props, exposes imperative methods, and emits view-scoped events.
+Chimera Camera's core is framework-neutral. A Lynx app — React, Vue, Svelte, or plain TypeScript —
+drives the live camera through exactly two primitives:
 
-## Element name
+1. **A custom element**, `<camera-view>`, configured with props and `bind*` events. This is the
+   preview and the session.
+2. **Imperative methods** on that element, called through Lynx's SelectorQuery bridge and wrapped by
+   `createCameraViewHandle(selector)`.
 
-The target Lynx native element tag is:
+That is the whole live-session surface; there is no React (or Vue, or Svelte) dependency in the
+core. One-shot operations that need no rendered element live on the [module surface](./camera-module).
 
-```text
-camera-view
-```
+## The element
 
-## Props
+The native layer registers one element under the tag **`camera-view`**, exported from the package
+as `CAMERA_VIEW_TAG`. Render it like any Lynx element and give it a stable `id` so imperative calls
+can find it.
+
+### Props
+
+| Prop | Type | Default | Notes |
+| ---- | ---- | ------- | ----- |
+| `active` | boolean | `false` | No camera session until `true`. |
+| `facing` | `'front' \| 'back' \| 'external'` | `'back'` | Which camera to open. |
+| `cameraId` | string | unset | Explicit device; selection is `facing`-based for now. |
+| `resizeMode` | `'cover' \| 'contain'` | `'cover'` | Fill/crop vs. fit/letterbox. |
+| `torch` | `'on' \| 'off'` | `'off'` | Session control *(written, unverified)*. |
+| `zoom` | number | `1` | Session control *(written, unverified)*. |
+| `enableAudio` | boolean | `false` | Recording audio *(written, unverified)*. |
+
+Defaults are applied **natively** (see the [native contract](./native-contract)), so an unset prop
+behaves the same on every platform and every framework.
+
+`zoom` and `torch` are also methods; setting the prop and calling the method are equivalent, and
+the last write wins.
+
+### Events
+
+The element emits events using Lynx's `bind<event>` convention. The payload arrives on
+`event.detail`.
+
+| Binding | `event.detail` | Status |
+| ------- | -------------- | ------ |
+| `bindready` | `CameraReadyEvent` | implemented |
+| `binderror` | `{ code: string, message: string }` | implemented |
+| `bindrecordingstarted` | `{ path?: string }` | written, unverified |
+| `bindrecordingfinished` | `{ file: VideoFile }` | written, unverified |
+
+`binderror` carries the same `code` values as the imperative errors — see [Errors](./errors).
+
+`CameraReadyEvent` carries the opened device plus its zoom envelope, which is what you need to
+build a zoom control that matches the hardware:
 
 ```ts
-export interface CameraViewProps {
-  active?: boolean
-  cameraId?: string
-  facing?: TargetCameraPosition
-  resizeMode?: PreviewResizeMode
-  torch?: TorchMode
-  zoom?: number
-  enableAudio?: boolean
-  onReady?: (event: CameraReadyEvent) => void
-  onError?: (event: CameraErrorEvent) => void
-  onRecordingStarted?: (event: RecordingStartedEvent) => void
-  onRecordingFinished?: (event: RecordingFinishedEvent) => void
+interface CameraReadyEvent {
+  deviceId: string
+  /** Device zoom envelope in videoZoomFactor units. */
+  minZoom?: number
+  maxZoom?: number
+  /** Factor at which the wide lens sits (display 1×); maps display multipliers to factors. */
+  wideFactor?: number
+  /** Factors where a virtual device switches lenses optically (empty for single-lens devices). */
+  switchOverZoomFactors?: number[]
 }
 ```
 
-## Methods
+## The imperative handle
+
+Preview is declarative; actions are imperative. `createCameraViewHandle(selector)` returns a typed
+`CameraViewHandle` whose methods each round-trip to the native element through Lynx's SelectorQuery:
 
 ```ts
-export interface CameraViewMethods {
-  ping(): Promise<{ ok: true }>
-  capturePhoto(options?: CapturePhotoOptions): Promise<PhotoFile>
-  startRecording(options?: StartRecordingOptions): Promise<void>
-  stopRecording(): Promise<VideoFile>
-  focusAtPoint(point: Point): Promise<void>
-  setZoom(value: number): Promise<void>
-  setTorch(mode: TorchMode): Promise<void>
-}
+import { createCameraViewHandle } from '@vyui/camera'
+
+const camera = createCameraViewHandle('#camera')
+
+await camera.ping()                 // { ok: true } once the bridge is live
+const photo = await camera.capturePhoto({ maxDimension: 1600 })
 ```
 
-## Bridge spike method
+### Methods
 
-`ping()` is part of the bridge spike. It proves that JavaScript can call an imperative native view method before camera behavior is implemented.
+| Method | Params | Notes |
+| ------ | ------ | ----- |
+| `ping()` | — | Resolves `{ ok: true }`. Bridge health check. |
+| `capturePhoto(options?)` | `CapturePhotoOptions` | Resolves a `PhotoFile`. |
+| `startRecording(options?)` | `StartRecordingOptions` | Records to a temp file *(written, unverified)*. |
+| `stopRecording()` | — | Resolves a `VideoFile` *(written, unverified)*. |
+| `focusAtPoint(point)` | `{ x, y }` in `0..1` preview space | *(written, unverified)* |
+| `setZoom(value)` | number | Clamped to the device range *(written, unverified)*. |
+| `setTorch(mode)` | `'on' \| 'off'` | *(written, unverified)* |
+| `setExposureBias(bias)` | EV number | Clamped to the device range *(written, unverified)*. |
 
-The method should stay in V1 until the bridge has been validated on both platforms. It can be removed after the project has a replacement health-check or test path.
+iOS implements `ping()` and `capturePhoto()` device-proven today; the rest are written to the
+[native contract](./native-contract) but have not been run. Every method needs an active session —
+`active={true}` and a `ready` event — and rejects `capture/not-active` before then.
 
-## Session state
+The handle also exposes the `selector` it was built with, so a helper that receives a handle can
+report which element it drives.
 
-Preview, capture, recording, focus, zoom, and torch belong to the mounted camera view because they depend on the active camera session. Permission and device discovery belong to `CameraModule`.
+### Under the hood
+
+Every call is the same SelectorQuery shape:
+
+```ts
+lynx
+  .createSelectorQuery()
+  .select(selector)                 // '#camera'
+  .invoke({
+    method,                         // 'capturePhoto', 'ping', 'startRecording', …
+    params,                         // the options object, or {}
+    success: (result) => { /* resolves the promise */ },
+    fail: (error) => { /* rejected as a ChimeraCameraError */ },
+  })
+  .exec()
+```
+
+`invokeCameraViewMethod(selector, method, params?)` is that call exported directly, for a method the
+typed handle does not cover yet. `isCameraViewBridgeAvailable()` reports whether a SelectorQuery
+exists at all — outside a Lynx runtime the calls reject with an actionable error rather than
+hanging.
+
+## Framework bindings are thin
+
+Because the element plus the SelectorQuery contract is the entire surface, a framework binding is
+just: render `<camera-view>` with the right props and events, and call
+`createCameraViewHandle('#id')` for actions.
+
+### ReactLynx
+
+```tsx
+import { createCameraViewHandle } from '@vyui/camera'
+
+<camera-view
+  id="camera"
+  active={true}
+  facing="back"
+  resizeMode="cover"
+  bindready={(e) => console.log('ready', e.detail.deviceId)}
+  binderror={(e) => console.warn(e.detail?.message)}
+  style={{ width: '100%', height: '320px' }}
+/>
+
+// later, in a handler:
+const photo = await createCameraViewHandle('#camera').capturePhoto()
+```
+
+See `example/react/src/App.tsx` for a complete flow.
+
+### Vue, Svelte, and plain TypeScript
+
+The same element and the same `createCameraViewHandle('#camera')` calls apply unchanged. Each
+framework renders `<camera-view>` and binds its `ready`/`error` events with its own template
+syntax, then calls the identical imperative handle for actions. `example/vue` is a working Vue
+version of the React demo.
+
+## Results
+
+`capturePhoto()` and `stopRecording()` return native file paths, not base64. See
+[Output transport](./output-transport) for how to display, upload, and clean up those files.

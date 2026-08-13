@@ -1,0 +1,78 @@
+---
+title: Install diagnostics
+description: Ask the package whether native setup actually took, and get told which step is missing.
+icon: Stethoscope
+---
+
+Lynx has no autolinking, so [installing the native side](./installation) is a handful of hand-edits
+that can each be half-applied. These four exports exist so a host can ask whether the wiring took
+and get an answer that names the missing step, rather than a black preview and a guess.
+
+```ts
+import { getCameraInstallStatusAsync, assertCameraInstalledAsync } from '@vyui/camera'
+
+console.log(await getCameraInstallStatusAsync())
+await assertCameraInstalledAsync()
+```
+
+## The status shape
+
+```ts
+interface CameraInstallStatus {
+  ok: boolean
+  code: CameraInstallStatusCode
+  nativeModuleName: string
+  jsVersion: string
+  nativeVersion?: string
+  missingMethods: string[]
+  message: string
+}
+```
+
+`message` is a complete, printable sentence naming what to fix — it is the same text
+`createCameraModule()` throws — so a host can surface it directly without mapping codes itself.
+
+## Status codes
+
+| Code | `ok` | Meaning |
+| ---- | ---- | ------- |
+| `mock` | ✅ | Running the [mock adapter](./mock). Native was never consulted. |
+| `installed` | ✅ | The native module is registered and exposes every required method. |
+| `native-modules-missing` | ❌ | `NativeModules` does not exist in this runtime — you are not in a Lynx host. |
+| `native-module-missing` | ❌ | `NativeModules.CameraModule` is not registered. The sources compiled, but `ChimeraCamera.register()` never ran. |
+| `native-methods-missing` | ❌ | Registered, but missing required methods — listed in `missingMethods`. Usually a stale native build against newer JS. |
+| `native-version-mismatch` | ❌ | The native module and the JS package come from different releases. |
+
+`native-methods-missing` is the reason a half-registered module is treated as *absent* by
+`createCameraModule()` rather than available: a module that looks present and then fails at capture
+time is a worse failure than one that fails at construction.
+
+## Sync vs. async
+
+| | Checks registration | Checks version |
+| --- | --- | --- |
+| `getCameraInstallStatus()` | ✅ | ❌ |
+| `getCameraInstallStatusAsync()` | ✅ | ✅ |
+
+The version check needs a round-trip to native, which is why it only exists on the async variant.
+**Prefer the async one** — a native/JS version mismatch is exactly the failure that otherwise
+presents as an inexplicable missing method later.
+
+A rejected version probe does not throw at the caller. It resolves to a version string that cannot
+match, so it lands in `native-version-mismatch` with the probe's own error text in `nativeVersion` —
+a broken probe is reported as an install problem rather than escaping as a raw native error.
+
+## Asserting
+
+`assertCameraInstalled()` and `assertCameraInstalledAsync()` are the same checks as a throw:
+
+```ts
+await assertCameraInstalledAsync()   // throws `status.message` unless ok
+```
+
+Both accept the same options as [`createCameraModule()`](./camera-module#creating-a-client), so
+`{ mock: true }` reports `ok` and `{ nativeModuleName }` checks a host that registered under a
+different name.
+
+Put the assert behind a dev-only guard or a debug screen. In production, prefer reading the status
+and degrading — a shipped app should not crash on launch because a native build went stale.
