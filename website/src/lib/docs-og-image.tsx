@@ -1,20 +1,37 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { notFound } from 'next/navigation'
 import { ImageResponse } from 'next/og'
 import { siteConfig } from '@/lib/site-config'
 import { apiSource, docsSource } from '@/lib/source'
 
-// Resolve the docs public directory: process.cwd() is docs/ locally, but can be
-// the monorepo root in deployment environments.
-function resolvePublicPath(relativePath: string): string {
-  const fromCwd = join(process.cwd(), 'public', relativePath)
-  if (existsSync(fromCwd)) return fromCwd
-  return join(process.cwd(), 'docs/public', relativePath)
+// The fonts come out of /public rather than off disk: this renders on Cloudflare
+// Workers, which has no filesystem. They go through the ASSETS binding, not a
+// plain fetch — a Worker fetching its own hostname times out (522). Cached per
+// isolate.
+let fontsPromise: Promise<[ArrayBuffer, ArrayBuffer]> | undefined
+
+function loadFonts(base: string): Promise<[ArrayBuffer, ArrayBuffer]> {
+  fontsPromise ??= Promise.all([
+    fetchFont('/fonts/geist-400.woff', base),
+    fetchFont('/fonts/geist-700.woff', base),
+  ]).catch((error) => {
+    // Otherwise one transient failure poisons the isolate for its whole life.
+    fontsPromise = undefined
+    throw error
+  })
+  return fontsPromise
 }
 
-const geistRegular = readFileSync(resolvePublicPath('fonts/geist-400.woff'))
-const geistBold = readFileSync(resolvePublicPath('fonts/geist-700.woff'))
+async function fetchFont(path: string, base: string): Promise<ArrayBuffer> {
+  const url = new URL(path, base)
+  // `next dev` has no bindings; there a plain fetch hits the dev server.
+  const assets = (await getCloudflareContext({ async: true })).env.ASSETS
+  const response = await (assets ? assets.fetch(url) : fetch(url))
+  if (!response.ok) {
+    throw new Error(`Failed to load OG font ${path}: ${response.status}`)
+  }
+  return response.arrayBuffer()
+}
 
 export const ogImageAlt = `${siteConfig.name} documentation`
 export const ogImageSize = {
@@ -165,7 +182,13 @@ function LynxCameraOgImage({
   )
 }
 
-function renderOgImageResponse(title: string, description?: string) {
+async function renderOgImageResponse(
+  base: string,
+  title: string,
+  description?: string,
+) {
+  const [geistRegular, geistBold] = await loadFonts(base)
+
   return new ImageResponse(
     <LynxCameraOgImage title={title} description={description} />,
     {
@@ -193,9 +216,9 @@ const sectionSources = {
   api: apiSource,
 } as const
 
-export function renderOpenGraphImage(slug?: string[]) {
+export function renderOpenGraphImage(base: string, slug?: string[]) {
   if (slug == null || slug.length === 0) {
-    return renderOgImageResponse(siteConfig.name, siteConfig.description)
+    return renderOgImageResponse(base, siteConfig.name, siteConfig.description)
   }
 
   const [section, ...rest] = slug
@@ -206,6 +229,7 @@ export function renderOpenGraphImage(slug?: string[]) {
   if (!page) notFound()
 
   return renderOgImageResponse(
+    base,
     String(page.data.title),
     page.data.description ?? undefined,
   )

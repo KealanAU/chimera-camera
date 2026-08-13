@@ -95,7 +95,7 @@ Requires **`minSdk` 24** (Android 7.0), which the shipped module declares.
 
 The shipped `android/` folder is a complete `com.android.library` module. In `settings.gradle`:
 
-```gradle
+```groovy
 include ':chimera-camera'
 project(':chimera-camera').projectDir =
     new File(rootProject.projectDir, '../node_modules/@vyui/camera/android')
@@ -103,7 +103,7 @@ project(':chimera-camera').projectDir =
 
 In your app module's `build.gradle`:
 
-```gradle
+```groovy
 dependencies {
     implementation project(':chimera-camera')
 }

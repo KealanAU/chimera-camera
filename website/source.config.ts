@@ -71,6 +71,11 @@ export const apiReference = defineDocs({
   dir: 'content/api',
   docs: {
     schema: apiReferenceFrontmatterSchema,
+    postprocess: {
+      // Same as the guides: without it `getText` falls back to reading the MDX
+      // off disk, which /llms-full.txt cannot do on Workers.
+      includeProcessedMarkdown: true,
+    },
   },
   meta: {
     schema: metaSchema,
@@ -80,6 +85,24 @@ export const apiReference = defineDocs({
 export default defineConfig({
   mdxOptions: {
     valueToExport: ['elementIds'],
+    // Shiki's full grammar bundle is ~8 MB and lands in the server bundle,
+    // which the Workers size limit does not have room for. These are the
+    // languages the content actually fences (bash covers `package-install`).
+    rehypeCodeOptions: {
+      // fumadocs' own defaults, restated because `langs` makes them required
+      themes: { light: 'github-light', dark: 'github-dark' },
+      langs: [
+        'bash',
+        'groovy',
+        'json',
+        'kotlin',
+        'ruby',
+        'swift',
+        'ts',
+        'tsx',
+        'xml',
+      ],
+    },
     remarkNpmOptions: {
       persist: {
         id: 'package-manager',
