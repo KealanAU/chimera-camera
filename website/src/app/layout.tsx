@@ -28,15 +28,6 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-    ],
-    apple: '/apple-icon.png',
-  },
   openGraph: {
     siteName: siteConfig.name,
   },
@@ -46,15 +37,15 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
   },
+  // ponytail: kept out of search while the site is still being built out.
+  // Flip both to true (and restore the googleBot snippet limits) at launch,
+  // together with the matching Disallow in app/robots.ts.
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
     googleBot: {
-      index: true,
-      follow: true,
-      'max-snippet': -1,
-      'max-image-preview': 'large',
-      'max-video-preview': -1,
+      index: false,
+      follow: false,
     },
   },
 }
