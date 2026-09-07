@@ -2,8 +2,6 @@ import type { HomeLayoutProps } from 'fumadocs-ui/layouts/home'
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
 import { siteConfig } from '@/lib/site-config'
 
-export const docsShellClassName = 'lc-docs-shell flex flex-col'
-export const docsShellHeaderClassName = 'max-md:hidden'
 export const docsLayoutContainerClassName = 'lc-docs-layout'
 export const apiReferenceSidebarWidthClassName =
   'md:[--fd-sidebar-width:19rem] lg:[--fd-sidebar-width:20rem]'

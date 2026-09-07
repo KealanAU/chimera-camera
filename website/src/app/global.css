@@ -239,25 +239,6 @@ a[data-active="true"] .api-toc-platform-pill {
   @apply ms-9 mt-1 mb-3;
 }
 
-@media (min-width: 768px) {
-  /* Make the HomeLayout wrapper transparent so its sticky #nd-nav child
-     becomes a direct layout participant of .lc-docs-shell. */
-  .lc-docs-shell > #nd-home-layout {
-    display: contents;
-  }
-
-  /* Nav bar height (h-14 = 3.5rem). Fumadocs uses this to offset
-     sticky sidebar/ToC below the nav. */
-  .lc-docs-shell {
-    --fd-banner-height: 3.5rem;
-  }
-
-  /* Short pages fill the viewport (nav + grid = 100dvh). */
-  .lc-docs-shell > #nd-docs-layout {
-    min-height: calc(100dvh - var(--fd-banner-height));
-  }
-}
-
 @theme inline {
   --default-font-family: var(--font-sans);
   --default-mono-font-family: var(--font-mono);
