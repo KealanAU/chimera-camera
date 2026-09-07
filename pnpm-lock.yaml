@@ -30,13 +30,13 @@ importers:
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.6.0
-        version: 0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))
+        version: 0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)))
       '@lynx-js/react-rsbuild-plugin':
         specifier: ^0.18.0
         version: 0.18.0(@lynx-js/react@0.123.0(@lynx-js/types@4.1.0)(@types/react@18.3.31))(tslib@2.8.1)
       '@lynx-js/rspeedy':
         specifier: ^0.16.0
-        version: 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+        version: 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       '@lynx-js/types':
         specifier: ^4.1.0
         version: 4.1.0
@@ -63,14 +63,14 @@ importers:
         version: 3.5.40(typescript@5.9.3)
       vue-lynx:
         specifier: ^0.5.1
-        version: 0.5.1(patch_hash=f16f939d0656802237503d0c465210088219fe50ef324d225f258ed179f99d8a)(@lynx-js/types@4.1.0)(@rsbuild/core@1.7.6)(@rsbuild/plugin-vue@1.2.9(@rsbuild/core@1.7.6)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.40)(vue@3.5.40(typescript@5.9.3)))(@types/react@18.3.31)(tslib@2.8.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+        version: 0.5.1(patch_hash=f16f939d0656802237503d0c465210088219fe50ef324d225f258ed179f99d8a)(@lynx-js/types@4.1.0)(@rsbuild/core@1.7.6)(@rsbuild/plugin-vue@1.2.9(@rsbuild/core@1.7.6)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.40)(vue@3.5.40(typescript@5.9.3)))(@types/react@18.3.31)(tslib@2.8.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.6.0
-        version: 0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))
+        version: 0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)))
       '@lynx-js/rspeedy':
         specifier: ^0.16.0
-        version: 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+        version: 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       '@lynx-js/types':
         specifier: ^4.1.0
         version: 4.1.0
@@ -175,8 +175,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0(supports-color@10.2.2)
       postcss:
-        specifier: 8.5.23
-        version: 8.5.23
+        specifier: 8.5.24
+        version: 8.5.24
       remark-mdx:
         specifier: ^3.1.1
         version: 3.1.1(supports-color@10.2.2)
@@ -5125,6 +5125,10 @@ packages:
     resolution: {integrity: sha512-g50586zr4bZmwFiTlflMu8E0bDTb5I5gertgwAKmsdUlTQIhZtunzUlD1WSzwcVWPoAVpsrA6vlfCD7oXvRwgg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.5.24:
+    resolution: {integrity: sha512-8RyVklq0owXUTa4xlpzu4l9AaVKIdQvAcOHZWaMh98HgySsUtxRVf/chRe3dsSLqb6i40BzGRzEUddRaI+9TSw==}
+    engines: {node: ^10 || ^12 || >=14}
+
   property-information@7.2.0:
     resolution: {integrity: sha512-IAtzIB6sUiWaJYrX9smp3V46pBGbBeLFRGdh25kg1334VcBlD8HzhPeNIWQH9zhGmo2itIe25EHt9dQP7G5hmg==}
 
@@ -7175,10 +7179,10 @@ snapshots:
     dependencies:
       '@lynx-js/webpack-runtime-globals': 0.0.7
 
-  '@lynx-js/css-extract-webpack-plugin@0.7.1(@lynx-js/template-webpack-plugin@0.13.0(tslib@2.8.1))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@lynx-js/css-extract-webpack-plugin@0.7.1(@lynx-js/template-webpack-plugin@0.13.0(tslib@2.8.1))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@lynx-js/template-webpack-plugin': 0.13.0(tslib@2.8.1)
-      mini-css-extract-plugin: 2.10.2(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      mini-css-extract-plugin: 2.10.2(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
     transitivePeerDependencies:
       - webpack
 
@@ -7198,9 +7202,9 @@ snapshots:
 
   '@lynx-js/internal-preact@10.29.1-20260519060144-e6da44c': {}
 
-  '@lynx-js/qrcode-rsbuild-plugin@0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))':
+  '@lynx-js/qrcode-rsbuild-plugin@0.6.0(@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)))':
     dependencies:
-      '@lynx-js/rspeedy': 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@lynx-js/rspeedy': 0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
 
   '@lynx-js/react-alias-rsbuild-plugin@0.18.0': {}
 
@@ -7248,7 +7252,7 @@ snapshots:
     optionalDependencies:
       '@lynx-js/types': 4.1.0
 
-  '@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@lynx-js/rspeedy@0.16.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(core-js@3.47.0)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(supports-color@10.2.2)(typescript@5.9.3)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@lynx-js/cache-events-webpack-plugin': 0.2.0
       '@lynx-js/chunk-loading-webpack-plugin': 0.4.1
@@ -7257,8 +7261,8 @@ snapshots:
       '@lynx-js/webpack-dev-transport': 0.3.0
       '@lynx-js/websocket': 0.0.4
       '@rsbuild/core': 2.1.4(core-js@3.47.0)
-      '@rsbuild/plugin-css-minimizer': 2.0.0(@rsbuild/core@2.1.4(core-js@3.47.0))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/rspack-plugin': 1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsbuild/plugin-css-minimizer': 2.0.0(@rsbuild/core@2.1.4(core-js@3.47.0))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/rspack-plugin': 1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -8042,9 +8046,9 @@ snapshots:
     optionalDependencies:
       '@rsbuild/core': 2.1.4(core-js@3.47.0)
 
-  '@rsbuild/plugin-css-minimizer@2.0.0(@rsbuild/core@2.1.4(core-js@3.47.0))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsbuild/plugin-css-minimizer@2.0.0(@rsbuild/core@2.1.4(core-js@3.47.0))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
-      css-minimizer-webpack-plugin: 8.0.0(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      css-minimizer-webpack-plugin: 8.0.0(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       reduce-configs: 1.1.2
     optionalDependencies:
       '@rsbuild/core': 2.1.4(core-js@3.47.0)
@@ -8069,13 +8073,13 @@ snapshots:
 
   '@rsdoctor/client@1.5.18': {}
 
-  '@rsdoctor/core@1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/core@1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@rsbuild/plugin-check-syntax': 1.6.1(@rsbuild/core@2.1.4(core-js@3.47.0))
-      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/sdk': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/sdk': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       '@rspack/resolver': 0.2.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
       browserslist-load-config: 1.0.3
       es-toolkit: 1.49.0
@@ -8093,10 +8097,10 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/graph@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/graph@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       es-toolkit: 1.49.0
       path-browserify: 1.0.1
       source-map: 0.7.6
@@ -8104,13 +8108,13 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rsdoctor/rspack-plugin@1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/rspack-plugin@1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
-      '@rsdoctor/core': 1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/sdk': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@8.1.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/core': 1.5.18(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@rsbuild/core@2.1.4(core-js@3.47.0))(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/sdk': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@8.1.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
     optionalDependencies:
       '@rspack/core': 2.1.4(@swc/helpers@0.5.23)
     transitivePeerDependencies:
@@ -8122,12 +8126,12 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/sdk@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/sdk@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@10.2.2)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@rsdoctor/client': 1.5.18
-      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       launch-editor: 2.14.1
       safer-buffer: 2.1.2
       socket.io: 4.8.1(supports-color@10.2.2)
@@ -8139,12 +8143,12 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/sdk@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@8.1.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/sdk@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(supports-color@8.1.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@rsdoctor/client': 1.5.18
-      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/graph': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
+      '@rsdoctor/utils': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       launch-editor: 2.14.1
       safer-buffer: 2.1.2
       socket.io: 4.8.1(supports-color@8.1.1)
@@ -8156,7 +8160,7 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/types@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/types@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@types/connect': 3.4.38
       '@types/estree': 1.0.5
@@ -8164,12 +8168,12 @@ snapshots:
       source-map: 0.7.6
     optionalDependencies:
       '@rspack/core': 2.1.4(@swc/helpers@0.5.23)
-      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)
+      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)
 
-  '@rsdoctor/utils@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))':
+  '@rsdoctor/utils@1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))':
     dependencies:
       '@babel/code-frame': 7.26.2
-      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@rsdoctor/types': 1.5.18(@rspack/core@2.1.4(@swc/helpers@0.5.23))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       '@types/estree': 1.0.5
       acorn: 8.17.0
       acorn-import-attributes: 1.9.5(acorn@8.17.0)
@@ -8689,7 +8693,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.3.0
       '@tailwindcss/oxide': 4.3.0
-      postcss: 8.5.23
+      postcss: 8.5.24
       tailwindcss: 4.3.0
 
   '@ts-morph/common@0.29.0':
@@ -9331,19 +9335,19 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  css-declaration-sorter@7.4.0(postcss@8.5.23):
+  css-declaration-sorter@7.4.0(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  css-minimizer-webpack-plugin@8.0.0(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)):
+  css-minimizer-webpack-plugin@8.0.0(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      cssnano: 7.1.9(postcss@8.5.23)
+      cssnano: 7.1.9(postcss@8.5.24)
       jest-worker: 30.4.1
-      postcss: 8.5.23
+      postcss: 8.5.24
       schema-utils: 4.3.3
       serialize-javascript: 7.0.7
-      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)
+      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)
     optionalDependencies:
       csso: 5.0.5
       esbuild: 0.28.1
@@ -9371,49 +9375,49 @@ snapshots:
 
   cssesc@3.0.0: {}
 
-  cssnano-preset-default@7.0.17(postcss@8.5.23):
+  cssnano-preset-default@7.0.17(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
-      css-declaration-sorter: 7.4.0(postcss@8.5.23)
-      cssnano-utils: 5.0.3(postcss@8.5.23)
-      postcss: 8.5.23
-      postcss-calc: 10.1.1(postcss@8.5.23)
-      postcss-colormin: 7.0.10(postcss@8.5.23)
-      postcss-convert-values: 7.0.12(postcss@8.5.23)
-      postcss-discard-comments: 7.0.8(postcss@8.5.23)
-      postcss-discard-duplicates: 7.0.4(postcss@8.5.23)
-      postcss-discard-empty: 7.0.3(postcss@8.5.23)
-      postcss-discard-overridden: 7.0.3(postcss@8.5.23)
-      postcss-merge-longhand: 7.0.7(postcss@8.5.23)
-      postcss-merge-rules: 7.0.11(postcss@8.5.23)
-      postcss-minify-font-values: 7.0.3(postcss@8.5.23)
-      postcss-minify-gradients: 7.0.5(postcss@8.5.23)
-      postcss-minify-params: 7.0.9(postcss@8.5.23)
-      postcss-minify-selectors: 7.1.2(postcss@8.5.23)
-      postcss-normalize-charset: 7.0.3(postcss@8.5.23)
-      postcss-normalize-display-values: 7.0.3(postcss@8.5.23)
-      postcss-normalize-positions: 7.0.4(postcss@8.5.23)
-      postcss-normalize-repeat-style: 7.0.4(postcss@8.5.23)
-      postcss-normalize-string: 7.0.3(postcss@8.5.23)
-      postcss-normalize-timing-functions: 7.0.3(postcss@8.5.23)
-      postcss-normalize-unicode: 7.0.9(postcss@8.5.23)
-      postcss-normalize-url: 7.0.3(postcss@8.5.23)
-      postcss-normalize-whitespace: 7.0.3(postcss@8.5.23)
-      postcss-ordered-values: 7.0.4(postcss@8.5.23)
-      postcss-reduce-initial: 7.0.9(postcss@8.5.23)
-      postcss-reduce-transforms: 7.0.3(postcss@8.5.23)
-      postcss-svgo: 7.1.3(postcss@8.5.23)
-      postcss-unique-selectors: 7.0.7(postcss@8.5.23)
+      css-declaration-sorter: 7.4.0(postcss@8.5.24)
+      cssnano-utils: 5.0.3(postcss@8.5.24)
+      postcss: 8.5.24
+      postcss-calc: 10.1.1(postcss@8.5.24)
+      postcss-colormin: 7.0.10(postcss@8.5.24)
+      postcss-convert-values: 7.0.12(postcss@8.5.24)
+      postcss-discard-comments: 7.0.8(postcss@8.5.24)
+      postcss-discard-duplicates: 7.0.4(postcss@8.5.24)
+      postcss-discard-empty: 7.0.3(postcss@8.5.24)
+      postcss-discard-overridden: 7.0.3(postcss@8.5.24)
+      postcss-merge-longhand: 7.0.7(postcss@8.5.24)
+      postcss-merge-rules: 7.0.11(postcss@8.5.24)
+      postcss-minify-font-values: 7.0.3(postcss@8.5.24)
+      postcss-minify-gradients: 7.0.5(postcss@8.5.24)
+      postcss-minify-params: 7.0.9(postcss@8.5.24)
+      postcss-minify-selectors: 7.1.2(postcss@8.5.24)
+      postcss-normalize-charset: 7.0.3(postcss@8.5.24)
+      postcss-normalize-display-values: 7.0.3(postcss@8.5.24)
+      postcss-normalize-positions: 7.0.4(postcss@8.5.24)
+      postcss-normalize-repeat-style: 7.0.4(postcss@8.5.24)
+      postcss-normalize-string: 7.0.3(postcss@8.5.24)
+      postcss-normalize-timing-functions: 7.0.3(postcss@8.5.24)
+      postcss-normalize-unicode: 7.0.9(postcss@8.5.24)
+      postcss-normalize-url: 7.0.3(postcss@8.5.24)
+      postcss-normalize-whitespace: 7.0.3(postcss@8.5.24)
+      postcss-ordered-values: 7.0.4(postcss@8.5.24)
+      postcss-reduce-initial: 7.0.9(postcss@8.5.24)
+      postcss-reduce-transforms: 7.0.3(postcss@8.5.24)
+      postcss-svgo: 7.1.3(postcss@8.5.24)
+      postcss-unique-selectors: 7.0.7(postcss@8.5.24)
 
-  cssnano-utils@5.0.3(postcss@8.5.23):
+  cssnano-utils@5.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  cssnano@7.1.9(postcss@8.5.23):
+  cssnano@7.1.9(postcss@8.5.24):
     dependencies:
-      cssnano-preset-default: 7.0.17(postcss@8.5.23)
+      cssnano-preset-default: 7.0.17(postcss@8.5.24)
       lilconfig: 3.1.3
-      postcss: 8.5.23
+      postcss: 8.5.24
 
   csso@5.0.5:
     dependencies:
@@ -11055,11 +11059,11 @@ snapshots:
 
   mimic-fn@2.1.0: {}
 
-  mini-css-extract-plugin@2.10.2(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)):
+  mini-css-extract-plugin@2.10.2(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)):
     dependencies:
       schema-utils: 4.3.3
       tapable: 2.3.3
-      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)
+      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)
 
   miniflare@5.20260804.1-alpha:
     dependencies:
@@ -11081,19 +11085,19 @@ snapshots:
     dependencies:
       brace-expansion: 2.1.4
 
-  minimizer-webpack-plugin@5.6.1(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)):
+  minimizer-webpack-plugin@5.6.1(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.49.0
-      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)
+      webpack: 5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)
     optionalDependencies:
-      cssnano: 7.1.9(postcss@8.5.23)
+      cssnano: 7.1.9(postcss@8.5.24)
       csso: 5.0.5
       esbuild: 0.28.1
       lightningcss: 1.32.0
-      postcss: 8.5.23
+      postcss: 8.5.24
 
   minipass@4.2.8: {}
 
@@ -11310,144 +11314,144 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcss-calc@10.1.1(postcss@8.5.23):
+  postcss-calc@10.1.1(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
       postcss-value-parser: 4.2.0
 
-  postcss-colormin@7.0.10(postcss@8.5.23):
+  postcss-colormin@7.0.10(postcss@8.5.24):
     dependencies:
       '@colordx/core': 5.5.0
       browserslist: 4.28.6
       caniuse-api: 3.0.0
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-convert-values@7.0.12(postcss@8.5.23):
+  postcss-convert-values@7.0.12(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-discard-comments@7.0.8(postcss@8.5.23):
+  postcss-discard-comments@7.0.8(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
 
-  postcss-discard-duplicates@7.0.4(postcss@8.5.23):
+  postcss-discard-duplicates@7.0.4(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  postcss-discard-empty@7.0.3(postcss@8.5.23):
+  postcss-discard-empty@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  postcss-discard-overridden@7.0.3(postcss@8.5.23):
+  postcss-discard-overridden@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  postcss-merge-longhand@7.0.7(postcss@8.5.23):
+  postcss-merge-longhand@7.0.7(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
-      stylehacks: 7.0.11(postcss@8.5.23)
+      stylehacks: 7.0.11(postcss@8.5.24)
 
-  postcss-merge-rules@7.0.11(postcss@8.5.23):
+  postcss-merge-rules@7.0.11(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
       caniuse-api: 3.0.0
-      cssnano-utils: 5.0.3(postcss@8.5.23)
-      postcss: 8.5.23
+      cssnano-utils: 5.0.3(postcss@8.5.24)
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
 
-  postcss-minify-font-values@7.0.3(postcss@8.5.23):
+  postcss-minify-font-values@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-minify-gradients@7.0.5(postcss@8.5.23):
+  postcss-minify-gradients@7.0.5(postcss@8.5.24):
     dependencies:
       '@colordx/core': 5.5.0
-      cssnano-utils: 5.0.3(postcss@8.5.23)
-      postcss: 8.5.23
+      cssnano-utils: 5.0.3(postcss@8.5.24)
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-minify-params@7.0.9(postcss@8.5.23):
+  postcss-minify-params@7.0.9(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
-      cssnano-utils: 5.0.3(postcss@8.5.23)
-      postcss: 8.5.23
+      cssnano-utils: 5.0.3(postcss@8.5.24)
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-minify-selectors@7.1.2(postcss@8.5.23):
+  postcss-minify-selectors@7.1.2(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
       caniuse-api: 3.0.0
       cssesc: 3.0.0
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
 
-  postcss-normalize-charset@7.0.3(postcss@8.5.23):
+  postcss-normalize-charset@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  postcss-normalize-display-values@7.0.3(postcss@8.5.23):
+  postcss-normalize-display-values@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-positions@7.0.4(postcss@8.5.23):
+  postcss-normalize-positions@7.0.4(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-repeat-style@7.0.4(postcss@8.5.23):
+  postcss-normalize-repeat-style@7.0.4(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-string@7.0.3(postcss@8.5.23):
+  postcss-normalize-string@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-timing-functions@7.0.3(postcss@8.5.23):
+  postcss-normalize-timing-functions@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-unicode@7.0.9(postcss@8.5.23):
+  postcss-normalize-unicode@7.0.9(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-url@7.0.3(postcss@8.5.23):
+  postcss-normalize-url@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-whitespace@7.0.3(postcss@8.5.23):
+  postcss-normalize-whitespace@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-ordered-values@7.0.4(postcss@8.5.23):
+  postcss-ordered-values@7.0.4(postcss@8.5.24):
     dependencies:
-      cssnano-utils: 5.0.3(postcss@8.5.23)
-      postcss: 8.5.23
+      cssnano-utils: 5.0.3(postcss@8.5.24)
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
-  postcss-reduce-initial@7.0.9(postcss@8.5.23):
+  postcss-reduce-initial@7.0.9(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
       caniuse-api: 3.0.0
-      postcss: 8.5.23
+      postcss: 8.5.24
 
-  postcss-reduce-transforms@7.0.3(postcss@8.5.23):
+  postcss-reduce-transforms@7.0.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
 
   postcss-selector-parser@7.1.4:
@@ -11455,15 +11459,15 @@ snapshots:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
 
-  postcss-svgo@7.1.3(postcss@8.5.23):
+  postcss-svgo@7.1.3(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-value-parser: 4.2.0
       svgo: 4.0.2
 
-  postcss-unique-selectors@7.0.7(postcss@8.5.23):
+  postcss-unique-selectors@7.0.7(postcss@8.5.24):
     dependencies:
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
 
   postcss-value-parser@4.2.0: {}
@@ -11475,6 +11479,12 @@ snapshots:
       source-map-js: 1.2.1
 
   postcss@8.5.23:
+    dependencies:
+      nanoid: 3.3.16
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
+  postcss@8.5.24:
     dependencies:
       nanoid: 3.3.16
       picocolors: 1.1.1
@@ -12075,10 +12085,10 @@ snapshots:
       client-only: 0.0.1
       react: 19.2.3
 
-  stylehacks@7.0.11(postcss@8.5.23):
+  stylehacks@7.0.11(postcss@8.5.24):
     dependencies:
       browserslist: 4.28.6
-      postcss: 8.5.23
+      postcss: 8.5.24
       postcss-selector-parser: 7.1.4
 
   supports-color@10.2.2: {}
@@ -12410,9 +12420,9 @@ snapshots:
 
   vscode-uri@3.1.0: {}
 
-  vue-lynx@0.5.1(patch_hash=f16f939d0656802237503d0c465210088219fe50ef324d225f258ed179f99d8a)(@lynx-js/types@4.1.0)(@rsbuild/core@1.7.6)(@rsbuild/plugin-vue@1.2.9(@rsbuild/core@1.7.6)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.40)(vue@3.5.40(typescript@5.9.3)))(@types/react@18.3.31)(tslib@2.8.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)):
+  vue-lynx@0.5.1(patch_hash=f16f939d0656802237503d0c465210088219fe50ef324d225f258ed179f99d8a)(@lynx-js/types@4.1.0)(@rsbuild/core@1.7.6)(@rsbuild/plugin-vue@1.2.9(@rsbuild/core@1.7.6)(@rspack/core@2.1.4(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.40)(vue@3.5.40(typescript@5.9.3)))(@types/react@18.3.31)(tslib@2.8.1)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)):
     dependencies:
-      '@lynx-js/css-extract-webpack-plugin': 0.7.1(@lynx-js/template-webpack-plugin@0.13.0(tslib@2.8.1))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      '@lynx-js/css-extract-webpack-plugin': 0.7.1(@lynx-js/template-webpack-plugin@0.13.0(tslib@2.8.1))(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       '@lynx-js/react': 0.116.5(@lynx-js/types@4.1.0)(@types/react@18.3.31)
       '@lynx-js/runtime-wrapper-webpack-plugin': 0.1.3
       '@lynx-js/template-webpack-plugin': 0.13.0(tslib@2.8.1)
@@ -12469,7 +12479,7 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23):
+  webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24):
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
@@ -12487,7 +12497,7 @@ snapshots:
       graceful-fs: 4.2.11
       loader-runner: 4.3.2
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.6.1(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.23))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
+      minimizer-webpack-plugin: 5.6.1(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24)(webpack@5.108.4(cssnano@7.1.9(postcss@8.5.24))(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.24))
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
