@@ -2,12 +2,16 @@ node_modules/
 dist/
 
 # Local reference clone of react-native-vision-camera (has its own .git).
-# Re-clone it if missing; see V1.md "Upstream Reference Strategy".
+# Re-clone it if missing; see docs/archive/V1.md "Upstream Reference Strategy".
 upstream/
 
 .DS_Store
 *.tgz
+.env*
 
-# Next.js / fumadocs build output in the website package.
-website/.next/
-website/.source/
+# Android/Gradle build output. Xcode's lands in example/host-ios, which has
+# its own .gitignore, as does website/.
+android/build/
+.gradle/
+.cxx/
+local.properties
