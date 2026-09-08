@@ -30,7 +30,7 @@ API is plain TypeScript that any JS framework can drive.
 - 🎥 Video recording with optional audio *(written, unverified)*
 - 🔦 Zoom, torch, and tap-to-focus *(written, unverified)*
 - 🔄 Front/back switching, `resizeMode`, and live `active` toggling
-- 🖼️ Photo-library picking
+- 🖼️ Photo library picking
 - 🔐 Camera and microphone permission checks and requests
 - ⚛️ Framework-neutral, so React, Vue, Svelte, or plain TypeScript all work unwrapped
 - 🧪 A mock adapter, so app flows can be built before any native wiring exists
@@ -99,7 +99,7 @@ Minimums: **iOS 15** deployment target, **Android 7.0** (`minSdk` 24).
 
 Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors
 [docs/native-contract.md](docs/native-contract.md) and the device-proven iOS
-behavior, which is fair reason to expect it to work, but nobody has confirmed
+behaviour, which is fair reason to expect it to work, but nobody has confirmed
 that on hardware yet. Treat Android as unsupported until it passes device
 acceptance.
 
@@ -138,20 +138,20 @@ want for mock previews, web previews, and JSON transports.
 
 ## Credits and licensing
 
-Chimera Camera is built off
+Chimera Camera is built on
 [`react-native-vision-camera`](https://github.com/mrousavy/react-native-vision-camera)
-by [Marc Rousavy](https://github.com/mrousavy) and its contributors, and the
-debt runs deeper than inspiration. This project lifts source, structure, and
+by [Marc Rousavy](https://github.com/mrousavy) and its contributors.
+This project lifts source, structure, and
 implementation approach from it wherever the MIT license allows, then rebuilds
-that work against Lynx rather than React Native. VisionCamera is copyright 2021
+that work against Lynx. VisionCamera is copyright 2021
 Marc Rousavy and MIT licensed, and those terms carry over to everything ported
 here. It is worth saying plainly that this would be a much smaller project
 without it.
 
-The camera glyph in the logo, the banner, and the example app icons comes from
+The camera glyph in the logo, the banner, and the example app icons come from
 [Material Symbols](https://github.com/google/material-design-icons), copyright
 Google LLC, licensed under the Apache License 2.0. The original glyph was
-recolored from a solid fill to a violet-to-teal gradient and rasterized to PNG
+recoloured from a solid fill to a violet-to-teal gradient and rasterised to PNG
 and WebP.
 
 Chimera Camera's own code is MIT licensed, and [LICENSE](LICENSE) has the text.
@@ -161,4 +161,4 @@ from Apache-licensed material.
 license in full alongside the Material Symbols notice, and the Apache text sits
 in [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt).
 
-This is not the official VisionCamera package and has no affiliation with it.
+This is not the official VisionCamera package and is not affiliated with it.
