@@ -34,8 +34,11 @@ describe('landing geometry', () => {
     expect(hitAt(0.5, 0.2)).toBe('back')
   })
 
+  // Mid is only exposed in the band between MID_CREST and BERG_CREST, which at
+  // center x is roughly 0.37-0.48 in layer-local terms. Anything lower is the
+  // lagoon and belongs to lynx. Move this if a re-cut moves those crests.
   test('resolves the rolling hills to the mid layer', () => {
-    expect(hitAt(0.5, 0.6)).toBe('mid')
+    expect(hitAt(0.5, 0.395)).toBe('mid')
   })
 
   test('resolves the lynx tap target in front of the mid layer', () => {
