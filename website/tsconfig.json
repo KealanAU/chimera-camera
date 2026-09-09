@@ -11,6 +11,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "isolatedModules": true,
+    // scripts/*.mts import app modules by their .ts specifier.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
@@ -28,6 +30,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
