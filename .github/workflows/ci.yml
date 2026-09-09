@@ -102,3 +102,38 @@ jobs:
             if (unpackedSize > 600000) fail(unpackedSize + ' bytes unpacked, max 600000');
             console.log('ok: ' + files.length + ' files, ' + unpackedSize + ' unpacked, ' + fs.statSync('/tmp/pkg.tgz').size + ' packed');
           "
+
+  website:
+    name: Check docs site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The site is standalone — it does not import the library package.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @chimera-camera/website
+
+      - name: Typecheck
+        run: pnpm --filter @chimera-camera/website run types:check
+
+      - name: Test
+        run: pnpm --filter @chimera-camera/website run test:logic
+
+      # Catches cross-page and API links that no longer resolve.
+      - name: Verify links
+        run: pnpm --filter @chimera-camera/website run check:links
+
+      # Not run here: test:screenshots needs a built site plus browser binaries,
+      # and the snapshots are chromium-darwin. Run it locally before a deploy.
+
