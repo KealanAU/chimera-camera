@@ -98,7 +98,7 @@ Two runnable demos drive that same core from different frameworks:
 Minimums: **iOS 15** deployment target, **Android 7.0** (`minSdk` 24).
 
 Android ships as experimental on purpose. The Kotlin/CameraX surface mirrors
-[docs/native-contract.md](docs/native-contract.md) and the device-proven iOS
+[native contract](https://camera.vyui.dev/docs/native-contract) and the device-proven iOS
 behaviour, which is fair reason to expect it to work, but nobody has confirmed
 that on hardware yet. Treat Android as unsupported until it passes device
 acceptance.
@@ -127,12 +127,13 @@ want for mock previews, web previews, and JSON transports.
 
 ## Links
 
+- [Documentation site](https://camera.vyui.dev) is the full guides and API reference
 - [Installation](INSTALLATION.md) is the full four-step setup and troubleshooting guide
 - Platform reference: [iOS](docs/ios-install.md) · [Android](docs/android-install.md)
-- [Native contract](docs/native-contract.md) covers props, methods, events, and error codes
+- [Native contract](https://camera.vyui.dev/docs/native-contract) covers props, methods, and events, and [errors](https://camera.vyui.dev/docs/errors) the codes
 - [Framework integration](docs/framework-integration.md) covers the element and SelectorQuery contract
-- [Output transport](docs/output-transport.md) covers file paths, lifetime, and cleanup ownership
-- [Mock testing](docs/mock-testing.md) · [LynxExplorer](docs/lynx-explorer.md)
+- [Output transport](https://camera.vyui.dev/docs/output-transport) covers file paths, lifetime, and cleanup ownership
+- [Mock adapter](https://camera.vyui.dev/docs/mock) · [LynxExplorer](docs/lynx-explorer.md)
 - [Publishing](docs/publishing.md) · [Changelog](CHANGELOG.md)
 - [Roadmap](ROADMAP.md) is the single source of truth for status, gates, and known debt
 

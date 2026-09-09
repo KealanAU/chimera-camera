@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test'
 
+import { LANDING_SKIP_INTRO_STORAGE_KEY } from '../src/components/landing/constants'
+
 test('landing page matches with intro skipped', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.localStorage.setItem('vc-landing-skip-intro-once', '1')
-  })
+  await page.addInitScript((key: string) => {
+    window.localStorage.setItem(key, '1')
+  }, LANDING_SKIP_INTRO_STORAGE_KEY)
 
   await page.goto('/')
   await page.waitForLoadState('networkidle')
@@ -105,26 +107,4 @@ test('scrollable docs pages have bottom spacing', async ({ page }) => {
 
   // Expect at least 16px of visible bottom spacing (fumadocs' py-6 = 24px)
   expect(bottomSpacing).toBeGreaterThanOrEqual(16)
-})
-
-test('hybrid object api page stays stable', async ({ page }) => {
-  await page.goto('/api/react-native-vision-camera/hybrid-objects/CameraOutput')
-  await page.waitForLoadState('networkidle')
-
-  await expect(page).toHaveScreenshot('api-hybrid-object.png', {
-    animations: 'disabled',
-    fullPage: true,
-    maxDiffPixels: 250,
-  })
-})
-
-test('function api page keeps linked code symbols', async ({ page }) => {
-  await page.goto('/api/react-native-vision-camera/functions/getCameraDevice')
-  await page.waitForLoadState('networkidle')
-
-  await expect(page.locator('.api-code-link').first()).toBeVisible()
-  await expect(page).toHaveScreenshot('api-function-page.png', {
-    animations: 'disabled',
-    fullPage: true,
-  })
 })

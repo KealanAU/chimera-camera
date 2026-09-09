@@ -4,8 +4,9 @@ This is the single source of truth for project status, release gates, working
 tasks, and known debt. Do not create separate TODO or per-version checklist
 files; update this document when implementation or device evidence changes.
 
-The normalized native contract lives in
-[docs/native-contract.md](docs/native-contract.md). The original planning specs
+The normalized native contract lives on the docs site at
+[camera.vyui.dev/docs/native-contract](https://camera.vyui.dev/docs/native-contract).
+The original planning specs
 [V0.md](docs/archive/V0.md) and [V1.md](docs/archive/V1.md) are archived under
 `docs/archive/`. [README.md](README.md) explains the project and architecture
 without duplicating the working checklist here.
@@ -305,7 +306,7 @@ imperative TypeScript API.
       are exercised today; video paths are contract-level until recording lands.
 - [x] Document file lifetime and cleanup ownership, with explicit base64 and
       `maxDimension` fallback guidance where native paths cannot be consumed.
-      See [docs/output-transport.md](docs/output-transport.md#file-lifetime-and-cleanup-ownership).
+      See [output transport](https://camera.vyui.dev/docs/output-transport#file-lifetime-and-cleanup-ownership).
 
 ### 0.3 exit criteria
 
