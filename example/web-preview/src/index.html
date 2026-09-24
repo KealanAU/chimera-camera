@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera Preview</title>
+<script>window.SystemInfo = { pixelWidth: 1170, pixelHeight: 2532, pixelRatio: 3 } // iPhone 15/16: 390×844 pt</script>
+<style>
+  :root { --bg: #e9e7e2; --bezel: #111; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #161616; --bezel: #2a2a2a; } }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); }
+  body { display: flex; justify-content: center; padding: 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif; }
+  .device { position: relative; padding: 12px; border-radius: 60px; background: var(--bezel); box-shadow: 0 30px 80px rgba(0,0,0,0.35); }
+  #phone { position: relative; width: 390px; height: 844px; border-radius: 48px; overflow: hidden; background: #000; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #phone *, #phone *::before, #phone *::after { box-sizing: border-box; }
+  /* Lynx defaults: every element is positioned, and text sits on its own line. */
+  .lx-view { position: relative; }
+  .lx-text { display: block; color: #fff; line-height: 1.25; white-space: nowrap; }
+  .island { position: absolute; top: 23px; left: 50%; width: 124px; height: 36px; margin-left: -62px; border-radius: 18px; background: #000; pointer-events: none; }
+  .home { position: absolute; bottom: 20px; left: 50%; width: 136px; height: 5px; margin-left: -68px; border-radius: 3px; background: rgba(255,255,255,0.85); pointer-events: none; }
+  /* Phones and short windows: shrink the device to fit. */
+  @media (max-width: 440px) { body { padding: 0; } .device { transform: scale(calc(100vw / 414px)); transform-origin: top center; } }
+</style>
+</head>
+<body>
+<div class="device"><div id="phone"></div><div class="island"></div><div class="home"></div></div>
+<script type="module">/*APP*/</script>
+</body>
+</html>

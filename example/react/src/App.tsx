@@ -49,6 +49,7 @@ import {
   blinkStyle,
   bottomBarStyle,
   center,
+  dialFanClipStyle,
   dialFanStyle,
   dialLabelStyle,
   dialOverlayStyle,
@@ -444,8 +445,8 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
         </view>
       )}
 
-      {/* Zoom stops — tap one, or long-press to open the dial. The lit stop shows the live value. */}
-      <view style={zoomWrapStyle} bindtouchstart={armDial} bindtouchend={cancelDial} bindtouchmove={dialDrag}>
+      {/* Zoom stops — tap one, or long-press to open the dial (which takes their place). The lit stop shows the live value. */}
+      <view style={{ ...zoomWrapStyle, ...fade(dialOpen) }} bindtouchstart={armDial} bindtouchend={cancelDial} bindtouchmove={dialDrag}>
         <view style={zoomPillStyle}>
           {zoomStops.map((stop) => {
             const active = stop === lit
@@ -497,7 +498,9 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       {/* Zoom dial — long-press for fine, continuous zoom. */}
       {dialOpen && (
         <view bindtap={() => setDialOpen(false)} bindtouchmove={dialDrag} style={dialOverlayStyle}>
-          <view style={dialFanStyle} />
+          <view style={dialFanClipStyle}>
+            <view style={dialFanStyle} />
+          </view>
           {dialTicks().map((z, i) => {
             const p = dialPoint(z)
             return <view key={i} style={dialTickStyle(p.x, p.y, dialTickRotation(z), i % 10 === 0, Math.abs(z - zoom) < 0.12)} />

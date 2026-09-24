@@ -63,10 +63,8 @@ export const DEFAULT_ZOOM_STOPS = [1, 2, 4]
 export function previewFrame(mode: Mode): { top: number; height: number } {
   const [w, h] = mode === 'video' ? [9, 16] : [3, 4]
   const height = Math.min(screenH, Math.round((screenW * h) / w))
-  const top =
-    mode === 'video'
-      ? Math.max(0, Math.round((screenH - height) / 2))
-      : Math.max(0, Math.min(Math.round(screenH * 0.133), screenH - height))
+  // Video starts just under the top controls so the clock never straddles its edge.
+  const top = Math.max(0, Math.min(mode === 'video' ? 104 : Math.round(screenH * 0.133), screenH - height))
   return { top, height }
 }
 
@@ -138,14 +136,17 @@ export const DIAL_PIVOT_X = screenW / 2
 export const DIAL_PIVOT_Y = screenH + 56
 export const DIAL_RADIUS = screenH * 0.4
 const DIAL_CENTER_DEG = -90
-const DIAL_SWEEP_DEG = 56
-/** 41 evenly-spaced ticks across the current display range. */
-export const dialTicks = () => Array.from({ length: 41 }, (_, i) => dialMin + (i / 40) * (dialMax - dialMin))
+const DIAL_SWEEP_DEG = 64
+// The arc is logarithmic, like iOS: each doubling of zoom gets the same
+// sweep, so .5× and 1× don't crowd together at one end of a 10× range.
+const dialSpan = () => Math.log(dialMax / dialMin)
+/** 41 ticks evenly spaced (in log terms) across the current display range. */
+export const dialTicks = () => Array.from({ length: 41 }, (_, i) => dialMin * Math.exp((i / 40) * dialSpan()))
 
 const toRad = (deg: number) => (deg * Math.PI) / 180
-const zoomToDeg = (z: number) => DIAL_CENTER_DEG + ((z - dialMin) / (dialMax - dialMin) - 0.5) * DIAL_SWEEP_DEG
+const zoomToDeg = (z: number) => DIAL_CENTER_DEG + (Math.log(z / dialMin) / dialSpan() - 0.5) * DIAL_SWEEP_DEG
 const angleToZoom = (deg: number) =>
-  dialMin + clamp01((deg - (DIAL_CENTER_DEG - DIAL_SWEEP_DEG / 2)) / DIAL_SWEEP_DEG) * (dialMax - dialMin)
+  dialMin * Math.exp(clamp01((deg - (DIAL_CENTER_DEG - DIAL_SWEEP_DEG / 2)) / DIAL_SWEEP_DEG) * dialSpan())
 
 /** Rotation that lays a tick along the arc's radius at a zoom value. */
 export const dialTickRotation = (z: number) => zoomToDeg(z) - 90

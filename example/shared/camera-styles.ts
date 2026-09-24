@@ -149,6 +149,8 @@ export const glyphStyle = { color: '#ffffff', fontSize: '20px' }
 // Zoom dial: a dark fan behind a radial tick ruler; ticks near the value light up.
 export const dialOverlayStyle = { ...fillStyle }
 const FAN_R = DIAL_RADIUS + 44
+// Clips the fan at the controls so the shutter and modes stay bright.
+export const dialFanClipStyle = { ...abs, left: '0', right: '0', top: '0', height: `${CONTROLS_TOP}px`, overflow: 'hidden' as const }
 export const dialFanStyle = {
   ...abs,
   left: `${DIAL_PIVOT_X - FAN_R}px`,

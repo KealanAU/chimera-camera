@@ -84,6 +84,21 @@ importers:
         specifier: ^3.3.8
         version: 3.3.8(typescript@5.9.3)
 
+  example/web-preview:
+    devDependencies:
+      esbuild:
+        specifier: ^0.28.1
+        version: 0.28.1
+      playwright-core:
+        specifier: ^1.60.0
+        version: 1.60.0
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
+
   website:
     dependencies:
       '@opennextjs/cloudflare':

@@ -74,8 +74,8 @@
       </view>
     </view>
 
-    <!-- Zoom stops — tap one, or long-press to open the dial. The lit stop shows the live value. -->
-    <view :style="zoomWrapStyle" @touchstart="armDial" @touchend="cancelDial" @touchmove="dialDrag">
+    <!-- Zoom stops — tap one, or long-press to open the dial (which takes their place). The lit stop shows the live value. -->
+    <view :style="{ ...zoomWrapStyle, ...fade(dialOpen) }" @touchstart="armDial" @touchend="cancelDial" @touchmove="dialDrag">
       <view :style="zoomPillStyle">
         <view v-for="stop in zoomStops" :key="stop" :style="zoomItemStyle(stop === lit)" @tap="applyZoom(stop)">
           <text :style="zoomTextStyle(stop === lit)">{{ stop === lit ? `${formatZoom(zoom)}×` : formatZoom(stop) }}</text>
@@ -116,7 +116,9 @@
 
     <!-- Zoom dial — long-press for fine, continuous zoom. -->
     <view v-if="dialOpen" :style="dialOverlayStyle" @tap="dialOpen = false" @touchmove="dialDrag">
-      <view :style="dialFanStyle" />
+      <view :style="dialFanClipStyle">
+        <view :style="dialFanStyle" />
+      </view>
       <view v-for="(tick, i) in ticks" :key="i" :style="tick" />
       <text v-for="z in zoomStops" :key="`lbl${z}`" :style="dialLabelStyle(dialPoint(z).x, dialPoint(z).y)">
         {{ formatZoom(z) }}
@@ -195,6 +197,7 @@ import {
   blinkStyle,
   bottomBarStyle,
   center,
+  dialFanClipStyle,
   dialFanStyle,
   dialLabelStyle,
   dialOverlayStyle,
