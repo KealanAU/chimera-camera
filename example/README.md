@@ -15,8 +15,8 @@ Files:
 - `shared/` — the framework-free half of the demo, imported verbatim by both
   apps so their `App` files are only state, handlers, and markup:
   `camera-core.ts` (module/mock wiring, screen probe, zoom-arc geometry,
-  exposure math), `camera-styles.ts` (the glass UI's style objects) and
-  `camera-element.ts` (the `<camera-view>` element's props, declared once for
+  exposure math, iOS-style framing), `camera-styles.ts` (the Camera-app UI's
+  style objects) and `camera-element.ts` (the `<camera-view>` element's props, declared once for
   both ReactLynx JSX and Vue templates).
 - `react/` — a runnable ReactLynx app (rspeedy). Its `src/App.tsx` drives the
   full `camera-view` surface (preview, `ready`/`error`, `ping()`,
@@ -26,7 +26,7 @@ Files:
   Run it with `pnpm --filter @chimera-camera/react run dev` and scan the QR code
   with Lynx Go / LynxExplorer (see `docs/lynx-explorer.md`). iOS device-proven.
 - `vue/` — a runnable Vue Lynx app (`vue-lynx` + rspeedy). Its `src/App.vue` is a
-  line-for-line port of `react/src/App.tsx` — same glass camera UI, driving the
+  line-for-line port of `react/src/App.tsx` — same iOS Camera-style UI, driving the
   **same** `camera-view` element and `createCameraViewHandle` contract with no
   React dependency — the 0.3 framework-portability proof. Run it with
   `pnpm --filter @chimera-camera/vue run dev`. Boots and compiles in mock mode;

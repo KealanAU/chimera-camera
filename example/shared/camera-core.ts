@@ -54,6 +54,48 @@ export const clampEv = (n: number) => Math.max(EXPOSURE_MIN, Math.min(EXPOSURE_M
 
 export const DEFAULT_ZOOM_STOPS = [1, 2, 4]
 
+/**
+ * iOS-style framing. Photo shows the sensor's 3:4 portrait frame between black
+ * bands, so what you see is what the capture holds; video opens up to 9:16.
+ * On short screens the frame slides up to the top rather than overlapping more
+ * of the controls.
+ */
+export function previewFrame(mode: Mode): { top: number; height: number } {
+  const [w, h] = mode === 'video' ? [9, 16] : [3, 4]
+  const height = Math.min(screenH, Math.round((screenW * h) / w))
+  const top =
+    mode === 'video'
+      ? Math.max(0, Math.round((screenH - height) / 2))
+      : Math.max(0, Math.min(Math.round(screenH * 0.133), screenH - height))
+  return { top, height }
+}
+
+/** "0.5" → ".5", "2.0" → "2", "1.43" → "1.4" — the Camera app's zoom labels. */
+export const formatZoom = (z: number): string => {
+  const r = Math.round(z * 10) / 10
+  return (Number.isInteger(r) ? String(r) : r.toFixed(1)).replace(/^0\./, '.')
+}
+
+/**
+ * The stop whose button carries the live value: the highest one at or below
+ * the current zoom. A dialled 1.4× lights the 1× button as "1.4×", like iOS,
+ * instead of leaving every button unlit.
+ */
+export const activeStop = (zoom: number, stops: number[]): number =>
+  stops.reduce((best, stop) => (stop <= zoom + 0.05 ? stop : best), stops[0])
+
+/** Recording clock, "00:01:07". */
+export const formatDuration = (ms: number): string => {
+  const total = Math.max(0, Math.floor(ms / 1000))
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(Math.floor(total / 3600))}:${pad(Math.floor(total / 60) % 60)}:${pad(total % 60)}`
+}
+
+// Mode carousel: fixed-width items slid so the selected one sits dead centre.
+export const MODES: Mode[] = ['video', 'photo']
+export const MODE_ITEM_W = 84
+export const modeOffset = (mode: Mode): number => screenW / 2 - (MODES.indexOf(mode) + 0.5) * MODE_ITEM_W
+
 // Everything user-facing is a DISPLAY multiplier (0.5×, 1×, 3×…). On multi-lens
 // devices the ultra-wide is the base lens (videoZoomFactor 1.0), so display 1× =
 // the wide lens sits at `wideFactor` in factor space. Convert at the setZoom edge.
@@ -92,18 +134,21 @@ export function opticalZoomStops(
 // shallowly across the lower third; drag an angle → zoom, tap away to close.
 // ponytail: these four constants are the calibration knobs — untested on-device,
 // nudge PIVOT_Y / RADIUS / SWEEP until the arc sits where it feels right.
-const DIAL_PIVOT_X = screenW / 2
+export const DIAL_PIVOT_X = screenW / 2
 export const DIAL_PIVOT_Y = screenH + 56
 export const DIAL_RADIUS = screenH * 0.4
 const DIAL_CENTER_DEG = -90
 const DIAL_SWEEP_DEG = 56
-/** 15 evenly-spaced ticks across the current display range. */
-export const dialTicks = () => Array.from({ length: 15 }, (_, i) => dialMin + (i / 14) * (dialMax - dialMin))
+/** 41 evenly-spaced ticks across the current display range. */
+export const dialTicks = () => Array.from({ length: 41 }, (_, i) => dialMin + (i / 40) * (dialMax - dialMin))
 
 const toRad = (deg: number) => (deg * Math.PI) / 180
 const zoomToDeg = (z: number) => DIAL_CENTER_DEG + ((z - dialMin) / (dialMax - dialMin) - 0.5) * DIAL_SWEEP_DEG
 const angleToZoom = (deg: number) =>
   dialMin + clamp01((deg - (DIAL_CENTER_DEG - DIAL_SWEEP_DEG / 2)) / DIAL_SWEEP_DEG) * (dialMax - dialMin)
+
+/** Rotation that lays a tick along the arc's radius at a zoom value. */
+export const dialTickRotation = (z: number) => zoomToDeg(z) - 90
 
 /** Screen position of a zoom value on the arc. */
 export const dialPoint = (z: number) => {
