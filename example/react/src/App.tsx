@@ -1,107 +1,139 @@
 /*
- * ReactLynx camera demo — iOS-style glass controls over Chimera Camera's
+ * ReactLynx camera demo — iOS Camera-style controls over Chimera Camera's
  * `camera-view`. Every framework-free piece (module wiring, screen probe, zoom
- * arc, exposure math) lives in `example/shared/camera-core.ts`, which
+ * arc, exposure math, framing) lives in `example/shared/camera-core.ts`, which
  * `example/vue/src/App.vue` imports verbatim; this file is state + handlers + JSX.
  *
  * Lynx note: `<view>` defaults to `display: linear`, so every flex row/centre
  * here sets `display: 'flex'` explicitly — without it children stack and overlap.
  *
- * ponytail: "glass" is faked with translucency + a hairline highlight + shadow
- * (Lynx iOS exposes no backdrop blur); flash/flip icons are text glyphs. Swap in
- * baked SF-style PNGs for a pixel-true look.
+ * ponytail: flash/flip icons are text glyphs. Swap in baked SF-style PNGs for a
+ * pixel-true look.
  */
 import { useEffect, useRef, useState } from '@lynx-js/react'
 
 import type { FlashMode, PhotoFile, TargetCameraPosition } from '@vyui/camera'
 
 import {
+  activeStop,
   cameraModule,
   clamp01,
   clampEv,
   delay,
   dialPoint,
+  dialTickRotation,
   dialTicks,
   displayToFactor,
+  formatDuration,
+  formatZoom,
   isNative,
   opticalZoomStops,
   pointToZoom,
-  screenH,
+  previewFrame,
   screenW,
   session,
   setDialRange,
   toMessage,
   touchPoint,
   DEFAULT_ZOOM_STOPS,
-  DIAL_PIVOT_Y,
-  DIAL_RADIUS,
   EXPOSURE_MAX,
   EXPOSURE_PX_PER_EV,
   EXPOSURE_TRACK_PX,
+  MODES,
   type Media,
   type Mode,
   type TouchEventLike,
 } from '../../shared/camera-core.js'
 import {
+  bandStyles,
+  blinkStyle,
   bottomBarStyle,
   center,
+  dialFanClipStyle,
+  dialFanStyle,
+  dialLabelStyle,
   dialOverlayStyle,
+  dialTickStyle,
   dialValueStyle,
-  errorBannerStyle,
-  errorTextStyle,
+  exposureTextStyle,
+  fade,
   fillStyle,
-  glassBg,
-  glassCircle,
+  flashBadgeStyle,
+  flashChipStyle,
+  flashGlyphStyle,
+  flipGlyphStyle,
+  flipStyle,
   glyphStyle,
+  hitStyle,
   modeItemStyle,
+  modeRowStyle,
   modeTextStyle,
   modeWrapStyle,
   playGlyphStyle,
+  previewStyle,
+  primaryButtonTextStyle,
   reticleStyle,
+  reticleTickStyles,
+  reviewBarStyle,
+  reviewImageStyle,
   reviewMetaStyle,
   reviewStyle,
   rootStyle,
-  saveStyle,
-  saveTextStyle,
-  shutterPhotoStyle,
+  saveButtonStyle,
+  shutterInnerStyle,
   shutterRingStyle,
-  shutterStopStyle,
-  shutterVideoStyle,
+  textButtonStyle,
+  textButtonTextStyle,
   thumbStyle,
+  timerStyle,
+  timerTextStyle,
+  toastDotStyle,
+  toastStyle,
+  toastTextStyle,
+  toastWrapStyle,
   topBarStyle,
-  usePhotoStyle,
-  usePhotoTextStyle,
   zoomItemStyle,
   zoomPillStyle,
   zoomTextStyle,
   zoomWrapStyle,
+  YELLOW,
 } from '../../shared/camera-styles.js'
 
 export interface CameraDemoProps {
   uploadPhoto?: (photo: PhotoFile) => Promise<void>
 }
 
+type Toast = { text: string; error: boolean }
+const FLASH_LABEL: Record<FlashMode, string> = { off: 'Flash Off', auto: 'Flash Auto', on: 'Flash On' }
+
 export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
   const [busy, setBusy] = useState(false)
   const [mode, setMode] = useState<Mode>('photo')
   const [facing, setFacing] = useState<TargetCameraPosition>('back')
+  const [flipTurns, setFlipTurns] = useState(0)
   const [media, setMedia] = useState<Media | null>(null)
   const [reviewing, setReviewing] = useState(false)
   const [saved, setSaved] = useState(false)
   const [recording, setRecording] = useState(false)
+  const [elapsedMs, setElapsedMs] = useState(0)
+  const [pressed, setPressed] = useState(false)
+  const [blink, setBlink] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [zoomStops, setZoomStops] = useState<number[]>(DEFAULT_ZOOM_STOPS)
   const [flash, setFlash] = useState<FlashMode>('off')
   const [screenFlash, setScreenFlash] = useState(false)
   const [reticle, setReticle] = useState<{ x: number; y: number } | null>(null)
+  const [reticleSettled, setReticleSettled] = useState(true)
   const [exposureBias, setExposureBias] = useState(0)
   const [dialOpen, setDialOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<Toast | null>(null)
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSentZoom = useRef(1)
   const wideFactor = useRef(1)
   const activeFocus = useRef(false)
-  const focusStartY = useRef(0)
+  const swiping = useRef(false)
+  const focusStart = useRef({ x: 0, y: 0 })
   const lastSentBias = useRef(0)
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -112,16 +144,34 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
         await cameraModule.requestCameraPermission()
         await cameraModule.requestMicrophonePermission()
       } catch (e) {
-        setError(toMessage(e))
+        fail(e)
       }
     })()
   }, [])
+
+  // Recording clock: tick while recording, from the moment it started.
+  useEffect(() => {
+    if (!recording) return
+    const startedAt = Date.now()
+    setElapsedMs(0)
+    const id = setInterval(() => setElapsedMs(Date.now() - startedAt), 250)
+    return () => clearInterval(id)
+  }, [recording])
+
+  // One status pill for everything transient; errors linger longer.
+  function showToast(text: string, error = false) {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setToast({ text, error })
+    toastTimer.current = setTimeout(() => setToast(null), error ? 4000 : 1400)
+  }
+  function fail(e: unknown) {
+    showToast(toMessage(e), true)
+  }
 
   async function shutter() {
     if (mode === 'video') return toggleRecording()
     if (busy) return
     setBusy(true)
-    setError(null)
     // Most front cameras have no flash unit: light the subject with a screen
     // flash (the display faces the user), held briefly so the sensor sees it.
     // Back cameras get the real flash, fired by native at the shutter.
@@ -131,9 +181,12 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
     }
     try {
       const handle = isNative ? session : cameraModule
-      setMedia({ kind: 'photo', file: await handle.capturePhoto({ flash, includeBase64: true, maxDimension: 1600 }) })
+      const capture = handle.capturePhoto({ flash, includeBase64: true, maxDimension: 1600 })
+      setBlink(true)
+      setTimeout(() => setBlink(false), 110)
+      setMedia({ kind: 'photo', file: await capture })
     } catch (e) {
-      setError(toMessage(e))
+      fail(e)
     } finally {
       setScreenFlash(false)
       setBusy(false)
@@ -152,8 +205,13 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       }
     } catch (e) {
       setRecording(false)
-      setError(toMessage(e))
+      fail(e)
     }
+  }
+
+  function selectMode(next: Mode) {
+    if (recording || next === mode) return
+    setMode(next)
   }
 
   // `value` is a display multiplier (0.5×, 1×, 3×…); convert to the device's
@@ -164,7 +222,7 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       setZoom(value)
       lastSentZoom.current = value
     } catch (e) {
-      setError(toMessage(e))
+      fail(e)
     }
   }
 
@@ -201,60 +259,85 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
     const rounded = Math.round(z * 10) / 10
     if (rounded !== lastSentZoom.current) {
       lastSentZoom.current = rounded
-      void session.setZoom(displayToFactor(rounded, wideFactor.current)).catch((e) => setError(toMessage(e)))
+      void session.setZoom(displayToFactor(rounded, wideFactor.current)).catch(fail)
     }
   }
 
   // iOS order: off → auto → on. Nothing is sent to native here; the mode rides
   // along with capturePhoto() so the flash only fires at the shutter.
   function cycleFlash() {
-    setFlash(flash === 'off' ? 'auto' : flash === 'auto' ? 'on' : 'off')
+    const next: FlashMode = flash === 'off' ? 'auto' : flash === 'auto' ? 'on' : 'off'
+    setFlash(next)
+    showToast(FLASH_LABEL[next])
   }
 
   function flip() {
+    if (recording) return
     setFacing(facing === 'back' ? 'front' : 'back')
+    setFlipTurns(flipTurns + 1)
     // Swapping the device input resets zoom to 1× natively, so mirror that here.
     setZoom(1)
     lastSentZoom.current = 1
   }
 
   // iOS focus+exposure gesture. Touch-down drops the reticle and focuses there
-  // (resetting exposure to auto); then sliding up/down slides the sun to
-  // brighten/dim; releasing fades the reticle out. Refs (not state) gate the
-  // move so the rapid down→move sequence isn't tripped by async re-renders.
+  // (resetting exposure to auto); sliding up/down slides the sun to
+  // brighten/dim; a mostly-sideways swipe switches mode instead. Releasing fades
+  // the reticle out. Refs (not state) gate the move so the rapid down→move
+  // sequence isn't tripped by async re-renders.
   function focusDown(event: TouchEventLike) {
+    const frame = previewFrame(mode)
     const t = touchPoint(event)
     const x = typeof t?.clientX === 'number' ? t.clientX : screenW / 2
-    const y = typeof t?.clientY === 'number' ? t.clientY : screenH / 2
+    const y = typeof t?.clientY === 'number' ? t.clientY : frame.top + frame.height / 2
     if (fadeTimer.current) {
       clearTimeout(fadeTimer.current)
       fadeTimer.current = null
     }
     activeFocus.current = true
-    focusStartY.current = y
+    swiping.current = false
+    focusStart.current = { x, y }
     lastSentBias.current = 0
     setReticle({ x, y })
+    // Land large, then settle on the next frame so the transition plays.
+    setReticleSettled(false)
+    setTimeout(() => setReticleSettled(true), 16)
     setExposureBias(0)
-    void session.focusAtPoint({ x: clamp01(x / screenW), y: clamp01(y / screenH) }).catch((e) => setError(toMessage(e)))
+    void session.focusAtPoint({ x: clamp01(x / screenW), y: clamp01((y - frame.top) / frame.height) }).catch(fail)
     void session.setExposureBias(0).catch(() => {})
   }
 
   function focusMove(event: TouchEventLike) {
-    if (!activeFocus.current) return
+    if (!activeFocus.current || swiping.current) return
     const t = touchPoint(event)
-    if (typeof t?.clientY !== 'number') return
-    const bias = clampEv((focusStartY.current - t.clientY) / EXPOSURE_PX_PER_EV) // drag up = brighter
+    if (typeof t?.clientX !== 'number' || typeof t.clientY !== 'number') return
+    const dx = t.clientX - focusStart.current.x
+    const dy = focusStart.current.y - t.clientY // drag up = brighter
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      swiping.current = true
+      setReticle(null)
+      const i = MODES.indexOf(mode) + (dx < 0 ? 1 : -1)
+      if (i >= 0 && i < MODES.length) selectMode(MODES[i])
+      return
+    }
+    const bias = clampEv(dy / EXPOSURE_PX_PER_EV)
     setExposureBias(bias)
     const rounded = Math.round(bias * 10) / 10
     if (rounded !== lastSentBias.current) {
       lastSentBias.current = rounded
-      void session.setExposureBias(rounded).catch((e) => setError(toMessage(e)))
+      void session.setExposureBias(rounded).catch(fail)
     }
   }
 
   function focusUp() {
     activeFocus.current = false
     fadeTimer.current = setTimeout(() => setReticle(null), 1500)
+  }
+
+  function openReview() {
+    if (!media || recording) return
+    setSaved(false)
+    setReviewing(true)
   }
 
   async function uploadCurrentPhoto() {
@@ -264,7 +347,7 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       await uploadPhoto(media.file)
       setReviewing(false)
     } catch (e) {
-      setError(toMessage(e))
+      fail(e)
     } finally {
       setBusy(false)
     }
@@ -273,48 +356,61 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
   // The other half of "upload or save": keep the capture in the device library.
   // Same temp file the upload path uses; saveToLibrary copies it into Photos.
   async function saveCurrentMedia() {
-    if (!media) return
+    if (!media || saved || busy) return
     setBusy(true)
     try {
       await cameraModule.saveToLibrary(media.file)
       setSaved(true)
+      showToast('Saved to Photos')
     } catch (e) {
-      setError(toMessage(e))
+      fail(e)
     } finally {
       setBusy(false)
     }
   }
 
   const photoSource = media?.kind === 'photo' && media.file.base64 ? `data:${media.file.mime ?? 'image/jpeg'};base64,${media.file.base64}` : null
-  const shutterInner = recording ? shutterStopStyle : mode === 'video' ? shutterVideoStyle : shutterPhotoStyle
+  const shutterKind = recording ? 'stop' : mode === 'video' ? 'video' : 'photo'
+  const lit = activeStop(zoom, zoomStops)
+  const [topBand, bottomBand] = bandStyles(mode)
 
   return (
     <view style={rootStyle}>
-      {/* Preview layer: live camera-view on native, last photo (or black) on mock. */}
-      {isNative ? (
-        <camera-view
-          id="camera"
-          active={true}
-          facing={facing}
-          resizeMode="cover"
-          bindready={onCameraReady}
-          binderror={(event: { detail?: { message?: string } }) => setError(event.detail?.message ?? 'camera-view failed')}
-          style={fillStyle}
-        />
-      ) : photoSource ? (
-        <image src={photoSource} style={fillStyle} mode="aspectFill" />
-      ) : null}
+      {/* Preview in its capture frame: live camera-view on native, last photo (or black) on mock. */}
+      <view style={previewStyle(mode)}>
+        {isNative ? (
+          <camera-view
+            id="camera"
+            active={true}
+            facing={facing}
+            resizeMode="cover"
+            bindready={onCameraReady}
+            binderror={(event: { detail?: { message?: string } }) => showToast(event.detail?.message ?? 'camera-view failed', true)}
+            style={fillStyle}
+          />
+        ) : photoSource ? (
+          <image src={photoSource} style={fillStyle} mode="aspectFill" />
+        ) : null}
+        <view style={blinkStyle(blink)} />
+        {/* Focus + exposure + mode-swipe catcher — above the preview, below the controls. */}
+        <view bindtouchstart={focusDown} bindtouchmove={focusMove} bindtouchend={focusUp} style={fillStyle} />
+      </view>
 
-      {/* Focus + exposure catcher — above the preview, below the controls. */}
-      <view bindtouchstart={focusDown} bindtouchmove={focusMove} bindtouchend={focusUp} style={fillStyle} />
+      <view style={topBand} />
+      <view style={bottomBand} />
+
       {reticle && (
         <>
-          <view style={{ ...reticleStyle, left: `${reticle.x - 35}px`, top: `${reticle.y - 35}px` }} />
+          <view style={reticleStyle(reticle.x, reticle.y, reticleSettled)}>
+            {reticleTickStyles.map((s, i) => (
+              <view key={i} style={s} />
+            ))}
+          </view>
           {/* Sun thumb slides on a track to the right of the box; up = brighter. */}
-          <view style={{ position: 'absolute', left: `${reticle.x + 44}px`, top: `${reticle.y - EXPOSURE_TRACK_PX}px`, width: '2px', height: `${EXPOSURE_TRACK_PX * 2}px`, backgroundColor: 'rgba(255,214,10,0.4)' }} />
-          <view style={{ position: 'absolute', left: `${reticle.x + 38}px`, top: `${reticle.y - (exposureBias / EXPOSURE_MAX) * EXPOSURE_TRACK_PX - 7}px`, width: '14px', height: '14px', borderRadius: '7px', backgroundColor: '#ffd60a' }} />
+          <view style={{ position: 'absolute', left: `${reticle.x + 50}px`, top: `${reticle.y - EXPOSURE_TRACK_PX}px`, width: '1px', height: `${EXPOSURE_TRACK_PX * 2}px`, backgroundColor: 'rgba(255,214,10,0.5)' }} />
+          <view style={{ position: 'absolute', left: `${reticle.x + 44}px`, top: `${reticle.y - (exposureBias / EXPOSURE_MAX) * EXPOSURE_TRACK_PX - 7}px`, width: '14px', height: '14px', borderRadius: '7px', backgroundColor: YELLOW }} />
           {Math.abs(exposureBias) > 0.05 && (
-            <text style={{ position: 'absolute', left: `${reticle.x + 58}px`, top: `${reticle.y - 9}px`, color: '#ffd60a', fontSize: '13px', fontWeight: 'bold' }}>
+            <text style={{ ...exposureTextStyle, position: 'absolute', left: `${reticle.x + 64}px`, top: `${reticle.y - 9}px` }}>
               {exposureBias > 0 ? '+' : ''}{exposureBias.toFixed(1)}
             </text>
           )}
@@ -324,47 +420,59 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
       {/* Retina screen flash for the front camera (no hardware torch). */}
       {screenFlash && <view style={{ ...fillStyle, backgroundColor: '#ffffff' }} />}
 
-      {/* Top strip: flash. */}
+      {/* Top strip: flash · recording clock · balance spacer. */}
       <view style={topBarStyle}>
-        <view bindtap={cycleFlash} style={{ ...glassCircle, backgroundColor: flash === 'off' ? glassBg : 'rgba(255,214,10,0.9)' }}>
-          <text style={{ ...glyphStyle, color: flash === 'off' ? '#ffffff' : '#141414' }}>{flash === 'auto' ? '⚡︎A' : '⚡︎'}</text>
+        <view bindtap={cycleFlash} style={{ ...hitStyle, ...fade(recording) }}>
+          <view style={flashChipStyle(flash === 'on')}>
+            <text style={{ ...flashGlyphStyle(flash === 'on'), opacity: flash === 'off' ? 0.55 : 1 }}>{'⚡︎'}</text>
+            {flash === 'auto' && <text style={flashBadgeStyle}>A</text>}
+          </view>
         </view>
+        {mode === 'video' && (
+          <view style={timerStyle(recording)}>
+            <text style={timerTextStyle}>{formatDuration(recording ? elapsedMs : 0)}</text>
+          </view>
+        )}
+        <view style={hitStyle} />
       </view>
 
-      {error && (
-        <view bindtap={() => setError(null)} style={errorBannerStyle}>
-          <text style={errorTextStyle}>{error}</text>
+      {toast && (
+        <view style={toastWrapStyle}>
+          <view bindtap={() => setToast(null)} style={toastStyle}>
+            {toast.error && <view style={toastDotStyle} />}
+            <text style={toastTextStyle}>{toast.text}</text>
+          </view>
         </view>
       )}
 
-      {/* Zoom pill — tap a stop, or long-press to open the arc dial. */}
-      <view style={zoomWrapStyle} bindtouchstart={armDial} bindtouchend={cancelDial} bindtouchmove={dialDrag}>
+      {/* Zoom stops — tap one, or long-press to open the dial (which takes their place). The lit stop shows the live value. */}
+      <view style={{ ...zoomWrapStyle, ...fade(dialOpen) }} bindtouchstart={armDial} bindtouchend={cancelDial} bindtouchmove={dialDrag}>
         <view style={zoomPillStyle}>
           {zoomStops.map((stop) => {
-            const active = zoom === stop
+            const active = stop === lit
             return (
-              <view key={stop} bindtap={() => applyZoom(stop)} style={{ ...zoomItemStyle, backgroundColor: active ? 'rgba(255,255,255,0.9)' : 'transparent' }}>
-                <text style={{ ...zoomTextStyle, color: active ? '#141414' : '#ffffff', fontWeight: active ? 'bold' : 'normal' }}>
-                  {stop}×
-                </text>
+              <view key={stop} bindtap={() => applyZoom(stop)} style={zoomItemStyle(active)}>
+                <text style={zoomTextStyle(active)}>{active ? `${formatZoom(zoom)}×` : formatZoom(stop)}</text>
               </view>
             )
           })}
         </view>
       </view>
 
-      {/* PHOTO / VIDEO mode. */}
+      {/* Mode carousel — tap a mode or swipe the preview sideways. */}
       <view style={modeWrapStyle}>
-        {(['photo', 'video'] as Mode[]).map((m) => (
-          <view key={m} bindtap={() => setMode(m)} style={modeItemStyle}>
-            <text style={{ ...modeTextStyle, color: mode === m ? '#ffd60a' : '#ffffff' }}>{m.toUpperCase()}</text>
-          </view>
-        ))}
+        <view style={modeRowStyle(mode, recording)}>
+          {MODES.map((m) => (
+            <view key={m} bindtap={() => selectMode(m)} style={modeItemStyle}>
+              <text style={modeTextStyle(mode === m)}>{m.toUpperCase()}</text>
+            </view>
+          ))}
+        </view>
       </view>
 
-      {/* Bottom bar: library thumbnail · shutter · flip. */}
+      {/* Bottom bar: last capture · shutter · flip. Side controls step aside while recording. */}
       <view style={bottomBarStyle}>
-        <view bindtap={() => media && (setSaved(false), setReviewing(true))} style={{ ...thumbStyle, opacity: media ? 1 : 0.4 }}>
+        <view bindtap={openReview} style={{ ...thumbStyle, ...fade(recording) }}>
           {photoSource ? (
             <image src={photoSource} style={fillStyle} mode="aspectFill" />
           ) : media?.kind === 'video' ? (
@@ -372,60 +480,77 @@ export function CameraDemo({ uploadPhoto }: CameraDemoProps) {
           ) : null}
         </view>
 
-        <view bindtap={shutter} style={{ ...shutterRingStyle, opacity: busy ? 0.5 : 1 }}>
-          <view style={shutterInner} />
+        <view
+          bindtouchstart={() => setPressed(true)}
+          bindtouchend={() => setPressed(false)}
+          bindtouchcancel={() => setPressed(false)}
+          bindtap={shutter}
+          style={{ ...shutterRingStyle, opacity: busy ? 0.5 : 1 }}
+        >
+          <view style={shutterInnerStyle(shutterKind, pressed)} />
         </view>
 
-        <view bindtap={flip} style={glassCircle}>
-          <text style={glyphStyle}>{'↻'}</text>
+        <view bindtap={flip} style={{ ...flipStyle, ...fade(recording) }}>
+          <text style={flipGlyphStyle(flipTurns)}>{'↻'}</text>
         </view>
       </view>
 
-      {/* Zoom arc — long-press dial for fine, continuous zoom. */}
+      {/* Zoom dial — long-press for fine, continuous zoom. */}
       {dialOpen && (
         <view bindtap={() => setDialOpen(false)} bindtouchmove={dialDrag} style={dialOverlayStyle}>
+          <view style={dialFanClipStyle}>
+            <view style={dialFanStyle} />
+          </view>
           {dialTicks().map((z, i) => {
             const p = dialPoint(z)
-            const on = Math.abs(z - zoom) < 0.25
-            return (
-              <view
-                key={i}
-                style={{ position: 'absolute', left: `${p.x - (on ? 5 : 3)}px`, top: `${p.y - (on ? 5 : 3)}px`, width: `${on ? 10 : 6}px`, height: `${on ? 10 : 6}px`, borderRadius: '5px', backgroundColor: on ? '#ffd60a' : 'rgba(255,255,255,0.55)' }}
-              />
-            )
+            return <view key={i} style={dialTickStyle(p.x, p.y, dialTickRotation(z), i % 10 === 0, Math.abs(z - zoom) < 0.12)} />
           })}
           {zoomStops.map((z) => {
             const p = dialPoint(z)
             return (
-              <text key={`lbl${z}`} style={{ position: 'absolute', left: `${p.x - 16}px`, top: `${p.y - 34}px`, width: '32px', textAlign: 'center' as const, color: '#ffffff', fontSize: '12px' }}>
-                {z}×
+              <text key={`lbl${z}`} style={dialLabelStyle(p.x, p.y)}>
+                {formatZoom(z)}
               </text>
             )
           })}
-          <text style={dialValueStyle}>{zoom.toFixed(1)}×</text>
+          <text style={dialValueStyle}>{formatZoom(zoom)}×</text>
         </view>
       )}
 
-      {/* Full-screen review — tapping the thumbnail lands here. */}
+      {/* Review — tapping the thumbnail lands here. */}
       {reviewing && media && (
         <view style={reviewStyle}>
           {media.kind === 'photo' && photoSource ? (
-            <image src={photoSource} style={fillStyle} mode="aspectFit" />
+            <image src={photoSource} style={reviewImageStyle} mode="aspectFill" />
           ) : (
             <view style={{ ...fillStyle, ...center, flexDirection: 'column' }}>
               <text style={{ ...playGlyphStyle, fontSize: '56px' }}>{'▶'}</text>
-              <text style={reviewMetaStyle}>Video · {media.kind === 'video' ? (media.file.durationMs ?? 0) : 0}ms</text>
+              <text style={reviewMetaStyle}>Video · {formatDuration(media.kind === 'video' ? (media.file.durationMs ?? 0) : 0)}</text>
             </view>
           )}
-          <view bindtap={() => setReviewing(false)} style={{ ...glassCircle, position: 'absolute', top: '56px', left: '20px' }}>
-            <text style={glyphStyle}>{'✕'}</text>
+          <view style={reviewBarStyle}>
+            <view bindtap={() => setReviewing(false)} style={textButtonStyle}>
+              <text style={textButtonTextStyle}>Retake</text>
+            </view>
+            <view bindtap={saveCurrentMedia} style={{ ...saveButtonStyle, opacity: busy ? 0.5 : 1 }}>
+              <text style={glyphStyle}>{saved ? '✓' : '↓'}</text>
+            </view>
+            {media.kind === 'photo' && uploadPhoto ? (
+              <view bindtap={uploadCurrentPhoto} style={textButtonStyle}>
+                <text style={primaryButtonTextStyle}>{busy ? 'Uploading…' : 'Use Photo'}</text>
+              </view>
+            ) : (
+              <view bindtap={() => setReviewing(false)} style={textButtonStyle}>
+                <text style={primaryButtonTextStyle}>Done</text>
+              </view>
+            )}
           </view>
-          <view bindtap={saved ? undefined : saveCurrentMedia} style={saveStyle}>
-            <text style={saveTextStyle}>{saved ? 'Saved ✓' : busy ? 'Saving…' : 'Save'}</text>
-          </view>
-          {media.kind === 'photo' && uploadPhoto && (
-            <view bindtap={uploadCurrentPhoto} style={usePhotoStyle}>
-              <text style={usePhotoTextStyle}>{busy ? 'Uploading…' : 'Use Photo'}</text>
+          {toast && (
+            <view style={toastWrapStyle}>
+              <view style={toastStyle}>
+                {toast.error && <view style={toastDotStyle} />}
+                <text style={toastTextStyle}>{toast.text}</text>
+              </view>
             </view>
           )}
         </view>

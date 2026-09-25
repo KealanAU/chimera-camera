@@ -55,7 +55,8 @@
     "!docs/archive",
     "!images/src",
     "!example/**/dist",
-    "!example/**/node_modules"
+    "!example/**/node_modules",
+    "!example/web-preview"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -1,0 +1,16 @@
+{
+  "name": "@chimera-camera/web-preview",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "shots": "node build.mjs && node shoot.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "playwright-core": "^1.60.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  }
+}
